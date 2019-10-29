@@ -11,12 +11,6 @@
 #include "assert.h"
 #include <camkes.h>
 
-static uint8_t lanFifoBuf[PAGE_SIZE];
-static uint8_t lanCtrFifoBuf[128];
-
-static uint8_t wanFifoBuf[PAGE_SIZE];
-static uint8_t wanCtrFifoBuf[128];
-
 static uint8_t nwFifoBuf[PAGE_SIZE];
 static uint8_t nwCtrFifoBuf[128];
 
@@ -33,23 +27,23 @@ static const ChanMuxConfig_t cfgChanMux =
     .channelsFifos = {
         {
             // Channel 0
-            .buffer = lanFifoBuf,
-            .len = sizeof(lanFifoBuf)
+            .buffer = NULL,
+            .len = 0,
         },
         {
             // Channel 1
-            .buffer = wanFifoBuf,
-            .len = sizeof(wanFifoBuf)
+            .buffer = NULL,
+            .len = 0,
         },
         {
             // Channel 2
-            .buffer = lanCtrFifoBuf,
-            .len = sizeof(lanCtrFifoBuf)
+            .buffer = NULL,
+            .len = 0,
         },
         {
             // Channel 3
-            .buffer = wanCtrFifoBuf,
-            .len = sizeof(wanCtrFifoBuf)
+            .buffer = NULL,
+            .len = 0,
         },
         {
             // Channel 4
@@ -85,12 +79,6 @@ static const ChanMuxConfig_t cfgChanMux =
     }
 };
 
-// static_assert( lanFifoBuf == cfgChanMux.channelsFifos[CHANNEL_LAN_DATA].buffer, "");
-// static_assert( lanFifoBuf == cfgChanMux.channelsFifos[CHANNEL_WAN_DATA].buffer, "");
-// static_assert( lanCtrFifoBuf == cfgChanMux.channelsFifos[CHANNEL_LAN_CTRL].buffer, "");
-// static_assert( wanCtrFifoBuf == cfgChanMux.channelsFifos[CHANNEL_WAN_CTRL].buffer, "");
-// static_assert( nwFifoBuf == cfgChanMux.channelsFifos[CHANNEL_NW_STACK_DATA].buffer, "");
-// static_assert( nwCtrFifoBuf == cfgChanMux.channelsFifos[CHANNEL_NW_STACK_CTRL].buffer, "");
 
 const ChannelDataport_t dataports[] =
 {
@@ -120,7 +108,7 @@ const ChannelDataport_t dataports[] =
     },
     {
         .io  = NULL,
-        .len = 0
+        .len = PAGE_SIZE
     },
 
     {
@@ -135,13 +123,6 @@ const ChannelDataport_t dataports[] =
 
 
 };
-
-// static_assert( &lanDataPort == dataports[CHANNEL_LAN_DATA].io, "");
-// static_assert( &wanDataPort == dataports[CHANNEL_WAN_DATA].io, "");
-// static_assert( &lanCtrlDataPort == dataports[CHANNEL_LAN_CTRL].io, "");
-// static_assert( &wanCtrlDataPort == dataports[CHANNEL_WAN_CTRL].io, "");
-// static_assert( &nwStackDataPort == dataports[CHANNEL_NW_STACK_DATA].io, "");
-// static_assert( &nwStackCtrlDataPort == dataports[CHANNEL_NW_STACK_CTRL].io, "");
 
 
 //------------------------------------------------------------------------------
@@ -160,17 +141,6 @@ ChanMux_dataAvailable_emit(
     switch (chanNum)
     {
     //---------------------------------
-    case CHANNEL_LAN_DATA:
-    case CHANNEL_LAN_CTRL:
-        // dataAvailableLan_emit();
-        break;
-
-    //---------------------------------
-    case CHANNEL_WAN_DATA:
-    case CHANNEL_WAN_CTRL:
-        // dataAvailableWan_emit();
-        break;
-
     //---------------------------------
     case CHANNEL_NW_STACK_DATA:
     case CHANNEL_NW_STACK_CTRL:
@@ -229,148 +199,6 @@ ChanMuxOut_takeByte(char byte)
 //==============================================================================
 
 //------------------------------------------------------------------------------
-seos_err_t
-ChanMuxLan_write(
-    unsigned int  chanNum,
-    size_t        len,
-    size_t*       lenWritten)
-{
-    Debug_LOG_TRACE("%s(): channel %u, len %u", __func__, chanNum, len);
-
-    // set defaults to error
-    *lenWritten = 0;
-
-    const ChannelDataport_t* dp = NULL;
-    switch (chanNum)
-    {
-    //---------------------------------
-    case CHANNEL_LAN_DATA:
-    case CHANNEL_LAN_CTRL:
-        dp = &dataports[chanNum];
-        break;
-    //---------------------------------
-    default:
-        Debug_LOG_ERROR("%s(): invalid channel %u", __func__, chanNum);
-        return SEOS_ERROR_ACCESS_DENIED;
-    }
-
-    Debug_ASSERT( NULL != dp );
-    seos_err_t ret = ChanMux_write(ChanMux_getInstance(), chanNum, dp, &len);
-    *lenWritten = len;
-
-    Debug_LOG_TRACE("%s(): channel %u, lenWritten %u", __func__, chanNum, len);
-
-    return ret;
-}
-
-
-//------------------------------------------------------------------------------
-seos_err_t
-ChanMuxLan_read(
-    unsigned int  chanNum,
-    size_t        len,
-    size_t*       lenRead)
-{
-    Debug_LOG_TRACE("%s(): channel %u, len %u", __func__, chanNum, len);
-
-    // set defaults to error
-    *lenRead = 0;
-
-    const ChannelDataport_t* dp = NULL;
-    switch (chanNum)
-    {
-    //---------------------------------
-    case CHANNEL_LAN_DATA:
-    case CHANNEL_LAN_CTRL:
-        dp = &dataports[chanNum];
-        break;
-    //---------------------------------
-    default:
-        Debug_LOG_ERROR("%s(): invalid channel %u", __func__, chanNum);
-        return SEOS_ERROR_ACCESS_DENIED;
-    }
-
-    Debug_ASSERT( NULL != dp );
-    seos_err_t ret = ChanMux_read(ChanMux_getInstance(), chanNum, dp, &len);
-    *lenRead = len;
-
-    Debug_LOG_TRACE("%s(): channel %u, lenRead %u", __func__, chanNum, len);
-
-    return ret;
-}
-
-
-//------------------------------------------------------------------------------
-seos_err_t
-ChanMuxWan_write(
-    unsigned int  chanNum,
-    size_t        len,
-    size_t*       lenWritten)
-{
-    Debug_LOG_TRACE("%s(): channel %u, len %u", __func__, chanNum, len);
-
-    // set defaults
-    *lenWritten = 0;
-
-    const ChannelDataport_t* dp = NULL;
-    switch (chanNum)
-    {
-    //---------------------------------
-    case CHANNEL_WAN_DATA:
-    case CHANNEL_WAN_CTRL:
-        dp = &dataports[chanNum];
-        break;
-    //---------------------------------
-    default:
-        Debug_LOG_ERROR("%s(): invalid channel %u", __func__, chanNum);
-        return SEOS_ERROR_ACCESS_DENIED;
-    }
-
-    Debug_ASSERT( NULL != dp );
-    seos_err_t ret = ChanMux_write(ChanMux_getInstance(), chanNum, dp, &len);
-    *lenWritten = len;
-
-    Debug_LOG_TRACE("%s(): channel %u, lenWritten %u", __func__, chanNum, len);
-
-    return ret;
-}
-
-
-//------------------------------------------------------------------------------
-seos_err_t
-ChanMuxWan_read(
-    unsigned int  chanNum,
-    size_t        len,
-    size_t*       lenRead)
-{
-    Debug_LOG_TRACE("%s(): channel %u, len %u", __func__, chanNum, len);
-
-    // set defaults
-    *lenRead = 0;
-
-    const ChannelDataport_t* dp = NULL;
-    switch (chanNum)
-    {
-    //---------------------------------
-    case CHANNEL_WAN_DATA:
-    case CHANNEL_WAN_CTRL:
-        dp = &dataports[chanNum];
-        break;
-    //---------------------------------
-    default:
-        Debug_LOG_ERROR("%s(): invalid channel %u", __func__, chanNum);
-        return SEOS_ERROR_ACCESS_DENIED;
-    }
-
-    Debug_ASSERT( NULL != dp );
-    seos_err_t ret = ChanMux_read(ChanMux_getInstance(), chanNum, dp, &len);
-    *lenRead = len;
-
-    Debug_LOG_TRACE("%s(): channel %u, lenRead %u", __func__, chanNum, len);
-
-    return ret;
-}
-
 
 //------------------------------------------------------------------------------
 seos_err_t
