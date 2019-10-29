@@ -4,11 +4,7 @@
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
  */
-#include <camkes.h>
-#include <string.h>
-#include "LibDebug/Debug.h"
-#include "SeosNwStack.h"
-
+#include "Seos_Nw_Config.h"
 
 int run()
 {
@@ -38,9 +34,34 @@ int run()
     {
         &nw_signal,
         &nw_data,
-        SEOS_NWSTACK_AS_CLIENT
+        pico_chan_mux_tap_create
     };
 
+    /* First init Nw driver and then init Nw stack */
+
+#ifdef SEOS_NWSTACK_AS_CLIENT
+#if (SEOS_NETWORK_TAP0_PROXY == IN_USE)
+    Seos_TapDriverConfig nw_driver_config_client =
+    {
+        .name      = SEOS_TAP_DRIVER_NAME,
+        .chan_ctrl = SEOS_TAP_CTRL_CHANNEL,
+        .chan_data = SEOS_TAP_DATA_CHANNEL
+
+    };
+    ret = Seos_NwDriver_TapConfig(&nw_driver_config_client);
+    if (ret != SEOS_SUCCESS)
+    {
+        Debug_LOG_FATAL("%s():Nw Driver Tap Config Failed for Client!", __FUNCTION__);
+        exit(0);
+    }
+
+#else
+
+    // Config driver for other interfaces e.g. ethernet
+
+#endif
+
+#endif
 
     ret = Seos_NwStack_init(&nw_camkes);
 
@@ -52,4 +73,3 @@ int run()
     }
     return 0;
 }
-
