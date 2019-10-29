@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.7.2)
 
 seos_set_config_file(config.h)
+set(SEOS_NW_CONFIG_H_FILE ${CMAKE_CURRENT_LIST_DIR}/config/Seos_Nw_Config.h)
 
 seos_use_libs(
     SEOS_LIBS
@@ -11,10 +12,15 @@ seos_use_libs(
 project(tests_picotcp_api C)
 
 DeclareCAmkESComponent(NwStack
+    INCLUDES
+        components/test_nwstack/ChanMux/src/instance
+        config
     SOURCES
         components/test_nwstack/NwStack/NW1/instance/Nw.c
     C_FLAGS
         -Wall -Werror
+        -DSEOS_NWSTACK_AS_CLIENT
+        -DNETWORK_CONFIG_H_FILE=${SEOS_NW_CONFIG_H_FILE}
     LIBS
         seos_libs
         seos_nw_lib
@@ -22,10 +28,15 @@ DeclareCAmkESComponent(NwStack
 )
 
 DeclareCAmkESComponent(NwStack_2
+    INCLUDES
+        components/test_nwstack/ChanMux/src/instance
+        config
     SOURCES
         components/test_nwstack/NwStack/NW2/instance/Nw2.c
     C_FLAGS
         -Wall -Werror
+        -DSEOS_NWSTACK_AS_SERVER
+        -DNETWORK_CONFIG_H_FILE=${SEOS_NW_CONFIG_H_FILE}
     LIBS
         seos_libs
         seos_nw_lib
