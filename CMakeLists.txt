@@ -20,7 +20,6 @@ DeclareCAmkESComponent(NwStack
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
-        -DNETWORK_CONFIG_H_FILE=${SEOS_NW_CONFIG_H_FILE}
     LIBS
         seos_libs
         seos_nw_lib
@@ -36,7 +35,6 @@ DeclareCAmkESComponent(NwStack_2
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
-        -DNETWORK_CONFIG_H_FILE=${SEOS_NW_CONFIG_H_FILE}
     LIBS
         seos_libs
         seos_nw_lib

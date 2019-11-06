@@ -33,39 +33,39 @@ int run()
 
     };
 
-    Seos_nw_camkes_info nw_camkes =
+    /* First init Nw driver and then init Nw stack. Driver fills the device
+     * create callback to be used for Nw Stack
+     */
+    seos_driver_config nw_driver_config_server =
     {
-        &nw_signal,
-        &nw_data,
-        pico_chan_mux_tap_create
+        .chan_ctrl              = SEOS_TAP1_CTRL_CHANNEL,
+        .chan_data              = SEOS_TAP1_DATA_CHANNEL,
+        .device_create_callback = NULL
     };
 
-    /* First init Nw driver and then init Nw stack */
+    ret = Seos_NwDriver_init(&nw_driver_config_server);
 
-#ifdef SEOS_NWSTACK_AS_SERVER
-#if (SEOS_NETWORK_TAP1_PROXY == IN_USE)
-    Seos_TapDriverConfig nw_driver_config_server =
-    {
-        .name      = SEOS_TAP_DRIVER_NAME,
-        .chan_ctrl = SEOS_TAP_CTRL_CHANNEL,
-        .chan_data = SEOS_TAP_DATA_CHANNEL
-    };
-    ret = Seos_NwDriver_TapConfig(&nw_driver_config_server);
     if (ret != SEOS_SUCCESS)
     {
         Debug_LOG_FATAL("%s():Nw Driver Tap Config Failed for Server!", __FUNCTION__);
         exit(0);
     }
-#else
 
-    // Config driver for other interfaces e.g. ethernet
-#endif
-
-#endif
-
+    seos_nw_config nw_stack_config =
+    {
+        .dev_addr             = SEOS_TAP1_ADDR,
+        .gateway_addr         = SEOS_TAP1_GATEWAY_ADDR,
+        .subnet_mask          = SEOS_TAP1_SUBNET_MASK,
+        .driver_create_device = nw_driver_config_server.device_create_callback
+    };
     // should never return as this starts pico_stack_tick().
+    Seos_nw_camkes_info nw_camkes =
+    {
+        &nw_signal,
+        &nw_data,
+    };
 
-    ret = Seos_NwStack_init(&nw_camkes);
+    ret = Seos_NwStack_init(&nw_camkes, &nw_stack_config);
 
     /*is possible when proxy does not run with use_tap=1 param. Just print and exit*/
     if (ret != SEOS_SUCCESS)
