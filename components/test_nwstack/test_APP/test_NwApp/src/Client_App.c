@@ -31,7 +31,7 @@ int run()
     {
         .domain = SEOS_AF_INET,
         .type   = SEOS_SOCK_STREAM,
-        .name   = "93.184.216.34",
+        .name   = "192.168.82.12", // local HTTP server
         .port   = HTTP_PORT
     };
 
@@ -54,7 +54,7 @@ int run()
 
 
     const char* request =
-        "GET / HTTP/1.0\r\nHost: example.com\r\nConnection: close\r\n\r\n";
+        "GET / HTTP/1.0\r\nHost: 192.168.82.12\r\nConnection: close\r\n\r\n";
 
     const size_t len_request = strlen(request);
     size_t len = len_request;
