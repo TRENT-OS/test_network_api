@@ -14,7 +14,7 @@
 #define NS_IN_SECOND 1000000000ULL
 #define NS_IN_MSEC   1000000ULL
 
-ttc_t timer_drv;
+static ttc_t timer_drv;
 
 /* this callback handler is meant to be invoked when the first interrupt
  * arrives on the interrupt event interface.
@@ -28,13 +28,9 @@ void irq_handle(void)
 {
     int error;
 
-
     ttc_handle_irq(&timer_drv);
 
-
-
     ttc_stop(&timer_drv);
-
 
     /* Signal the RPC interface. */
     error = sem_post();
@@ -42,11 +38,9 @@ void irq_handle(void)
 
     error = irq_acknowledge();
     ZF_LOGF_IF(error != 0, "Failed to acknowledge interrupt");
-
-
 }
 
-void timeout__init()
+void Timer__init()
 {
     /* Structure of the timer configuration in platsupport library */
     ttc_config_t config;
@@ -60,19 +54,15 @@ void timeout__init()
     config.clk_src = 0;
     config.id = TMR_DEFAULT;
 
-
     int error = ttc_init(&timer_drv, config);
     assert(error == 0);
-
 }
 
-void timeout_sleep(int msec)
+void Timer_sleep(int msec)
 {
-
     ttc_set_timeout(&timer_drv, msec * NS_IN_MSEC, false);
 
     ttc_start(&timer_drv);
-
 
     int error = sem_wait();
     ZF_LOGF_IF(error != 0, "Failed to wait on semaphore");

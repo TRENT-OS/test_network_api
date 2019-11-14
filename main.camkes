@@ -23,7 +23,7 @@ assembly {
         // Network Stack App
         //----------------------------------------------------------------------
         component  NwApp            nwApp;
-       connection seL4RPCCall      NwApp_nwStack       (from nwApp.seos, to nwStack.seos);
+        connection seL4RPCCall      NwApp_nwStack       (from nwApp.seos, to nwStack.seos);
 
 
         //----------------------------------------------------------------------
@@ -44,19 +44,19 @@ assembly {
         // MUX
         //----------------------------------------------------------------------
         component ChanMux           chanMux;
-        
+
         //----------------------------------------------------------------------
         // OUTPUT
         //----------------------------------------------------------------------
-        
+
         connection seL4RPCCall      chanmux_uart        (from chanMux.Output, to uartDrv.UartDrv);
         connection seL4SharedData   uart_dataConnection (from chanMux.outputDataPort, to uartDrv.inputDataPort);
-        
-    
+
+
         //----------------------------------------------------------------------
         // TIMER
         //----------------------------------------------------------------------
-  
+
         component Timerbase timerbase;
         component Timer timer;
         component TimerClient timerclient;
@@ -65,8 +65,9 @@ assembly {
         connection seL4HardwareInterrupt timer_irq(from timerbase.irq, to timer.irq);
         /* timer interface connection */
 
-        connection seL4RPCCall timeout_timer(from timerclient.timeout, to timer.timeout);
-
+        connection seL4RPCCall timerclient_timer(from timerclient.Timer, to timer.Timer);
+        connection seL4RPCCall nwStack_timerClient(from nwStack.Timer, to timerclient.TimerClient);
+        connection seL4RPCCall nwStack2_timerClient(from nwStack_2.Timer, to timerclient.TimerClient);
 
         // Channel Network Stack
         connection seL4SharedData         NwStack_dataConnection   (from nwStack.chanMuxDataPort,          to chanMux.nwStackDataPort);
@@ -92,8 +93,7 @@ assembly {
         connection seL4Notification       NwStackEventsRxd3_2      (from nwStack_2.e_conn_2,                 to nwStack_2.c_conn_2);
         connection seL4Notification       NwAppInitDone_2          (from nwStack_2.e_initdone_2,             to nwStack_2.c_initdone_2);
 
-        
-        
+
         //----------------------------------------------------------------------
         // UART
         //----------------------------------------------------------------------
@@ -101,25 +101,17 @@ assembly {
         component  UartDrv          uartDrv;
         connection seL4HardwareMMIO uart_memio          (from uartDrv.uartRegBase, to uartDev.uartRegBase);
         connection seL4RPCCall      uart_chanmux        (from uartDrv.Output, to chanMux.ChanMuxOut);
-        
-        
-        
     }
     configuration {
         uartDev.uartRegBase_paddr  = 0xE0000000;
-    uartDev.uartRegBase_size   = 0x1000;
-    uartDrv.inputDataPort       = "R";
-    
-    
-    timerbase.reg_paddr = 0xF8001000;   // paddr of mmio registers
-    timerbase.reg_size = 0x1000;        // size of mmio registers
-    timerbase.irq_irq_number = 42;      // timer irq number
+        uartDev.uartRegBase_size   = 0x1000;
+        uartDrv.inputDataPort       = "R";
 
+        timerbase.reg_paddr = 0xF8001000;   // paddr of mmio registers
+        timerbase.reg_size = 0x1000;        // size of mmio registers
+        timerbase.irq_irq_number = 42;      // timer irq number
 
-   /* assign an initial value to semaphore */
-
-    timer.sem_value = 0;
-    
+        /* assign an initial value to semaphore */
+        timer.sem_value = 0;
     }
 }
-

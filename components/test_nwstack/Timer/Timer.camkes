@@ -5,7 +5,6 @@
  *
  */
 
- 
 import "../../../interfaces/timer.camkes";
 
 component Timerbase{
@@ -15,9 +14,9 @@ component Timerbase{
 }
 
 component Timer {
-    dataport Buf         reg;
+    dataport Buf            reg;
     consumes DataAvailable  irq;
 
-    provides timer_inf     timeout;
+    provides timer_inf      Timer;
     has semaphore           sem;
 }
