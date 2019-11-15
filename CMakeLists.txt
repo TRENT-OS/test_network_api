@@ -21,7 +21,7 @@ DeclareCAmkESComponent(NwStack
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
     LIBS
-        seos_libs
+        seos_core_api
         seos_nw_lib
         seos_nw_driver_tap_proxy_lib
 )
@@ -36,7 +36,7 @@ DeclareCAmkESComponent(NwStack_2
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
     LIBS
-        seos_libs
+        seos_core_api
         seos_nw_lib
         seos_nw_driver_tap_proxy_lib
 )
@@ -75,6 +75,7 @@ DeclareCAmkESComponent(ChanMux
     C_FLAGS
         -Wall -Werror
     LIBS
+        seos_core_api
         seos_libs
 )
 
