@@ -88,11 +88,7 @@ int run()
     }
     while (offs < len_request);
 
-
     Debug_LOG_INFO("Client socket read Webpage start. %s\n", __FUNCTION__);
-
-
-
 
     /*
     As of now the nw stack behavior is as below:
@@ -128,18 +124,13 @@ int run()
 
         /* This means end of read or nothing further to read as socket was closed */
         case  SEOS_ERROR_CONNECTION_CLOSED:
-
-            flag = false;    /* terminate loop and close handle*/
+            Debug_LOG_INFO("Web page read length %d and data:\n %s\n", len, buffer);
             Debug_LOG_INFO(" Client app read completed..\n");
+            flag = false;    /* terminate loop and close handle*/
             break;
 
         /* Success . continue further reading */
         case  SEOS_SUCCESS:
-
-            if (len > 0)
-            {
-                Debug_LOG_INFO("Web page read length %d and data:\n %s\n", len, buffer);
-            }
             continue ;
 
         /* Error case, break and close the handle */
@@ -148,8 +139,6 @@ int run()
             flag = false;    /* terminate loop and close handle */
             break;
         }// end of switch
-
-
     }
     while (flag);
 
