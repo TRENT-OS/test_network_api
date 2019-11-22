@@ -124,18 +124,18 @@ int run()
 
         /* This means end of read or nothing further to read as socket was closed */
         case  SEOS_ERROR_CONNECTION_CLOSED:
-            Debug_LOG_INFO("Web page read length %d and data:\n %s\n", len, buffer);
-            Debug_LOG_INFO(" Client app read completed..\n");
+            Debug_LOG_INFO("Client app read completed..");
             flag = false;    /* terminate loop and close handle*/
             break;
 
         /* Success . continue further reading */
         case  SEOS_SUCCESS:
+            Debug_LOG_INFO("Web page chunk received, length %d and data:\n %s", len, buffer);
             continue ;
 
         /* Error case, break and close the handle */
         default:
-            Debug_LOG_WARNING(" Read failure. Closing socket!!!.\n");
+            Debug_LOG_WARNING("Read failure, error: %d.", err);
             flag = false;    /* terminate loop and close handle */
             break;
         }// end of switch
@@ -144,13 +144,6 @@ int run()
 
     /* Close the socket communication */
     err = Seos_socket_close(handle);
-
-    if (err != SEOS_SUCCESS)
-    {
-        Debug_LOG_WARNING("Client socket close failure. %s, error :%d\n", __FUNCTION__,
-                          err);
-        return -1;
-    }
 
     return 0;
 }

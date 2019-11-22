@@ -95,7 +95,7 @@ int run()
         if (SEOS_SUCCESS == err)
         {
             Debug_ASSERT(n == 1);
-            Debug_LOG_INFO("Got a byte %02x, send it back", *needle);
+            Debug_LOG_TRACE("Got a byte %02x, send it back", *needle);
             err = Seos_socket_write(seos_socket_handle, needle, &n);
             if (err != SEOS_SUCCESS)
             {
