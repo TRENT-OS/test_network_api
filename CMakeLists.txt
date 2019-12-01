@@ -84,6 +84,9 @@ DeclareCAmkESComponent(TimerClient
         components/test_nwstack/TimerClient/src/Timer_Client.c
     C_FLAGS
         -Wall -Werror
+    LIBS
+        seos_core_api
+        seos_libs
 )
 
 DeclareCAmkESComponent(Timer

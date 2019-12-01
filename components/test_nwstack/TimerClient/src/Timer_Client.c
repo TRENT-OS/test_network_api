@@ -5,27 +5,27 @@
  *
  */
 
-#include <stdio.h>
+#include "LibDebug/Debug.h"
 #include <camkes.h>
 
 #define MSECS_TO_SLEEP      10
 #define SIGNAL_PERIOD_MS    1000
 
-static unsigned counterMs = 0;
+static unsigned int counterMs = 0;
 
-/* run the control thread */
-int run(void)
+//------------------------------------------------------------------------------
+int
+run(void)
 {
-    printf("Starting the client\n");
-    printf("------Sleep for %d mseconds------\n", MSECS_TO_SLEEP);
+    Debug_LOG_INFO("Starting TimerClient");
 
-    while (1)
+    for(;;)
     {
         Timer_sleep(MSECS_TO_SLEEP);
         counterMs += MSECS_TO_SLEEP;
         if ((counterMs % SIGNAL_PERIOD_MS) == 0)
         {
-            //printf("%s: sending tick\n", __func__);
+            // Debug_LOG_DEBUG("sending tick");
             e_timeout_nwstacktick_emit();
             e_timeout_nwstacktick_2_emit();
         }
@@ -33,8 +33,10 @@ int run(void)
     return 0;
 }
 
-unsigned
-TimerClient_getTimeMs()
+
+//------------------------------------------------------------------------------
+unsigned int
+TimerClient_getTimeMs(void)
 {
     return counterMs;
 }
