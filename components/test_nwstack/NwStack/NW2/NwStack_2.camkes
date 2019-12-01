@@ -36,6 +36,6 @@ component NwStack_2 {
     emits      NwStack_ConnEv_2             e_conn_2;
     consumes   NwStack_ConnEv_2             c_conn_2;
 
-    emits      NwStack_DataAvailable_2      e_write_nwstacktick_2;
-    consumes   NwStack_DataAvailable_2      c_nwstacktick_2;
+    emits      NwStack_DataAvailable        e_write_nwstacktick_2;
+    consumes   NwStack_DataAvailable        c_nwstacktick_2;
 }

@@ -26,7 +26,7 @@ run(void)
         if ((counterMs % SIGNAL_PERIOD_MS) == 0)
         {
             // Debug_LOG_DEBUG("sending tick");
-            e_timeout_nwstacktick_emit();
+            e_timeout_nwstacktick_1_emit();
             e_timeout_nwstacktick_2_emit();
         }
     }
