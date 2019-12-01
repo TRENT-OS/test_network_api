@@ -4,7 +4,12 @@
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
  */
+
+#include "SeosNwStack.h"
 #include "Seos_Nw_Config.h"
+#include "Seos_Driver_Config.h"
+#include "LibDebug/Debug.h"
+#include <camkes.h>
 
 int run()
 {

@@ -7,12 +7,7 @@
 
 #pragma once
 
-#include <camkes.h>
-#include <string.h>
-#include "LibDebug/Debug.h"
-#include "SeosNwStack.h"
 #include "ChanMux_config.h"
-#include "Seos_Driver_Config.h"
 
 /* ########## USER CONFIGURATION FOR NETWORK DRIVER    ##################### */
 /* Below params configure the driver, as of now we only have TAP proxy driver */
