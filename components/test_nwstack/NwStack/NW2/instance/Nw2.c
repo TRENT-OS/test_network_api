@@ -13,7 +13,7 @@
 
 int run()
 {
-    Debug_LOG_INFO("starting network stack as Server...\n");
+    Debug_LOG_INFO("initializing network stack as Server...\n");
     int ret;
 
     seos_nw_camkes_signal_glue  nw_signal =
@@ -52,8 +52,8 @@ int run()
 
     if (ret != SEOS_SUCCESS)
     {
-        Debug_LOG_FATAL("%s():Nw Driver Tap Config Failed for Server!", __FUNCTION__);
-        exit(0);
+        Debug_LOG_FATAL("Seos_NwDriver_init() for server failed, error %d", ret);
+        return -1;
     }
 
     seos_nw_config nw_stack_config =
@@ -63,20 +63,23 @@ int run()
         .subnet_mask          = SEOS_TAP1_SUBNET_MASK,
         .driver_create_device = nw_driver_config_server.device_create_callback
     };
-    // should never return as this starts pico_stack_tick().
+
     Seos_nw_camkes_info nw_camkes =
     {
         &nw_signal,
         &nw_data,
     };
 
+    // this runs the network stack main loop, it does not return during normal
+    // operation
     ret = Seos_NwStack_init(&nw_camkes, &nw_stack_config);
-
-    /*is possible when proxy does not run with use_tap=1 param. Just print and exit*/
     if (ret != SEOS_SUCCESS)
     {
-        Debug_LOG_WARNING("Network Stack Init()-Sever Failed...Exiting NwStack-2. Error:%d\n",
-                          ret);
+        Debug_LOG_FATAL("Seos_NwStack_init Init() for server failed, error %d", ret);
+        return -1;
     }
+
+    Debug_LOG_WARNING("network stack for server terminated");
+
     return 0;
 }
