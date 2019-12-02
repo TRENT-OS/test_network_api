@@ -84,7 +84,7 @@ assembly {
         // Channel Network Stack 2
         connection seL4SharedData         NwStack_dataConnection_2 (from nwStack_2.chanMuxDataPort_2,        to chanMux.nwStackDataPort_2);
         connection seL4SharedData         NwStack_ctrlConnection_2 (from nwStack_2.chanMuxCtrlDataPort_2,    to chanMux.nwStackCtrlDataPort_2);
-        connection seL4SharedData         NwApp_dataConnection_2   (from nwApp_2.NwAppDataPort_2,            to nwStack_2.NwAppDataPort_2);
+        connection seL4SharedData         NwApp_dataConnection_2   (from nwApp_2.NwAppDataPort,              to nwStack_2.NwAppDataPort_2);
         connection seL4NotificationNative NwStackdataAvail1_2      (from chanMux.e_read_nwstacktick_2,       to nwStack_2.c_nwstacktick_2);
         connection seL4NotificationNative NwStackdataAvail2_2      (from nwStack_2.e_write_nwstacktick_2,    to nwStack_2.c_nwstacktick_2);
         connection seL4NotificationNative NwStackdataAvail3_2      (from timerclient.e_timeout_nwstacktick_2,to nwStack_2.c_nwstacktick_2);
