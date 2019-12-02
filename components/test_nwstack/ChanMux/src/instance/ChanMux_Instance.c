@@ -84,44 +84,82 @@ const ChannelDataport_t dataports[] =
 {
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = (void**) &nwStackCtrlDataPort,
         .len = PAGE_SIZE
     },
     {
-        .io = (void**) &nwStackDataPort,
+        .io = (void**) &nwStackDataPortRead,
         .len = PAGE_SIZE
     },
     {
         .io  = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
-
     {
         .io  = (void**) &nwStackCtrlDataPort_2,
         .len = PAGE_SIZE
     },
 
     {
-        .io  = (void**) &nwStackDataPort_2,
+        .io  = (void**) &nwStackDataPortRead_2,
         .len = PAGE_SIZE
     }
+};
 
+const ChannelDataport_t writeDataports[] =
+{
+    {
+        .io = NULL,
+        .len = 0
+    },
+    {
+        .io = NULL,
+        .len = 0
+    },
+    {
+        .io = NULL,
+        .len = 0
+    },
+    {
+        .io = NULL,
+        .len = 0
+    },
+    {
+        .io = (void**) &nwStackCtrlDataPort,
+        .len = PAGE_SIZE
+    },
+    {
+        .io = (void**) &nwStackDataPortWrite,
+        .len = PAGE_SIZE
+    },
+    {
+        .io  = NULL,
+        .len = 0
+    },
+    {
+        .io  = (void**) &nwStackCtrlDataPort_2,
+        .len = PAGE_SIZE
+    },
 
+    {
+        .io  = (void**) &nwStackDataPortWrite_2,
+        .len = PAGE_SIZE
+    },
 };
 
 
@@ -192,13 +230,9 @@ ChanMuxOut_takeByte(char byte)
     ChanMux_takeByte(ChanMux_getInstance(), byte);
 }
 
-
-
 //==============================================================================
 // CAmkES Interface
 //==============================================================================
-
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 seos_err_t
@@ -221,7 +255,7 @@ ChanMuxNwStack_write(
     case CHANNEL_NW_STACK_DATA_2:
     case CHANNEL_NW_STACK_CTRL_2:
 
-        dp = &dataports[chanNum];
+        dp = &writeDataports[chanNum];
         break;
     //---------------------------------
     default:

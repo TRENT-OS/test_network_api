@@ -12,7 +12,8 @@ import "../../../../interfaces/timer_client.camkes";
 component NwStack {
     control;
 
-    dataport    Buf                     chanMuxDataPort;
+    dataport    Buf                     chanMuxDataPortRead;
+    dataport    Buf                     chanMuxDataPortWrite;
     dataport    Buf                     chanMuxCtrlDataPort;
     uses        ChanMuxNwStackInf       ChanMux;
     uses        timer_client_inf        Timer;
