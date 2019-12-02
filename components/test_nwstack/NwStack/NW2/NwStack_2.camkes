@@ -18,7 +18,7 @@ component NwStack_2 {
 
     /* Below interface is for applications using the Nw Stack 2  */
 
-    provides   NwStackInf                   seos;
+    provides   NwStackInf                   network_stack_rpc;
     dataport   Buf                          NwAppDataPort_2;
 
     /* List of signal emits and consumed */

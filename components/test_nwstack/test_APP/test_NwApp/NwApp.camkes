@@ -12,6 +12,6 @@ component NwApp {
 
     control;
 
-    uses      NwStackInf  seos;
+    uses      NwStackInf  network_stack_rpc;
     dataport  Buf         NwAppDataPort;
 }
