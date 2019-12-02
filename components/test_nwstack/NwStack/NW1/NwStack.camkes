@@ -37,4 +37,6 @@ component NwStack {
 
     emits       NwStack_DataAvailable   e_write_nwstacktick;
     consumes    NwStack_DataAvailable   c_nwstacktick;
+
+    has         mutex                   allocatorMutex;
 }
