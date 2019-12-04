@@ -84,19 +84,19 @@ const ChannelDataport_t dataports[] =
 {
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
     {
         .io = (void**) &nwStackCtrlDataPort,
@@ -108,7 +108,7 @@ const ChannelDataport_t dataports[] =
     },
     {
         .io  = NULL,
-        .len = PAGE_SIZE
+        .len = 0
     },
 
     {
