@@ -37,8 +37,7 @@ static const ChanMuxConfig_t cfgChanMux =
     }
 };
 
-
-const ChannelDataport_t dataports[] =
+static const ChannelDataport_t dataports[] =
 {
     { .io = NULL,                             .len = 0 },
     { .io = NULL,                             .len = 0 },
