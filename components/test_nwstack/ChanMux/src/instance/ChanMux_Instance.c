@@ -11,6 +11,10 @@
 #include "assert.h"
 #include <camkes.h>
 
+#define NO_CHANMUX_FIFO         { .buffer = NULL, .len = 0 }
+#define NO_CHANMUX_DATA_PORT    { .io = NULL, .len = 0 }
+
+
 static uint8_t nwFifoBuf[PAGE_SIZE];
 static uint8_t nwCtrFifoBuf[128];
 
@@ -25,13 +29,13 @@ static const ChanMuxConfig_t cfgChanMux =
         .len = PAGE_SIZE
     },
     .channelsFifos = {
-        { .buffer = NULL,           .len = 0 },
-        { .buffer = NULL,           .len = 0 },
-        { .buffer = NULL,           .len = 0 },
-        { .buffer = NULL,           .len = 0 },
+        NO_CHANMUX_FIFO,
+        NO_CHANMUX_FIFO,
+        NO_CHANMUX_FIFO,
+        NO_CHANMUX_FIFO,
         { .buffer = nwCtrFifoBuf,   .len = sizeof(nwCtrFifoBuf) },
         { .buffer = nwFifoBuf,      .len = sizeof(nwFifoBuf) },
-        { .buffer = NULL,           .len = 0 },
+        NO_CHANMUX_FIFO,
         { .buffer = nwCtrFifoBuf_2, .len = sizeof(nwCtrFifoBuf_2) },
         { .buffer = nwFifoBuf_2,    .len = sizeof(nwFifoBuf_2) }
     }
@@ -39,15 +43,15 @@ static const ChanMuxConfig_t cfgChanMux =
 
 static const ChannelDataport_t dataports[] =
 {
-    { .io = NULL,                             .len = 0 },
-    { .io = NULL,                             .len = 0 },
-    { .io = NULL,                             .len = 0 },
-    { .io = NULL,                             .len = 0 },
-    { .io = (void**) &nwStackCtrlDataPort,    .len = PAGE_SIZE },
-    { .io = (void**) &nwStackDataPort,        .len = PAGE_SIZE },
-    { .io = NULL,                             .len = 0 },
-    { .io = (void**) &nwStackCtrlDataPort_2,  .len = PAGE_SIZE },
-    { .io = (void**) &nwStackDataPort_2,      .len = PAGE_SIZE }
+    NO_CHANMUX_DATA_PORT,
+    NO_CHANMUX_DATA_PORT,
+    NO_CHANMUX_DATA_PORT,
+    NO_CHANMUX_DATA_PORT,
+    { .io = (void**) &nwStackCtrlDataPort,   .len = PAGE_SIZE },
+    { .io = (void**) &nwStackDataPort,       .len = PAGE_SIZE },
+    NO_CHANMUX_DATA_PORT,
+    { .io = (void**) &nwStackCtrlDataPort_2, .len = PAGE_SIZE },
+    { .io = (void**) &nwStackDataPort_2,     .len = PAGE_SIZE }
 };
 
 
