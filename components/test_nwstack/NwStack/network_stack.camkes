@@ -14,6 +14,8 @@ component NwStack_1 {
 
     control;
 
+    has         mutex                   mutex_malloc
+
     consumes    NwStack_DataAvailable   event_tick_or_data;
 
     emits       NwStack_DataAvailable   event_internal;
@@ -49,6 +51,8 @@ component NwStack_1 {
 component NwStack_2 {
 
     control;
+
+    has         mutex                   mutex_malloc
 
     consumes   NwStack_DataAvailable    event_tick_or_data;
 
