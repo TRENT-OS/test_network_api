@@ -25,103 +25,30 @@ static const ChanMuxConfig_t cfgChanMux =
         .len = PAGE_SIZE
     },
     .channelsFifos = {
-        {
-            // Channel 0
-            .buffer = NULL,
-            .len = 0,
-        },
-        {
-            // Channel 1
-            .buffer = NULL,
-            .len = 0,
-        },
-        {
-            // Channel 2
-            .buffer = NULL,
-            .len = 0,
-        },
-        {
-            // Channel 3
-            .buffer = NULL,
-            .len = 0,
-        },
-        {
-            // Channel 4
-            .buffer = nwCtrFifoBuf,
-            .len = sizeof(nwCtrFifoBuf)
-        },
-        {
-            // Channel 5
-            .buffer = nwFifoBuf,
-            .len = sizeof(nwFifoBuf)
-
-        },
-
-        {
-            // Channel 6
-            .buffer = NULL,
-            .len = 0,
-        },
-
-        {
-            //channel 7
-            .buffer = nwCtrFifoBuf_2,
-            .len = sizeof(nwCtrFifoBuf_2)
-
-        },
-
-        {
-            //channel 8
-            .buffer = nwFifoBuf_2,
-            .len = sizeof(nwFifoBuf_2)
-        }
-
+        { .buffer = NULL,           .len = 0 },
+        { .buffer = NULL,           .len = 0 },
+        { .buffer = NULL,           .len = 0 },
+        { .buffer = NULL,           .len = 0 },
+        { .buffer = nwCtrFifoBuf,   .len = sizeof(nwCtrFifoBuf) },
+        { .buffer = nwFifoBuf,      .len = sizeof(nwFifoBuf) },
+        { .buffer = NULL,           .len = 0 },
+        { .buffer = nwCtrFifoBuf_2, .len = sizeof(nwCtrFifoBuf_2) },
+        { .buffer = nwFifoBuf_2,    .len = sizeof(nwFifoBuf_2) }
     }
 };
 
 
 const ChannelDataport_t dataports[] =
 {
-    {
-        .io = NULL,
-        .len = 0
-    },
-    {
-        .io = NULL,
-        .len = 0
-    },
-    {
-        .io = NULL,
-        .len = 0
-    },
-    {
-        .io = NULL,
-        .len = 0
-    },
-    {
-        .io = (void**) &nwStackCtrlDataPort,
-        .len = PAGE_SIZE
-    },
-    {
-        .io = (void**) &nwStackDataPort,
-        .len = PAGE_SIZE
-    },
-    {
-        .io  = NULL,
-        .len = 0
-    },
-
-    {
-        .io  = (void**) &nwStackCtrlDataPort_2,
-        .len = PAGE_SIZE
-    },
-
-    {
-        .io  = (void**) &nwStackDataPort_2,
-        .len = PAGE_SIZE
-    }
-
-
+    { .io = NULL,                             .len = 0 },
+    { .io = NULL,                             .len = 0 },
+    { .io = NULL,                             .len = 0 },
+    { .io = NULL,                             .len = 0 },
+    { .io = (void**) &nwStackCtrlDataPort,    .len = PAGE_SIZE },
+    { .io = (void**) &nwStackDataPort,        .len = PAGE_SIZE },
+    { .io = NULL,                             .len = 0 },
+    { .io = (void**) &nwStackCtrlDataPort_2,  .len = PAGE_SIZE },
+    { .io = (void**) &nwStackDataPort_2,      .len = PAGE_SIZE }
 };
 
 
