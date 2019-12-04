@@ -8,10 +8,11 @@
 import "../../../../interfaces/NwStackInf.camkes";
 
 
-component NwApp {
+component NwApp_1 {
 
     control;
 
-    uses      NwStackInf  network_stack_rpc;
-    dataport  Buf         NwAppDataPort;
+    uses      NwStackInf    network_stack_rpc;
+    dataport  Buf           NwAppDataPort;
+    consumes  ServiceReady  event_network_stack_init_done;
 }

@@ -11,12 +11,12 @@ seos_use_libs(
 
 project(tests_picotcp_api C)
 
-DeclareCAmkESComponent(NwStack
+DeclareCAmkESComponent(NwStack_1
     INCLUDES
         components/test_nwstack/ChanMux/src/instance
         config
     SOURCES
-        components/test_nwstack/NwStack/NW1/instance/Nw.c
+        components/test_nwstack/NwStack/network_stack_1.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
@@ -24,6 +24,20 @@ DeclareCAmkESComponent(NwStack
         seos_core_api
         seos_libs
         seos_nw_lib
+)
+
+DeclareCAmkESComponent(NwDriver_1
+    INCLUDES
+        components/test_nwstack/ChanMux/src/instance
+        config
+    SOURCES
+        components/test_nwstack/NwDriver/nic_driver_common.c
+        components/test_nwstack/NwDriver/nic_driver_1.c
+    C_FLAGS
+        -Wall -Werror
+    LIBS
+        seos_core_api
+        seos_libs
         seos_nw_driver_tap_proxy_lib
 )
 
@@ -32,7 +46,7 @@ DeclareCAmkESComponent(NwStack_2
         components/test_nwstack/ChanMux/src/instance
         config
     SOURCES
-        components/test_nwstack/NwStack/NW2/instance/Nw2.c
+        components/test_nwstack/NwStack/network_stack_2.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
@@ -40,10 +54,24 @@ DeclareCAmkESComponent(NwStack_2
         seos_core_api
         seos_libs
         seos_nw_lib
+)
+
+DeclareCAmkESComponent(NwDriver_2
+    INCLUDES
+        components/test_nwstack/ChanMux/src/instance
+        config
+    SOURCES
+        components/test_nwstack/NwDriver/nic_driver_common.c
+        components/test_nwstack/NwDriver/nic_driver_2.c
+    C_FLAGS
+        -Wall -Werror
+    LIBS
+        seos_core_api
+        seos_libs
         seos_nw_driver_tap_proxy_lib
 )
 
-DeclareCAmkESComponent(NwApp
+DeclareCAmkESComponent(NwApp_1
     INCLUDES
         components/test_nwstack/test_APP/include
     SOURCES

@@ -8,7 +8,6 @@ procedure NwStackInf {
 
     include "SeosError.h";
 
-    void        init(void);
     seos_err_t  socket_create(in int domain, in int type, inout int pHandle);
     seos_err_t  socket_close(in int handle);
     seos_err_t  socket_write(in int handle,inout size_t pLen);

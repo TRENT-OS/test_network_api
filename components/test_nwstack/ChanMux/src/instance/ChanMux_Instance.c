@@ -64,16 +64,16 @@ static const dataport_rw_t dataports[] =
     NO_CHANMUX_DATA_PORT_RW,
     NO_CHANMUX_DATA_PORT_RW,
     NO_CHANMUX_DATA_PORT_RW,
-    CHANMUX_DATA_PORT_RW_SHARED( (void**)&nwStackCtrlDataPort, PAGE_SIZE ),
+    CHANMUX_DATA_PORT_RW_SHARED( (void**)&port_nic_1_ctrl, PAGE_SIZE ),
     {
-        .read  = CHANMUX_DATA_PORT( (void**)&nwStackDataPortRead,  PAGE_SIZE ),
-        .write = CHANMUX_DATA_PORT( (void**)&nwStackDataPortWrite, PAGE_SIZE )
+        .read  = CHANMUX_DATA_PORT( (void**)&port_nic_1_data_read,  PAGE_SIZE ),
+        .write = CHANMUX_DATA_PORT( (void**)&port_nic_1_data_write, PAGE_SIZE )
     },
     NO_CHANMUX_DATA_PORT_RW,
-    CHANMUX_DATA_PORT_RW_SHARED( (void**)&nwStackCtrlDataPort_2, PAGE_SIZE ),
+    CHANMUX_DATA_PORT_RW_SHARED( (void**)&port_nic_2_ctrl, PAGE_SIZE ),
     {
-        .read  = CHANMUX_DATA_PORT( (void**) &nwStackDataPortRead_2,  PAGE_SIZE ),
-        .write = CHANMUX_DATA_PORT( (void**) &nwStackDataPortWrite_2, PAGE_SIZE )
+        .read  = CHANMUX_DATA_PORT( (void**) &port_nic_2_data_read,  PAGE_SIZE ),
+        .write = CHANMUX_DATA_PORT( (void**) &port_nic_2_data_write, PAGE_SIZE )
     }
 };
 
@@ -94,16 +94,15 @@ ChanMux_dataAvailable_emit(
     switch (chanNum)
     {
     //---------------------------------
-    //---------------------------------
     case CHANNEL_NW_STACK_DATA:
     case CHANNEL_NW_STACK_CTRL:
-        e_read_nwstacktick_emit();
+        event_nic_1_hasData_emit();
         break;
 
     //---------------------------------
     case CHANNEL_NW_STACK_DATA_2:
     case CHANNEL_NW_STACK_CTRL_2:
-        e_read_nwstacktick_2_emit();
+        event_nic_2_hasData_emit();
         break;
 
 
@@ -155,7 +154,7 @@ ChanMuxOut_takeByte(char byte)
 
 //------------------------------------------------------------------------------
 seos_err_t
-ChanMuxNwStack_write(
+ChanMux_driver_write(
     unsigned int  chanNum,
     size_t        len,
     size_t*       lenWritten)
@@ -194,7 +193,7 @@ ChanMuxNwStack_write(
 
 //------------------------------------------------------------------------------
 seos_err_t
-ChanMuxNwStack_read(
+ChanMux_driver_read(
     unsigned int  chanNum,
     size_t        len,
     size_t*       lenRead)
