@@ -41,17 +41,40 @@ static const ChanMuxConfig_t cfgChanMux =
     }
 };
 
-static const ChannelDataport_t dataports[] =
+
+typedef struct {
+    ChannelDataport_t  read;
+    ChannelDataport_t  write;
+} dataport_rw_t;
+
+#define CHANMUX_DATA_PORT( _pBuf_, _len_ )     { .io = _pBuf_, .len = _len_ }
+
+#define CHANMUX_DATA_PORT_RW_SHARED(_pBuf_, _len_) \
+            { \
+                .read = CHANMUX_DATA_PORT(_pBuf_, _len_), \
+                .write = CHANMUX_DATA_PORT(_pBuf_, _len_) \
+            }
+
+#define NO_CHANMUX_DATA_PORT_RW     CHANMUX_DATA_PORT_RW_SHARED(NULL, 0)
+
+
+static const dataport_rw_t dataports[] =
 {
-    NO_CHANMUX_DATA_PORT,
-    NO_CHANMUX_DATA_PORT,
-    NO_CHANMUX_DATA_PORT,
-    NO_CHANMUX_DATA_PORT,
-    { .io = (void**) &nwStackCtrlDataPort,   .len = PAGE_SIZE },
-    { .io = (void**) &nwStackDataPort,       .len = PAGE_SIZE },
-    NO_CHANMUX_DATA_PORT,
-    { .io = (void**) &nwStackCtrlDataPort_2, .len = PAGE_SIZE },
-    { .io = (void**) &nwStackDataPort_2,     .len = PAGE_SIZE }
+    NO_CHANMUX_DATA_PORT_RW,
+    NO_CHANMUX_DATA_PORT_RW,
+    NO_CHANMUX_DATA_PORT_RW,
+    NO_CHANMUX_DATA_PORT_RW,
+    CHANMUX_DATA_PORT_RW_SHARED( (void**)&nwStackCtrlDataPort, PAGE_SIZE ),
+    {
+        .read  = CHANMUX_DATA_PORT( (void**)&nwStackDataPortRead,  PAGE_SIZE ),
+        .write = CHANMUX_DATA_PORT( (void**)&nwStackDataPortWrite, PAGE_SIZE )
+    },
+    NO_CHANMUX_DATA_PORT_RW,
+    CHANMUX_DATA_PORT_RW_SHARED( (void**)&nwStackCtrlDataPort_2, PAGE_SIZE ),
+    {
+        .read  = CHANMUX_DATA_PORT( (void**) &nwStackDataPortRead_2,  PAGE_SIZE ),
+        .write = CHANMUX_DATA_PORT( (void**) &nwStackDataPortWrite_2, PAGE_SIZE )
+    }
 };
 
 
@@ -151,7 +174,7 @@ ChanMuxNwStack_write(
     case CHANNEL_NW_STACK_DATA_2:
     case CHANNEL_NW_STACK_CTRL_2:
 
-        dp = &dataports[chanNum];
+        dp = &dataports[chanNum].write;
         break;
     //---------------------------------
     default:
@@ -189,7 +212,7 @@ ChanMuxNwStack_read(
     case CHANNEL_NW_STACK_CTRL:
     case CHANNEL_NW_STACK_DATA_2:
     case CHANNEL_NW_STACK_CTRL_2:
-        dp = &dataports[chanNum];
+        dp = &dataports[chanNum].read;
         break;
     //---------------------------------
     default:

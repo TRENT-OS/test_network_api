@@ -33,9 +33,10 @@ int run()
 
     seos_nw_ports_glue nw_data =
     {
-        .ChanMuxDataPort     =  chanMuxDataPort,
-        .ChanMuxCtrlPort     =  chanMuxCtrlDataPort,
-        .Appdataport         =  NwAppDataPort
+        .ChanMuxDataPortRead  =  chanMuxDataPortRead,
+        .ChanMuxDataPortWrite =  chanMuxDataPortWrite,
+        .ChanMuxCtrlPort      =  chanMuxCtrlDataPort,
+        .Appdataport          =  NwAppDataPort
     };
 
     /* First init Nw driver and then init Nw stack. Driver fills the device

@@ -32,9 +32,10 @@ int run()
 
     seos_nw_ports_glue nw_data =
     {
-        .ChanMuxDataPort = chanMuxDataPort_2,
-        .ChanMuxCtrlPort = chanMuxCtrlDataPort_2,
-        .Appdataport     = NwAppDataPort_2
+        .ChanMuxDataPortRead  = chanMuxDataPortRead_2,
+        .ChanMuxDataPortWrite = chanMuxDataPortWrite_2,
+        .ChanMuxCtrlPort      = chanMuxCtrlDataPort_2,
+        .Appdataport          = NwAppDataPort_2
 
     };
 
