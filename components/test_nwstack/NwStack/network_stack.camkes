@@ -45,6 +45,7 @@ component NwStack_1 {
     emits       ServiceReady            event_network_init_done;
 
     has         mutex                   allocatorMutex;
+    has         mutex                   picotcpMutex;
 }
 
 
@@ -86,4 +87,5 @@ component NwStack_2 {
     emits      ServiceReady            event_network_init_done;
 
     has         mutex                   allocatorMutex;
+    has         mutex                   picotcpMutex;
 }
