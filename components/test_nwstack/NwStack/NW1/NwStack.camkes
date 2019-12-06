@@ -39,4 +39,5 @@ component NwStack {
     consumes    NwStack_DataAvailable   c_nwstacktick;
 
     has         mutex                   allocatorMutex;
+    has         mutex                   picotcpMutex;
 }

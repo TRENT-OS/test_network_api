@@ -41,4 +41,5 @@ component NwStack_2 {
     consumes   NwStack_DataAvailable_2      c_nwstacktick_2;
 
     has        mutex                        allocatorMutex;
+    has        mutex                        picotcpMutex;
 }
