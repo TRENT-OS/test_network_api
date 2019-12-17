@@ -9,76 +9,34 @@
 #include "LibDebug/Debug.h"
 #include "SeosError.h"
 #include "seos_api_network_stack.h"
+#include "seos_config_client.h"
 #include <camkes.h>
 
 
-
-
-/*
-    Debug_LOG_INFO("initializing network stack as Server...\n");
-    int ret;
-
-    seos_nw_camkes_signal_glue  nw_signal =
-    {
-        .e_write_emit        =  e_write_2_emit,
-        .c_write_wait        =  c_write_2_wait,
-        .e_read_emit         =  e_read_2_emit,
-        .c_read_wait         =  c_read_2_wait,
-        .e_conn_emit         =  e_conn_2_emit,
-        .c_conn_wait         =  c_conn_2_wait,
-        .e_write_nwstacktick =  e_write_nwstack_tick_2_emit,
-        .c_nwstacktick_wait  =  c_nwstack_tick_2_wait,
-        .e_initdone          =  e_initdone_2_emit,
-        // .c_initdone          =  c_initdone_2_wait
-    };
-
-    seos_nw_ports_glue nw_data =
-    {
-        .nwdriver_ReadPort     = driverReadPort_2,
-        .nwdriver_WritePort    = driverWritePort_2,
-        .Appdataport           = NwAppDataPort_2
-
-    };
-
-    seos_nw_driver_rpc_api nw_driver_api =
-    {
-        .dev_write             = seos_driver_tx_data,
-        .get_mac               = seos_driver_get_mac,
-        .dev_link_state        = NULL
-    };
-
-    // Wait for an event here from Driver to get Initialsed
-    // < ---------------------------->
-    c_driver_initdone_2_wait();
-
-
-    // this runs the network stack main loop, it does not return during normal
-    // operation
-    ret = Seos_NwStack_init(&nw_camkes, &nw_stack_config);
-    if (ret != SEOS_SUCCESS)
-    {
-        Debug_LOG_FATAL("Seos_NwStack_init Init() for server failed, error %d", ret);
-        return -1;
-    }
-
-    Debug_LOG_WARNING("network stack for server terminated");
-
-    return 0;
-}
-*/
-
-
-static const seos_network_stack_config_t config =
+static const seos_network_stack_config_t default_config =
 {
     .dev_addr      = SEOS_TAP1_ADDR,
     .gateway_addr  = SEOS_TAP1_GATEWAY_ADDR,
     .subnet_mask   = SEOS_TAP1_SUBNET_MASK
 };
 
+// use network stack params configured in config server.
+char DEV_ADDR[20];
+char GATEWAY_ADDR[20];
+char SUBNET_MASK[20];
+
+static seos_network_stack_config_t param_config =
+ {
+    .dev_addr      =   DEV_ADDR,
+    .gateway_addr  =   GATEWAY_ADDR,
+    .subnet_mask   =   SUBNET_MASK
+ };
 
 //------------------------------------------------------------------------------
 int run()
 {
+    bool set_default_param = false;
+
     Debug_LOG_INFO("driver up, starting network stack #2 (server)\n");
 
     // can't make this "static const" or even "static" because the data ports
@@ -137,14 +95,83 @@ int run()
         }
     };
 
-    seos_err_t ret = seos_network_stack_run(&camkes_config, &config);
+
+    Debug_LOG_INFO(" Extract Network Params from the Config #2");
+
+    // Wait to sync with the config server. This is how it is currently available in
+    // config server
+    while (!server_seos_configuration_IsUpAndRunning())
+        ;
+
+    // Create a handle to the remote config library instance.
+    seos_err_t ret;
+    SeosConfigHandle serverLibWithMemBackend;
+
+    ret = seos_configuration_createHandle(
+                 SEOS_CONFIG_HANDLE_KIND_RPC,
+                 0,
+                 &serverLibWithMemBackend
+             );
+
     if (ret != SEOS_SUCCESS)
     {
-        Debug_LOG_FATAL("seos_network_stack_run() for #2 (server) failed, error %d", ret);
-        return -1;
+        set_default_param = true;
     }
 
-    Debug_LOG_WARNING("network stack 2 (server terminated gracefully");
+    if(!set_default_param)
+    {
+        // Get the needed param values one by one from config server, using below API
+        size_t bytesCopied;
+        char* domain_name = "Domain-Network Stack";
+        int error = SEOS_SUCCESS;
 
+        ret = seos_configuration_parameterGetValueFromDomainName(
+                                                    serverLibWithMemBackend,
+                                                    domain_name,
+                                                    "SEOS_TAP1_ADDR",
+                                                    DEV_ADDR,
+                                                    sizeof(DEV_ADDR),
+                                                    &bytesCopied
+                                                    );
+        error |= ret;
+        ret = seos_configuration_parameterGetValueFromDomainName(
+                                                    serverLibWithMemBackend,
+                                                    domain_name,
+                                                    "SEOS_TAP1_GATEWAY_ADDR",
+                                                    GATEWAY_ADDR,
+                                                    sizeof(GATEWAY_ADDR),
+                                                    &bytesCopied
+                                                    );
+        error |= ret;
+        ret = seos_configuration_parameterGetValueFromDomainName(
+                                                    serverLibWithMemBackend,
+                                                    domain_name,
+                                                    "SEOS_TAP1_SUBNET_MASK",
+                                                    SUBNET_MASK,
+                                                    sizeof(SUBNET_MASK),
+                                                    &bytesCopied
+                                                    );
+        error |= ret;
+
+        if(error != SEOS_SUCCESS)
+        {
+            set_default_param = true;
+        }
+    }
+
+    if(set_default_param)
+    {
+        param_config = default_config;
+        Debug_LOG_INFO("Using Default config for Stack #2 instance");
+    }
+
+    ret = seos_network_stack_run(&camkes_config, &param_config);
+    if (ret != SEOS_SUCCESS)
+    {
+        Debug_LOG_FATAL("seos_network_stack_run() for #2 (server) failed, error %d",
+                        ret);
+        return -1;
+    }
+    Debug_LOG_WARNING("network stack 2 (server) terminated gracefully");
     return 0;
 }

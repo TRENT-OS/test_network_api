@@ -9,6 +9,7 @@ import "../../../interfaces/ChanMuxInf.camkes";
 import "../../../interfaces/NwStackInf.camkes";
 import "../../../interfaces/timer_client.camkes";
 import "../../../interfaces/NwDriverInf.camkes";
+import "../../../interfaces/configuration.camkes";
 
 component NwStack_1 {
 
@@ -43,6 +44,11 @@ component NwStack_1 {
     provides    NwStackInf              network_stack_rpc;
     dataport    Buf                     port_app_io;
     emits       ServiceReady            event_network_init_done;
+
+    //---------------------------------------------------
+    // Configuration server
+    uses         configuration_server_interface server;
+    dataport     Buf cfg_dataport_buf;
 }
 
 
@@ -82,4 +88,11 @@ component NwStack_2 {
     provides   NwStackInf              network_stack_rpc;
     dataport   Buf                     port_app_io;
     emits      ServiceReady            event_network_init_done;
+
+    //---------------------------------------------------
+    // Configuration server
+    uses         configuration_server_interface server;
+    dataport     Buf cfg_dataport_buf;
+
+
 }

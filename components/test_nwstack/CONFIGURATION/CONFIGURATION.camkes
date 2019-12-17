@@ -1,0 +1,24 @@
+/*
+   *  CAmkES configuration file for SEOS configuration component.
+   *
+   *  Copyright (C) 2019, Hensoldt Cyber GmbH
+*/
+
+#if defined(FS_SUPPORT)
+import "../../interfaces/filesystem.camkes";
+#endif
+import "../../../interfaces/configuration.camkes";
+
+component CONFIGURATION_SERVER {
+    control;
+
+    provides configuration_server_interface server;
+
+    dataport Buf cfg_dataport_buf;
+
+    has mutex m;
+    #if defined(FS_SUPPORT)
+    dataport Buf fs_dataport_buf;
+    uses fs_interface api_fs_component;
+    #endif
+}

@@ -1,0 +1,47 @@
+/*
+   *  CAmkES configuration file for configuration as server.
+   *
+   *  Copyright (C) 2019, Hensoldt Cyber GmbH
+*/
+
+
+procedure configuration_server_interface {
+    include "SeosError.h";
+    include "seos_config_data_types.h";
+
+    bool seos_configuration_IsUpAndRunning();
+
+    seos_err_t seos_configuration_createHandle(SeosConfigLib_HandleKind handleKind, unsigned int id, out SeosConfigHandle handle);
+
+    seos_err_t seos_configuration_domainEnumeratorInit(SeosConfigHandle handle, out SeosConfigLib_DomainEnumerator enumerator);
+    seos_err_t seos_configuration_domainEnumeratorClose(SeosConfigHandle handle, inout SeosConfigLib_DomainEnumerator enumerator);
+    seos_err_t seos_configuration_domainEnumeratorReset(SeosConfigHandle handle, inout SeosConfigLib_DomainEnumerator enumerator);
+    seos_err_t seos_configuration_domainEnumeratorIncrement(SeosConfigHandle handle, inout SeosConfigLib_DomainEnumerator enumerator);
+    seos_err_t seos_configuration_domainEnumeratorGetElement(SeosConfigHandle handle, refin SeosConfigLib_DomainEnumerator enumerator, out SeosConfigLib_Domain domain);
+
+    seos_err_t seos_configuration_parameterEnumeratorInit(SeosConfigHandle handle, refin SeosConfigLib_DomainEnumerator domainEnumerator, out SeosConfigLib_ParameterEnumerator enumerator);
+    seos_err_t seos_configuration_parameterEnumeratorClose(SeosConfigHandle handle, inout SeosConfigLib_ParameterEnumerator enumerator);
+    seos_err_t seos_configuration_parameterEnumeratorReset(SeosConfigHandle handle, inout SeosConfigLib_ParameterEnumerator enumerator);
+    seos_err_t seos_configuration_parameterEnumeratorIncrement(SeosConfigHandle handle, inout SeosConfigLib_ParameterEnumerator enumerator);
+    seos_err_t seos_configuration_parameterEnumeratorGetElement(SeosConfigHandle handle, refin SeosConfigLib_ParameterEnumerator enumerator, out SeosConfigLib_Parameter parameter);
+
+    void seos_configuration_domainGetName(refin SeosConfigLib_Domain domain, out SeosConfigLib_DomainName domainName);
+    seos_err_t seos_configuration_domainCreateParameterEnumerator(SeosConfigHandle handle, refin SeosConfigLib_Domain domain, refin SeosConfigLib_ParameterName parameterName, out SeosConfigLib_ParameterEnumerator parameterEnumerator);
+    seos_err_t seos_configuration_domainGetElement(SeosConfigHandle handle, refin SeosConfigLib_Domain domain, refin SeosConfigLib_ParameterName parameterName, out SeosConfigLib_Parameter parameter);
+    void seos_configuration_parameterGetName(refin SeosConfigLib_Parameter parameter, out SeosConfigLib_ParameterName parameterName);
+    void seos_configuration_parameterGetType(refin SeosConfigLib_Parameter parameter, out SeosConfigLib_ParameterType parameterType);
+    size_t seos_configuration_parameterGetSize(refin SeosConfigLib_Parameter parameter);
+
+    seos_err_t seos_configuration_parameterGetValue(SeosConfigHandle handle, refin SeosConfigLib_Parameter parameter, dataport_ptr_t buffer, size_t bufferLength, out size_t bytesCopied);
+    seos_err_t seos_configuration_parameterGetValueAsU32(SeosConfigHandle handle, refin SeosConfigLib_Parameter parameter, out uint32_t value);
+    seos_err_t seos_configuration_parameterGetValueAsU64(SeosConfigHandle handle, refin SeosConfigLib_Parameter parameter, out uint64_t value);
+    seos_err_t seos_configuration_parameterGetValueAsString(SeosConfigHandle handle, refin SeosConfigLib_Parameter parameter, dataport_ptr_t buffer, size_t bufferLength);
+    seos_err_t seos_configuration_parameterGetValueAsBlob(SeosConfigHandle handle, refin SeosConfigLib_Parameter parameter, dataport_ptr_t buffer, size_t bufferLength);
+
+    seos_err_t seos_configuration_parameterSetValue(SeosConfigHandle handle, refin SeosConfigLib_ParameterEnumerator enumerator, SeosConfigLib_ParameterType parameterType, dataport_ptr_t buffer, size_t bufferLength);
+    seos_err_t seos_configuration_parameterSetValueAsU32(SeosConfigHandle handle, refin SeosConfigLib_ParameterEnumerator enumerator, uint32_t value);
+    seos_err_t seos_configuration_parameterSetValueAsU64(SeosConfigHandle handle, refin SeosConfigLib_ParameterEnumerator enumerator, uint64_t value);
+    seos_err_t seos_configuration_parameterSetValueAsString(SeosConfigHandle handle, refin SeosConfigLib_ParameterEnumerator enumerator, SeosConfigLib_ParameterType parameterType, dataport_ptr_t buffer, size_t bufferLength);
+    seos_err_t seos_configuration_parameterSetValueAsBlob(SeosConfigHandle handle, refin SeosConfigLib_ParameterEnumerator enumerator, SeosConfigLib_ParameterType parameterType, dataport_ptr_t buffer, size_t bufferLength);
+    seos_err_t seos_configuration_parameterGetValueFromDomainName(SeosConfigHandle handle, string domain_name, string parameterName, dataport_ptr_t buffer, size_t bufferLength, inout size_t bytesCopied);
+};

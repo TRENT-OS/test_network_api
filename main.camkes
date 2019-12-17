@@ -3,6 +3,7 @@ import <std_connector.camkes>;
 import "components/test_nwstack/ChanMux/ChanMux.camkes";
 import "components/test_nwstack/NwDriver/nic_driver.camkes";
 import "components/test_nwstack/NwStack/network_stack.camkes";
+import "components/test_nwstack/CONFIGURATION/CONFIGURATION.camkes";
 import "components/test_nwstack/test_APP/test_NwApp/NwApp.camkes";
 import "components/test_nwstack/test_APP/test_NwApp2/NwApp_2.camkes";
 import "components/test_nwstack/TimerClient/TimerClient.camkes";
@@ -56,6 +57,14 @@ assembly {
         connection seL4SharedData   NwDriver_Chanmux_port_data_write (from nwDriver_1.port_chanMux_data_write, to chanMux.port_nic_1_data_write);
 
         //----------------------------------------------------------------------
+        // configuration_server
+        //----------------------------------------------------------------------
+        component CONFIGURATION_SERVER configuration_server;
+
+        connection seL4RPCCall            NwStack_configuration_server (from nwStack_1.server, to configuration_server.server);
+        connection seL4SharedData         NwStack_config_data          (from nwStack_1.cfg_dataport_buf, to configuration_server.cfg_dataport_buf);
+
+        //----------------------------------------------------------------------
         // Network Stack #1
         //----------------------------------------------------------------------
         component  NwStack_1              nwStack_1;
@@ -99,6 +108,10 @@ assembly {
         // Network Stack #2
         //----------------------------------------------------------------------
         component  NwStack_2              nwStack_2;
+
+        connection seL4RPCCall            NwStack_configuration_server_2 (from nwStack_2.server,                 to configuration_server.server);
+        connection seL4SharedData         NwStack_config_data_2          (from nwStack_2.cfg_dataport_buf,       to configuration_server.cfg_dataport_buf);
+
 
         connection seL4NotificationNative NwStackdataAvail2_2 (from nwStack_2.event_internal, to nwStack_2.event_tick_or_data);
         connection seL4Notification       NwStackEventsRxd1_2 (from nwStack_2.e_write,        to nwStack_2.c_write);
