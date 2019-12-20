@@ -57,8 +57,11 @@ int run()
 
     Debug_LOG_INFO("Launching Server echo server\n");
 
+    bool read1b1 = true;
+
     while (1)
     {
+        read1b1 = !read1b1;
         err = Seos_socket_accept(seos_nw_server_handle, &seos_socket_handle);
         if (err != SEOS_SUCCESS)
         {
@@ -84,29 +87,24 @@ int run()
             Once we accept an incoming connection, start reading data from the client and echo back
             the data rxd.
         */
-        size_t n = 1;
-        char* needle = buffer;
-        memset(buffer, 0, sizeof(buffer));
 
         Debug_LOG_INFO("Beginning server read loop");
         /* Keep calling read until we receive CONNECTION_CLOSED from the stack */
         do {
-            n = 1;
-            err = Seos_socket_read(seos_socket_handle, needle, &n);
+            size_t n = (read1b1 ? 1 : sizeof(buffer));
+            err = Seos_socket_read(seos_socket_handle, buffer, &n);
 
             if (SEOS_SUCCESS == err)
             {
-                Debug_ASSERT(n == 1);
-                Debug_LOG_TRACE("Got a byte %02x, send it back", *needle);
-                err = Seos_socket_write(seos_socket_handle, needle, &n);
+                Debug_LOG_TRACE("Got %uz bytes, send them back", n);
+                err = Seos_socket_write(seos_socket_handle, buffer, &n);
                 if (err != SEOS_SUCCESS)
                 {
                     Debug_LOG_ERROR("Server socket: error write back echo data %d bytes, error code:%d\n", n, err);
                 }
             }
         }
-        while (needle < buffer + sizeof(buffer)
-                && SEOS_SUCCESS == err);
+        while (SEOS_SUCCESS == err);
 
         switch (err)
 
