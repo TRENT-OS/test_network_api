@@ -9,6 +9,7 @@ import "../../interfaces/NwStackInf.camkes";
 import "../../interfaces/timer_client.camkes";
 import "../../interfaces/NwDriverInf.camkes";
 
+
 component NwStack_1 {
 
     control;
@@ -42,6 +43,7 @@ component NwStack_1 {
     provides    NwStackInf              network_stack_rpc;
     dataport    Buf                     port_app_io;
     emits       ServiceReady            event_network_init_done;
+
 }
 
 
@@ -81,4 +83,5 @@ component NwStack_2 {
     provides   NwStackInf              network_stack_rpc;
     dataport   Buf                     port_app_io;
     emits      ServiceReady            event_network_init_done;
+
 }

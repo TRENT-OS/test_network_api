@@ -15,4 +15,5 @@ component NwApp_1 {
     uses      NwStackInf    network_stack_rpc;
     dataport  Buf           NwAppDataPort;
     consumes  ServiceReady  event_network_stack_init_done;
+
 }
