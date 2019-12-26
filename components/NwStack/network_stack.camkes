@@ -5,7 +5,6 @@
  *
  */
 
-import "../../interfaces/ChanMuxInf.camkes";
 import "../../interfaces/NwStackInf.camkes";
 import "../../interfaces/timer_client.camkes";
 import "../../interfaces/NwDriverInf.camkes";
