@@ -5,7 +5,7 @@
  *
  */
 
-import "../../../interfaces/timer.camkes";
+import "../../interfaces/timer.camkes";
 
 component Timerbase{
     hardware;

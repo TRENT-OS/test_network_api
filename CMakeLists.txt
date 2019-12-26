@@ -13,10 +13,10 @@ project(tests_picotcp_api C)
 
 DeclareCAmkESComponent(NwStack_1
     INCLUDES
-        components/test_nwstack/ChanMux/src/instance
+        components/ChanMux/src/instance
         config
     SOURCES
-        components/test_nwstack/NwStack/network_stack_1.c
+        components/NwStack/network_stack_1.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
@@ -28,11 +28,11 @@ DeclareCAmkESComponent(NwStack_1
 
 DeclareCAmkESComponent(NwDriver_1
     INCLUDES
-        components/test_nwstack/ChanMux/src/instance
+        components/ChanMux/src/instance
         config
     SOURCES
-        components/test_nwstack/NwDriver/nic_driver_common.c
-        components/test_nwstack/NwDriver/nic_driver_1.c
+        components/NwDriver/nic_driver_common.c
+        components/NwDriver/nic_driver_1.c
     C_FLAGS
         -Wall -Werror
     LIBS
@@ -43,10 +43,10 @@ DeclareCAmkESComponent(NwDriver_1
 
 DeclareCAmkESComponent(NwStack_2
     INCLUDES
-        components/test_nwstack/ChanMux/src/instance
+        components/ChanMux/src/instance
         config
     SOURCES
-        components/test_nwstack/NwStack/network_stack_2.c
+        components/NwStack/network_stack_2.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
@@ -58,11 +58,11 @@ DeclareCAmkESComponent(NwStack_2
 
 DeclareCAmkESComponent(NwDriver_2
     INCLUDES
-        components/test_nwstack/ChanMux/src/instance
+        components/ChanMux/src/instance
         config
     SOURCES
-        components/test_nwstack/NwDriver/nic_driver_common.c
-        components/test_nwstack/NwDriver/nic_driver_2.c
+        components/NwDriver/nic_driver_common.c
+        components/NwDriver/nic_driver_2.c
     C_FLAGS
         -Wall -Werror
     LIBS
@@ -73,9 +73,9 @@ DeclareCAmkESComponent(NwDriver_2
 
 DeclareCAmkESComponent(NwApp_1
     INCLUDES
-        components/test_nwstack/test_APP/include
+        components/test_APP/include
     SOURCES
-        components/test_nwstack/test_APP/test_NwApp/src/Client_App.c
+        components/test_APP/test_NwApp/src/Client_App.c
         ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
     C_FLAGS
         -Wall -Werror
@@ -87,9 +87,9 @@ DeclareCAmkESComponent(NwApp_1
 
 DeclareCAmkESComponent(NwApp_2
     INCLUDES
-        components/test_nwstack/test_APP/include
+        components/test_APP/include
     SOURCES
-        components/test_nwstack/test_APP/test_NwApp2/src/Server_App.c
+        components/test_APP/test_NwApp2/src/Server_App.c
         ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
     C_FLAGS
         -Wall -Werror
@@ -101,7 +101,7 @@ DeclareCAmkESComponent(NwApp_2
 
 DeclareCAmkESComponent(ChanMux
     SOURCES
-        components/test_nwstack/ChanMux/src/instance/ChanMux_Instance.c
+        components/ChanMux/src/instance/ChanMux_Instance.c
     C_FLAGS
         -Wall -Werror
     LIBS
@@ -111,7 +111,7 @@ DeclareCAmkESComponent(ChanMux
 
 DeclareCAmkESComponent(TimerClient
     SOURCES
-        components/test_nwstack/TimerClient/src/Timer_Client.c
+        components/TimerClient/src/Timer_Client.c
     C_FLAGS
         -Wall -Werror
     LIBS
@@ -121,15 +121,15 @@ DeclareCAmkESComponent(TimerClient
 
 DeclareCAmkESComponent(Timer
     SOURCES
-        components/test_nwstack/Timer/src/timer.c
+        components/Timer/src/timer.c
     C_FLAGS
         -Wall -Werror
 )
 
 DeclareCAmkESComponent(UartDrv
     SOURCES
-        components/test_nwstack/Uart/src/UartDrv.c
-        components/test_nwstack/Uart/src/qemu_uart.c
+        components/Uart/src/UartDrv.c
+        components/Uart/src/qemu_uart.c
     C_FLAGS
         -Wall -Werror
 )

@@ -5,8 +5,8 @@
  *
  */
 
-import "../../../interfaces/timer.camkes";
-import "../../../interfaces/timer_client.camkes";
+import "../../interfaces/timer.camkes";
+import "../../interfaces/timer_client.camkes";
 
 component TimerClient {
     control;

@@ -1,14 +1,14 @@
 /*
- *  SEOS Network Stack Server Test App
+ *  SEOS Network Stack Client Test App
  *
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
  */
 
-import "../../../../interfaces/NwStackInf.camkes";
+import "../../../interfaces/NwStackInf.camkes";
 
 
-component NwApp_2 {
+component NwApp_1 {
 
     control;
 

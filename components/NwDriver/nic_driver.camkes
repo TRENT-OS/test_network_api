@@ -5,9 +5,9 @@
  *
  */
 
-import "../../../interfaces/ChanMuxInf.camkes";
-import "../../../interfaces/NwStackInf.camkes";
-import "../../../interfaces/NwDriverInf.camkes";
+import "../../interfaces/ChanMuxInf.camkes";
+import "../../interfaces/NwStackInf.camkes";
+import "../../interfaces/NwDriverInf.camkes";
 
 
 //------------------------------------------------------------------------------

@@ -1,13 +1,13 @@
 import <std_connector.camkes>;
 
-import "components/test_nwstack/ChanMux/ChanMux.camkes";
-import "components/test_nwstack/NwDriver/nic_driver.camkes";
-import "components/test_nwstack/NwStack/network_stack.camkes";
-import "components/test_nwstack/test_APP/test_NwApp/NwApp.camkes";
-import "components/test_nwstack/test_APP/test_NwApp2/NwApp_2.camkes";
-import "components/test_nwstack/TimerClient/TimerClient.camkes";
-import "components/test_nwstack/Timer/Timer.camkes";
-import "components/test_nwstack/Uart/Uart.camkes";
+import "components/ChanMux/ChanMux.camkes";
+import "components/NwDriver/nic_driver.camkes";
+import "components/NwStack/network_stack.camkes";
+import "components/test_APP/test_NwApp/NwApp.camkes";
+import "components/test_APP/test_NwApp2/NwApp_2.camkes";
+import "components/TimerClient/TimerClient.camkes";
+import "components/Timer/Timer.camkes";
+import "components/Uart/Uart.camkes";
 
 assembly {
     composition {
