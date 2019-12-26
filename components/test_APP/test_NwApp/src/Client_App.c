@@ -31,7 +31,7 @@ int run()
     {
         .domain = SEOS_AF_INET,
         .type   = SEOS_SOCK_STREAM,
-        .name   = "192.168.82.12", // local HTTP server
+        .name   = CFG_TEST_HTTP_SERVER,
         .port   = HTTP_PORT
     };
 
