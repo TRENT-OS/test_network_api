@@ -5,7 +5,8 @@
  *
  */
 
-#include "Seos_Nw_Config.h"
+#include "seos_system_config.h"
+
 #include "LibDebug/Debug.h"
 #include "SeosError.h"
 #include "seos_api_network_stack.h"

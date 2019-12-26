@@ -5,8 +5,9 @@
  */
 
 
+#include "seos_system_config.h"
+
 #include "ChanMux/ChanMux.h"
-#include "ChanMux_config.h"
 #include "SeosError.h"
 #include "assert.h"
 #include <camkes.h>

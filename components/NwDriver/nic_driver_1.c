@@ -4,7 +4,8 @@
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  */
 
-#include "Seos_Nw_Config.h"
+#include "seos_system_config.h"
+
 #include "LibDebug/Debug.h"
 #include "nic_driver_common.h"
 #include <camkes.h>

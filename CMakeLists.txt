@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.7.2)
 
-seos_set_config_file(config.h)
+seos_set_config_file(seos_system_config.h)
+
+project(seos_system_config C)
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 seos_use_libs(
     SEOS_LIBS
@@ -11,68 +15,58 @@ seos_use_libs(
 project(tests_picotcp_api C)
 
 DeclareCAmkESComponent(NwStack_1
-    INCLUDES
-        components/ChanMux/src/instance
-        config
     SOURCES
         components/NwStack/network_stack_1.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
         seos_nw_lib
 )
 
 DeclareCAmkESComponent(NwDriver_1
-    INCLUDES
-        components/ChanMux/src/instance
-        config
     SOURCES
         components/NwDriver/nic_driver_common.c
         components/NwDriver/nic_driver_1.c
     C_FLAGS
         -Wall -Werror
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
         seos_nw_driver_tap_proxy_lib
 )
 
 DeclareCAmkESComponent(NwStack_2
-    INCLUDES
-        components/ChanMux/src/instance
-        config
     SOURCES
         components/NwStack/network_stack_2.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
         seos_nw_lib
 )
 
 DeclareCAmkESComponent(NwDriver_2
-    INCLUDES
-        components/ChanMux/src/instance
-        config
     SOURCES
         components/NwDriver/nic_driver_common.c
         components/NwDriver/nic_driver_2.c
     C_FLAGS
         -Wall -Werror
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
         seos_nw_driver_tap_proxy_lib
 )
 
 DeclareCAmkESComponent(NwApp_1
-    INCLUDES
-        components/test_APP/include
     SOURCES
         components/test_APP/test_NwApp/src/Client_App.c
         ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
@@ -80,13 +74,12 @@ DeclareCAmkESComponent(NwApp_1
         -Wall -Werror
         -DCLIENT_CONFIG=1
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
 )
 
 DeclareCAmkESComponent(NwApp_2
-    INCLUDES
-        components/test_APP/include
     SOURCES
         components/test_APP/test_NwApp2/src/Server_App.c
         ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
@@ -94,6 +87,7 @@ DeclareCAmkESComponent(NwApp_2
         -Wall -Werror
         -DSERVER_CONFIG=1
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
 )
@@ -104,6 +98,7 @@ DeclareCAmkESComponent(ChanMux
     C_FLAGS
         -Wall -Werror
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
 )
@@ -114,6 +109,7 @@ DeclareCAmkESComponent(TimerClient
     C_FLAGS
         -Wall -Werror
     LIBS
+        seos_system_config
         seos_core_api
         seos_libs
 )
