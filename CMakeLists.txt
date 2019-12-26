@@ -68,7 +68,7 @@ DeclareCAmkESComponent(NwDriver_2
 
 DeclareCAmkESComponent(NwApp_1
     SOURCES
-        components/test_APP/test_NwApp/src/Client_App.c
+        components/TestAppClient/test_app_client.c
         ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
     C_FLAGS
         -Wall -Werror
@@ -81,7 +81,7 @@ DeclareCAmkESComponent(NwApp_1
 
 DeclareCAmkESComponent(NwApp_2
     SOURCES
-        components/test_APP/test_NwApp2/src/Server_App.c
+        components/TestAppServer/test_app_server.c
         ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
     C_FLAGS
         -Wall -Werror
@@ -94,7 +94,7 @@ DeclareCAmkESComponent(NwApp_2
 
 DeclareCAmkESComponent(ChanMux
     SOURCES
-        components/ChanMux/src/instance/ChanMux_Instance.c
+        components/ChanMux/ChanMux.c
     C_FLAGS
         -Wall -Werror
     LIBS
@@ -105,7 +105,7 @@ DeclareCAmkESComponent(ChanMux
 
 DeclareCAmkESComponent(TimerClient
     SOURCES
-        components/TimerClient/src/Timer_Client.c
+        components/TimerClient/timer_client.c
     C_FLAGS
         -Wall -Werror
     LIBS
@@ -116,7 +116,7 @@ DeclareCAmkESComponent(TimerClient
 
 DeclareCAmkESComponent(Timer
     SOURCES
-        components/Timer/src/timer.c
+        components/Timer/timer.c
     C_FLAGS
         -Wall -Werror
 )

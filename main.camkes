@@ -3,10 +3,10 @@ import <std_connector.camkes>;
 import "components/ChanMux/ChanMux.camkes";
 import "components/NwDriver/nic_driver.camkes";
 import "components/NwStack/network_stack.camkes";
-import "components/test_APP/test_NwApp/NwApp.camkes";
-import "components/test_APP/test_NwApp2/NwApp_2.camkes";
-import "components/TimerClient/TimerClient.camkes";
-import "components/Timer/Timer.camkes";
+import "components/TestAppClient/test_app_client.camkes";
+import "components/TestAppServer/test_app_server.camkes";
+import "components/TimerClient/timer_client.camkes";
+import "components/Timer/timer.camkes";
 import "components/Uart/Uart.camkes";
 
 assembly {
