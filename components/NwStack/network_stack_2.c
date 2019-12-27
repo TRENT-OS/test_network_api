@@ -24,7 +24,7 @@ static const seos_network_stack_config_t config =
 //------------------------------------------------------------------------------
 int run()
 {
-    Debug_LOG_INFO("driver up, starting network stack #2 (server)\n");
+    Debug_LOG_INFO("starting network stack #2 (server)\n");
 
     // can't make this "static const" or even "static" because the data ports
     // are allocated at runtime
