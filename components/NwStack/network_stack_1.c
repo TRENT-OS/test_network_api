@@ -82,9 +82,6 @@ int run()
         }
     };
 
-
-
-
     seos_err_t ret = seos_network_stack_run(&camkes_config, &config);
     if (ret != SEOS_SUCCESS)
     {

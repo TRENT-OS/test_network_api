@@ -13,62 +13,6 @@
 #include <camkes.h>
 
 
-
-
-/*
-    Debug_LOG_INFO("initializing network stack as Server...\n");
-    int ret;
-
-    seos_nw_camkes_signal_glue  nw_signal =
-    {
-        .e_write_emit        =  e_write_2_emit,
-        .c_write_wait        =  c_write_2_wait,
-        .e_read_emit         =  e_read_2_emit,
-        .c_read_wait         =  c_read_2_wait,
-        .e_conn_emit         =  e_conn_2_emit,
-        .c_conn_wait         =  c_conn_2_wait,
-        .e_write_nwstacktick =  e_write_nwstack_tick_2_emit,
-        .c_nwstacktick_wait  =  c_nwstack_tick_2_wait,
-        .e_initdone          =  e_initdone_2_emit,
-        // .c_initdone          =  c_initdone_2_wait
-    };
-
-    seos_nw_ports_glue nw_data =
-    {
-        .nwdriver_ReadPort     = driverReadPort_2,
-        .nwdriver_WritePort    = driverWritePort_2,
-        .Appdataport           = NwAppDataPort_2
-
-    };
-
-    seos_nw_driver_rpc_api nw_driver_api =
-    {
-        .dev_write             = seos_driver_tx_data,
-        .get_mac               = seos_driver_get_mac,
-        .dev_link_state        = NULL
-    };
-
-    // Wait for an event here from Driver to get Initialsed
-    // < ---------------------------->
-    c_driver_initdone_2_wait();
-
-
-    // this runs the network stack main loop, it does not return during normal
-    // operation
-    ret = Seos_NwStack_init(&nw_camkes, &nw_stack_config);
-    if (ret != SEOS_SUCCESS)
-    {
-        Debug_LOG_FATAL("Seos_NwStack_init Init() for server failed, error %d", ret);
-        return -1;
-    }
-
-    Debug_LOG_WARNING("network stack for server terminated");
-
-    return 0;
-}
-*/
-
-
 static const seos_network_stack_config_t config =
 {
     .dev_addr      = SEOS_TAP1_ADDR,
@@ -107,15 +51,15 @@ int run()
         {
             .wait_init_done     = event_nic_init_done_wait,
 
-            .from =
+            .from = // NIC -> stack
             {
-                .buffer         = port_nic_from, // NIC -> stack
+                .buffer         = port_nic_from,
                 .len            = PAGE_SIZE
             },
 
-            .to =
+            .to = // stack -> NIC
             {
-                .buffer         = port_nic_to,   // stack -> NIC
+                .buffer         = port_nic_to,
                 .len            = PAGE_SIZE
             },
 
@@ -145,7 +89,7 @@ int run()
         return -1;
     }
 
-    Debug_LOG_WARNING("network stack 2 (server terminated gracefully");
+    Debug_LOG_WARNING("network stack #2 (server terminated gracefully");
 
     return 0;
 }
