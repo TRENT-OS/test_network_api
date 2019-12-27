@@ -79,7 +79,7 @@ static const dataport_rw_t dataports[] =
 
 
 //------------------------------------------------------------------------------
-void
+static void
 ChanMux_dataAvailable_emit(
     unsigned int chanNum)
 {
