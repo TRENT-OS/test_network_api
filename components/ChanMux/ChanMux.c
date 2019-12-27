@@ -271,7 +271,7 @@ ChanMux_driver_write(
 
 
 //------------------------------------------------------------------------------
-// function write() of interface
+// function read() of interface
 seos_err_t
 ChanMux_driver_read(
     unsigned int  chanNum,
