@@ -94,14 +94,14 @@ ChanMux_dataAvailable_emit(
     switch (chanNum)
     {
     //---------------------------------
-    case CHANNEL_NW_STACK_DATA:
-    case CHANNEL_NW_STACK_CTRL:
+    case CHANMUX_CHANNEL_NIC_0_CTRL:
+    case CHANMUX_CHANNEL_NIC_0_DATA:
         event_nic_1_hasData_emit();
         break;
 
     //---------------------------------
-    case CHANNEL_NW_STACK_DATA_2:
-    case CHANNEL_NW_STACK_CTRL_2:
+    case CHANMUX_CHANNEL_NIC_1_CTRL:
+    case CHANMUX_CHANNEL_NIC_1_DATA:
         event_nic_2_hasData_emit();
         break;
 
@@ -168,11 +168,10 @@ ChanMux_driver_write(
     switch (chanNum)
     {
     //---------------------------------
-    case CHANNEL_NW_STACK_DATA:
-    case CHANNEL_NW_STACK_CTRL:
-    case CHANNEL_NW_STACK_DATA_2:
-    case CHANNEL_NW_STACK_CTRL_2:
-
+    case CHANMUX_CHANNEL_NIC_0_CTRL:
+    case CHANMUX_CHANNEL_NIC_0_DATA:
+    case CHANMUX_CHANNEL_NIC_1_CTRL:
+    case CHANMUX_CHANNEL_NIC_1_DATA:
         dp = &dataports[chanNum].write;
         break;
     //---------------------------------
@@ -207,10 +206,10 @@ ChanMux_driver_read(
     switch (chanNum)
     {
     //---------------------------------
-    case CHANNEL_NW_STACK_DATA:
-    case CHANNEL_NW_STACK_CTRL:
-    case CHANNEL_NW_STACK_DATA_2:
-    case CHANNEL_NW_STACK_CTRL_2:
+    case CHANMUX_CHANNEL_NIC_0_CTRL:
+    case CHANMUX_CHANNEL_NIC_0_DATA:
+    case CHANMUX_CHANNEL_NIC_1_CTRL:
+    case CHANMUX_CHANNEL_NIC_1_DATA:
         dp = &dataports[chanNum].read;
         break;
     //---------------------------------

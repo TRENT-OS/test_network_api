@@ -15,9 +15,9 @@
 
 static const seos_network_stack_config_t config =
 {
-    .dev_addr      = SEOS_TAP0_ADDR,
-    .gateway_addr  = SEOS_TAP0_GATEWAY_ADDR,
-    .subnet_mask   = SEOS_TAP0_SUBNET_MASK
+    .dev_addr      = ETH_0_ADDR,
+    .gateway_addr  = ETH_0_GATEWAY_ADDR,
+    .subnet_mask   = ETH_0_SUBNET_MASK
 };
 
 

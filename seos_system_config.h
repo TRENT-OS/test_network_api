@@ -34,40 +34,39 @@
 //-----------------------------------------------------------------------------
 // ChanMUX
 //-----------------------------------------------------------------------------
+
 enum
 {
-    CHANNEL_UNUSED_0,        // 0
-    CHANNEL_UNUSED_1,        // 1
-    CHANNEL_UNUSED_2,        // 2
-    CHANNEL_UNUSED_3,        // 3
-    CHANNEL_NW_STACK_CTRL,   // 4
-    CHANNEL_NW_STACK_DATA,   // 5
-    CHANNEL_UNUSED_6,        // 6
-    CHANNEL_NW_STACK_CTRL_2, // 7
-    CHANNEL_NW_STACK_DATA_2, // 8
+    CHANMUX_CHANNEL_UNUSED_0,   // 0
+    CHANMUX_CHANNEL_UNUSED_1,   // 1
+    CHANMUX_CHANNEL_UNUSED_2,   // 2
+    CHANMUX_CHANNEL_UNUSED_3,   // 3
+    CHANMUX_CHANNEL_NIC_0_CTRL, // 4
+    CHANMUX_CHANNEL_NIC_0_DATA, // 5
+    CHANMUX_CHANNEL_UNUSED_6,   // 6
+    CHANMUX_CHANNEL_NIC_1_CTRL, // 7
+    CHANMUX_CHANNEL_NIC_1_DATA, // 8
 
-    CHANMUX_NUM_CHANNELS     // 9
+    CHANMUX_NUM_CHANNELS        // 9
 };
 
 
 //-----------------------------------------------------------------------------
-// Network Stack
+// Network Stack #1
 //-----------------------------------------------------------------------------
 
-#define SEOS_TAP0_CTRL_CHANNEL          CHANNEL_NW_STACK_CTRL
-#define SEOS_TAP0_DATA_CHANNEL          CHANNEL_NW_STACK_DATA
+#define ETH_0_ADDR                  "192.168.82.91"
+#define ETH_0_GATEWAY_ADDR          "192.168.82.1"
+#define ETH_0_SUBNET_MASK           "255.255.255.0"
 
-#define SEOS_TAP1_CTRL_CHANNEL          CHANNEL_NW_STACK_CTRL_2
-#define SEOS_TAP1_DATA_CHANNEL          CHANNEL_NW_STACK_DATA_2
 
-/* Below defines are used to configure the network stack*/
-#define SEOS_TAP0_ADDR                  "192.168.82.91"
-#define SEOS_TAP0_GATEWAY_ADDR          "192.168.82.1"
-#define SEOS_TAP0_SUBNET_MASK           "255.255.255.0"
+//-----------------------------------------------------------------------------
+// Network Stack #2
+//-----------------------------------------------------------------------------
 
-#define SEOS_TAP1_ADDR                  "192.168.82.92"
-#define SEOS_TAP1_GATEWAY_ADDR          "192.168.82.1"
-#define SEOS_TAP1_SUBNET_MASK           "255.255.255.0"
+#define ETH_1_ADDR                  "192.168.82.92"
+#define ETH_1_GATEWAY_ADDR          "192.168.82.1"
+#define ETH_1_SUBNET_MASK           "255.255.255.0"
 
 
 //-----------------------------------------------------------------------------

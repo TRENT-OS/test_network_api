@@ -16,8 +16,8 @@ int run()
 {
     Debug_LOG_INFO("starting network driver #2");
 
-    int ret = chanmux_nic_driver_start(SEOS_TAP1_CTRL_CHANNEL,
-                                       SEOS_TAP1_DATA_CHANNEL);
+    int ret = chanmux_nic_driver_start(CHANMUX_CHANNEL_NIC_1_CTRL,
+                                       CHANMUX_CHANNEL_NIC_1_DATA);
     if (ret < 0)
     {
         Debug_LOG_ERROR("chanmux_nic_driver_start() failed for driver #2, error %d", ret);
