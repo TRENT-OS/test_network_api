@@ -100,7 +100,8 @@ ChanMux_dataAvailable_emit(
 
     //---------------------------------
     default:
-        Debug_LOG_ERROR("%s(): invalid channel %u", __func__, chanNum);
+        Debug_LOG_ERROR("[channel %u] invalid channel to signal data available",
+                        chanNum);
 
         break;
     }
@@ -157,7 +158,7 @@ ChanMux_driver_write(
     size_t        len,
     size_t*       lenWritten)
 {
-    Debug_LOG_TRACE("%s(): channel %u, len %u", __func__, chanNum, len);
+    Debug_LOG_TRACE("[Channel %u] write len %u", chanNum, len);
 
     // set defaults
     *lenWritten = 0;
@@ -174,7 +175,7 @@ ChanMux_driver_write(
         break;
     //---------------------------------
     default:
-        Debug_LOG_ERROR("%s(): invalid channel %u", __func__, chanNum);
+        Debug_LOG_ERROR("[Channel %u] invalid channel for writing", chanNum);
         return SEOS_ERROR_ACCESS_DENIED;
     }
 
@@ -182,7 +183,7 @@ ChanMux_driver_write(
     seos_err_t ret = ChanMux_write(ChanMux_getInstance(), chanNum, dp, &len);
     *lenWritten = len;
 
-    Debug_LOG_TRACE("%s(): channel %u, lenWritten %u", __func__, chanNum, len);
+    Debug_LOG_TRACE("[Channel %u] lenWritten %u", chanNum, len);
 
     return ret;
 }
@@ -196,7 +197,7 @@ ChanMux_driver_read(
     size_t        len,
     size_t*       lenRead)
 {
-    Debug_LOG_TRACE("%s(): channel %u, len %u", __func__, chanNum, len);
+    Debug_LOG_TRACE("[Channel %u] read len %u", __func__, chanNum, len);
 
     // set defaults
     *lenRead = 0;
@@ -213,7 +214,7 @@ ChanMux_driver_read(
         break;
     //---------------------------------
     default:
-        Debug_LOG_ERROR("%s(): invalid channel %u", __func__, chanNum);
+        Debug_LOG_ERROR("[Channel %u] invalid channel for reading", chanNum);
         return SEOS_ERROR_ACCESS_DENIED;
     }
 
@@ -221,7 +222,7 @@ ChanMux_driver_read(
     seos_err_t ret = ChanMux_read(ChanMux_getInstance(), chanNum, dp, &len);
     *lenRead = len;
 
-    Debug_LOG_TRACE("%s(): channel %u, lenRead %u", __func__, chanNum, len);
+    Debug_LOG_TRACE("[Channel %u] lenRead %u", chanNum, len);
 
     return ret;
 }
