@@ -79,14 +79,6 @@ static const dataport_rw_t dataports[] =
 
 
 //------------------------------------------------------------------------------
-const ChanMuxConfig_t*
-ChanMux_config_getConfig(void)
-{
-    return &cfgChanMux;
-}
-
-
-//------------------------------------------------------------------------------
 void
 ChanMux_dataAvailable_emit(
     unsigned int chanNum)
@@ -126,7 +118,7 @@ ChanMux_getInstance(void)
 
     if ((NULL == self) && ChanMux_ctor(&theOne,
                                        channels,
-                                       ChanMux_config_getConfig(),
+                                       &cfgChanMux,
                                        NULL,
                                        ChanMux_dataAvailable_emit,
                                        Output_write))
