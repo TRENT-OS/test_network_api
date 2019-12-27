@@ -5,7 +5,7 @@
  *
  */
 
-import "../../interfaces/ChanMuxInf.camkes";
+import <seos_if_chanMux.camkes>;
 import "../../interfaces/UartInf.camkes";
 
 
