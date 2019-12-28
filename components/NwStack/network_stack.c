@@ -15,16 +15,16 @@
 
 static const seos_network_stack_config_t config =
 {
-    .dev_addr      = ETH_1_ADDR,
-    .gateway_addr  = ETH_1_GATEWAY_ADDR,
-    .subnet_mask   = ETH_1_SUBNET_MASK
+    .dev_addr      = CFG_ETH_ADDR,
+    .gateway_addr  = CFG_ETH_GATEWAY_ADDR,
+    .subnet_mask   = CFG_ETH_SUBNET_MASK
 };
 
 
 //------------------------------------------------------------------------------
 int run()
 {
-    Debug_LOG_INFO("starting network stack #1 (client)\n");
+    Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
 
     // can't make this "static const" or even "static" because the data ports
     // are allocated at runtime
@@ -43,8 +43,13 @@ int run()
             .notify_read        = e_read_emit,
             .wait_read          = c_read_wait,
 
+#if defined(SEOS_NWSTACK_AS_SERVER)
+            .notify_connection  = e_conn_emit,
+            .wait_connection    = c_conn_wait,
+#else
             .notify_connection  = NULL,
             .wait_connection    = NULL,
+#endif
         },
 
         .drv_nic =
@@ -85,11 +90,16 @@ int run()
     seos_err_t ret = seos_network_stack_run(&camkes_config, &config);
     if (ret != SEOS_SUCCESS)
     {
-        Debug_LOG_FATAL("seos_network_stack_run() for #1 (client) failed, error %d", ret);
+        Debug_LOG_FATAL("[NwStack '%s'] seos_network_stack_run() failed, error %d",
+                        get_instance_name(), ret);
         return -1;
     }
 
-    Debug_LOG_WARNING("network stack #1 (client) terminated gracefully");
+    // actually, seos_network_stack_run() is not supposed to return with
+    // SEOS_SUCCESS. We have to assume this is a graceful shutdown for some
+    // reason
+    Debug_LOG_WARNING("[NwStack '%s'] graceful termination",
+                        get_instance_name());
 
     return 0;
 }

@@ -16,10 +16,13 @@ project(tests_picotcp_api C)
 
 DeclareCAmkESComponent(NwStack_1
     SOURCES
-        components/NwStack/network_stack_1.c
+        components/NwStack/network_stack.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
+        -DCFG_ETH_ADDR=ETH_1_ADDR
+        -DCFG_ETH_GATEWAY_ADDR=ETH_1_GATEWAY_ADDR
+        -DCFG_ETH_SUBNET_MASK=ETH_1_SUBNET_MASK
     LIBS
         seos_system_config
         seos_core_api
@@ -43,10 +46,13 @@ DeclareCAmkESComponent(NwDriver_1
 
 DeclareCAmkESComponent(NwStack_2
     SOURCES
-        components/NwStack/network_stack_2.c
+        components/NwStack/network_stack.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
+        -DCFG_ETH_ADDR=ETH_2_ADDR
+        -DCFG_ETH_GATEWAY_ADDR=ETH_2_GATEWAY_ADDR
+        -DCFG_ETH_SUBNET_MASK=ETH_2_SUBNET_MASK
     LIBS
         seos_system_config
         seos_core_api
