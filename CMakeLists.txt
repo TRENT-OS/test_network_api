@@ -29,10 +29,11 @@ DeclareCAmkESComponent(NwStack_1
 
 DeclareCAmkESComponent(NwDriver_1
     SOURCES
-        components/NwDriver/nic_driver_common.c
-        components/NwDriver/nic_driver_1.c
+        components/NwDriver/nic_driver.c
     C_FLAGS
         -Wall -Werror
+        -DCFG_CHANMUX_CHANNEL_CRTL=CHANMUX_CHANNEL_NIC_1_CTRL
+        -DCFG_CHANMUX_CHANNEL_DATA=CHANMUX_CHANNEL_NIC_1_DATA
     LIBS
         seos_system_config
         seos_core_api
@@ -55,9 +56,10 @@ DeclareCAmkESComponent(NwStack_2
 
 DeclareCAmkESComponent(NwDriver_2
     SOURCES
-        components/NwDriver/nic_driver_common.c
-        components/NwDriver/nic_driver_2.c
+        components/NwDriver/nic_driver.c
     C_FLAGS
+        -DCFG_CHANMUX_CHANNEL_CRTL=CHANMUX_CHANNEL_NIC_2_CTRL
+        -DCFG_CHANMUX_CHANNEL_DATA=CHANMUX_CHANNEL_NIC_2_DATA
         -Wall -Werror
     LIBS
         seos_system_config
