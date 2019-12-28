@@ -25,7 +25,10 @@ extern seos_err_t Seos_NwAPP_RT(Seos_nw_context ctx);
 
 int run()
 {
+    Debug_LOG_INFO("Starting test_app_client...");
+
     char buffer[4096];
+    Seos_NwAPP_RT(NULL);   // Must be actullay called by SEOS Runtime
 
     seos_nw_client_struct cli_socket =
     {
@@ -35,30 +38,24 @@ int run()
         .port   = HTTP_PORT
     };
 
-    seos_socket_handle_t handle;
-
-    Seos_NwAPP_RT(NULL);   // Must be actullay called by SEOS Runtime
-
-    Debug_LOG_INFO("Starting App as Client...\n");
-
-
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
+    seos_socket_handle_t handle;
     seos_err_t err = Seos_client_socket_create(NULL, &cli_socket, &handle);
 
     if (err != SEOS_SUCCESS)
     {
-        Debug_LOG_WARNING("Error creating App socket...error:%d\n", err);
+        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
         return -1;
     }
 
+    Debug_LOG_INFO("send request to host...");
 
     const char* request =
         "GET / HTTP/1.0\r\nHost: 192.168.82.12\r\nConnection: close\r\n\r\n";
 
     const size_t len_request = strlen(request);
     size_t len = len_request;
-
 
     /* Send the request to the host */
     size_t offs = 0;
@@ -71,24 +68,20 @@ int run()
 
         if (err != SEOS_SUCCESS)
         {
-            Debug_LOG_WARNING("Client socket write failure. %s, error:%d\n", __FUNCTION__,
-                              err);
+            Debug_LOG_ERROR("socket_write() failed, code %d", err);
             Seos_socket_close(handle);
-            return -1;  /* return write error reason */
+            return -1;
         }
 
-        if (len_io > lenRemaining)
-        {
-            /* fatal error, this must not happen. API broken*/
-            Debug_ASSERT(false);
-        }
+        /* fatal error, this must not happen. API broken*/
+        Debug_ASSERT( len_io > lenRemaining );
 
         offs += len_io;
 
     }
     while (offs < len_request);
 
-    Debug_LOG_INFO("Client socket read Webpage start. %s\n", __FUNCTION__);
+    Debug_LOG_INFO("read response...");
 
     /*
     As of now the nw stack behavior is as below:
@@ -123,19 +116,19 @@ int run()
         {
 
         /* This means end of read or nothing further to read as socket was closed */
-        case  SEOS_ERROR_CONNECTION_CLOSED:
-            Debug_LOG_INFO("Client app read completed..");
+        case SEOS_ERROR_CONNECTION_CLOSED:
+            Debug_LOG_INFO("socket_read() reported connection closed");
             flag = false;    /* terminate loop and close handle*/
             break;
 
         /* Success . continue further reading */
-        case  SEOS_SUCCESS:
-            Debug_LOG_INFO("Web page chunk received, length %d and data:\n %s", len, buffer);
+        case SEOS_SUCCESS:
+            Debug_LOG_INFO("chunk read, length %d", len);
             continue ;
 
         /* Error case, break and close the handle */
         default:
-            Debug_LOG_WARNING("Read failure, error: %d.", err);
+            Debug_LOG_INFO("socket_read() failed, error %d", err);
             flag = false;    /* terminate loop and close handle */
             break;
         }// end of switch
