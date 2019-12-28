@@ -41,11 +41,11 @@ enum
     CHANMUX_CHANNEL_UNUSED_1,   // 1
     CHANMUX_CHANNEL_UNUSED_2,   // 2
     CHANMUX_CHANNEL_UNUSED_3,   // 3
-    CHANMUX_CHANNEL_NIC_0_CTRL, // 4
-    CHANMUX_CHANNEL_NIC_0_DATA, // 5
+    CHANMUX_CHANNEL_NIC_1_CTRL, // 4
+    CHANMUX_CHANNEL_NIC_1_DATA, // 5
     CHANMUX_CHANNEL_UNUSED_6,   // 6
-    CHANMUX_CHANNEL_NIC_1_CTRL, // 7
-    CHANMUX_CHANNEL_NIC_1_DATA, // 8
+    CHANMUX_CHANNEL_NIC_2_CTRL, // 7
+    CHANMUX_CHANNEL_NIC_2_DATA, // 8
 
     CHANMUX_NUM_CHANNELS        // 9
 };
@@ -55,18 +55,18 @@ enum
 // Network Stack #1
 //-----------------------------------------------------------------------------
 
-#define ETH_0_ADDR                  "192.168.82.91"
-#define ETH_0_GATEWAY_ADDR          "192.168.82.1"
-#define ETH_0_SUBNET_MASK           "255.255.255.0"
+#define ETH_1_ADDR                  "192.168.82.91"
+#define ETH_1_GATEWAY_ADDR          "192.168.82.1"
+#define ETH_1_SUBNET_MASK           "255.255.255.0"
 
 
 //-----------------------------------------------------------------------------
 // Network Stack #2
 //-----------------------------------------------------------------------------
 
-#define ETH_1_ADDR                  "192.168.82.92"
-#define ETH_1_GATEWAY_ADDR          "192.168.82.1"
-#define ETH_1_SUBNET_MASK           "255.255.255.0"
+#define ETH_2_ADDR                  "192.168.82.92"
+#define ETH_2_GATEWAY_ADDR          "192.168.82.1"
+#define ETH_2_SUBNET_MASK           "255.255.255.0"
 
 
 //-----------------------------------------------------------------------------

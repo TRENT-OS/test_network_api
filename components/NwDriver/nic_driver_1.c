@@ -16,8 +16,8 @@ int run()
 {
     Debug_LOG_INFO("starting network driver #1");
 
-    int ret = chanmux_nic_driver_start(CHANMUX_CHANNEL_NIC_0_CTRL,
-                                       CHANMUX_CHANNEL_NIC_0_DATA);
+    int ret = chanmux_nic_driver_start(CHANMUX_CHANNEL_NIC_1_CTRL,
+                                       CHANMUX_CHANNEL_NIC_1_DATA);
     if (ret < 0)
     {
         Debug_LOG_ERROR("chanmux_nic_driver_start() failed for driver #1, error %d", ret);

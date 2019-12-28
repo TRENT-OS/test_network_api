@@ -15,9 +15,9 @@
 
 static const seos_network_stack_config_t config =
 {
-    .dev_addr      = ETH_1_ADDR,
-    .gateway_addr  = ETH_1_GATEWAY_ADDR,
-    .subnet_mask   = ETH_1_SUBNET_MASK
+    .dev_addr      = ETH_2_ADDR,
+    .gateway_addr  = ETH_2_GATEWAY_ADDR,
+    .subnet_mask   = ETH_2_SUBNET_MASK
 };
 
 
