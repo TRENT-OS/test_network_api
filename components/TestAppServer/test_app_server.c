@@ -4,121 +4,185 @@
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
  */
+
+// This example demonstrates a server with an incoming connection. Reads
+// incoming data afterconnection is established. Writes or echoes the received
+// data back to the client. When the connection with the client is closed a new
+// round begins, in an infinitive loop.
+// Currently only a single socket is supported per stack instance.
+// i.e. no multitasking is supported as of now.
+
 #include <string.h>
 #include "stdint.h"
 #include "LibDebug/Debug.h"
 #include "SeosError.h"
-
 #include "OS_Network.h"
-
-/*
- * This example demonstrates a server with an incoming connection. Reads
- *  incoming data afterconnection is established. Writes or echoes the received
- *  data back to the client. When the connection with the client is closed a new
- *  round begins, in an infinitive loop.
- *  Currently only a single socket is supported per stack instance.
- *  i.e. no multitasking is supported as of now.
-*/
+#include "camkes.h"
 
 
-extern seos_err_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
-
-int run()
+//------------------------------------------------------------------------------
+static seos_err_t
+handle_connection(
+    OS_socket_handle_t  hSocket)
 {
-    Debug_LOG_INFO("Starting test_app_server...");
+    seos_err_t ret;
 
-    char buffer[4096];
-    OS_NetworkAPP_RT(NULL);    /* Must be actually called by SEOS Runtime */
+    Debug_LOG_INFO("[socket %u] new connection", hSocket);
 
-    OS_NetworkServer_Socket_t  srv_socket =
+    // network stack return code behavior
+    //
+    //  SEOS_SUCCESS
+    //    length > 0 indicate data has been read
+    //    length = 0 indicates all data has been read and the TCP
+    //      connection is still open - unless one has called read() with
+    //      length=0, in this case obviously length=0 will also be returned
+    //      and there may still be data in the buffer.
+    //
+    // SEOS_ERROR_CONNECTION_CLOSED indicates there is no more data to read
+    //    and the connection has been closed. If there is still unread
+    //    data and the connection has been clsoed, then SEOS_SUCCESS with
+    //    length > 0 will be returned
+    //
+    // SEOS_ERROR_GENERIC is an unspecified error, something went wrong,
+    //    the TCP connection may still be alive or not.
+
+    // keep calling read until we receive CONNECTION_CLOSED from the stack
+    char buffer[4096] = {0};
+
+    for(;;)
     {
-        .domain = OS_AF_INET,
-        .type   = OS_SOCK_STREAM,
-        .listen_port = 5555,
-        .backlog = 1,
-    };
+        Debug_LOG_TRACE("[socket %u] read ...", hSocket);
 
-    /* Gets filled when accept is called */
-    OS_NetworkSocket_Handle_t  seos_socket_handle ;
-    /* Gets filled when server socket create is called */
-    OS_NetworkServer_Handle_t  seos_nw_server_handle ;
+        size_t n = 1;
+        ret = OS_socket_read(hSocket, buffer, &n);
+        if (SEOS_SUCCESS != ret)
+        {
+            if (SEOS_ERROR_CONNECTION_CLOSED == ret)
+            {
+                // connection was closed, consider this as successful. The
+                // test runner checks for this string
+                Debug_LOG_INFO("connection closed by server");
+                return SEOS_SUCCESS;
+            }
 
-    seos_err_t err = OS_NetworkServerSocket_create(NULL, &srv_socket,
-                                                   &seos_nw_server_handle);
+            Debug_LOG_ERROR("[socket %u] socket_read() failed, error %d",
+                            hSocket, ret);
+            return SEOS_ERROR_GENERIC;
+        }
 
-    if (err != SEOS_SUCCESS)
-    {
-        Debug_LOG_ERROR("server_socket_create() failed, code %d", err);
-        return -1;
+        Debug_ASSERT(n == 1);
+        Debug_LOG_TRACE("[socket %u] read 0x%02x, send it back",
+                        hSocket, buffer[0]);
+
+        ret = OS_socket_write(hSocket, buffer, &n);
+        if (SEOS_SUCCESS != ret)
+        {
+            // SEOS_ERROR_CONNECTION_CLOSED is not accepted here, because the
+            // peer is not expected to close the connection
+            Debug_LOG_ERROR("[socket %u] socket_write() failed, error %d",
+                            hSocket, ret);
+            return SEOS_ERROR_GENERIC;
+        }
     }
+}
 
+
+//------------------------------------------------------------------------------
+static seos_err_t
+run_server(
+    OS_server_socket_handle_t  hServerSocket)
+{
     Debug_LOG_INFO("launching echo server");
 
     for (;;)
     {
-        err = OS_NetworkServerSocket_accept(seos_nw_server_handle, &seos_socket_handle);
-        if (err != SEOS_SUCCESS)
+        seos_err_t ret;
+
+        Debug_LOG_INFO("[socket %u] waiting for connection ...", hServerSocket);
+        OS_socket_handle_t  hSocket = 0;
+        ret = OS_socket_accept(hServerSocket, &hSocket);
+        if (SEOS_SUCCESS != ret)
         {
-            Debug_LOG_ERROR("socket_accept() failed, error %d", err);
-            return -1;
+            Debug_LOG_ERROR("[socket %u] socket_accept() failed, error %d",
+                            hServerSocket, ret);
+            return SEOS_ERROR_GENERIC;
         }
 
-        /*
-            As of now the nw stack behavior is as below:
-            Keep reading data until you receive one of the return values:
-             a. err = SEOS_ERROR_CONNECTION_CLOSED and length = 0 indicating end of data read
-                      and connection close
-             b. err = SEOS_ERROR_GENERIC  due to error in read
-             c. err = SEOS_SUCCESS and length = 0 indicating no data to read but there is still
-                      connection
-             d. err = SEOS_SUCCESS and length >0 , valid data
+        ret = handle_connection(hSocket);
 
-            Take appropriate actions based on the return value rxd.
+        // close the socket, ignore any error
+        (void)OS_socket_close(hSocket);
 
-
-            Only a single socket is supported and no multithreading !!!
-            Once we accept an incoming connection, start reading data from the client and echo back
-            the data rxd.
-        */
-        memset(buffer, 0, sizeof(buffer));
-
-        Debug_LOG_INFO("starting server read loop");
-        /* Keep calling read until we receive CONNECTION_CLOSED from the stack */
-        for (;;)
+        if (SEOS_SUCCESS != ret)
         {
-            Debug_LOG_DEBUG("read...");
-            size_t n = 1;
-            err = OS_NetworkSocket_read(seos_socket_handle, buffer, &n);
-            if (SEOS_SUCCESS != err)
-            {
-                Debug_LOG_ERROR("socket_read() failed, error %d", err);
-                break;
-            }
-
-            Debug_ASSERT(n == 1);
-            Debug_LOG_DEBUG("Got a byte %02x, send it back", buffer[0]);
-
-            err = OS_NetworkSocket_write(seos_socket_handle, buffer, &n);
-            if (err != SEOS_SUCCESS)
-            {
-                Debug_LOG_ERROR("socket_write() failed, error %d", err);
-                break;
-            }
+            Debug_LOG_ERROR("[socket %u] handle_connection() failed for socket %u, error %d",
+                            hServerSocket, hSocket, ret);
+            return SEOS_ERROR_GENERIC;
         }
-
-        switch (err)
-        {
-        /* This means end of read as socket was closed. Exit now and close handle*/
-        case SEOS_ERROR_CONNECTION_CLOSED:
-            // the test runner checks for this string
-            Debug_LOG_INFO("connection closed by server");
-            break;
-        /* Any other value is a failure in read, hence exit and close handle  */
-        default :
-            Debug_LOG_ERROR("server socket failure, error %d", err);
-            break;
-        } //end of switch
     }
-    return -1;
+}
+
+
+//------------------------------------------------------------------------------
+static seos_err_t
+run_app(void)
+{
+    seos_err_t ret;
+
+    OS_server_socket_params_t params =
+    {
+        .mode = OS_SOCKET_IPV4 | OS_SOCKET_STREAM,
+        .port = 5555,
+        .backlog = 1
+    };
+
+    OS_server_socket_handle_t hServerSocket = 0;
+    ret = OS_server_socket_create(NULL, &params, &hServerSocket);
+    if (SEOS_SUCCESS != ret)
+    {
+        Debug_LOG_ERROR("server_socket_create() failed, code %d", ret);
+        return SEOS_ERROR_GENERIC;
+    }
+
+    ret = run_server(hServerSocket);
+    if (SEOS_SUCCESS != ret)
+    {
+        Debug_LOG_ERROR("run_server() failed, error %d", ret);
+    }
+
+    // close the server socket, ignore any error
+    (void)OS_server_socket_close(hServerSocket);
+
+    return ret;
+}
+
+
+//------------------------------------------------------------------------------
+int run(void)
+{
+    Debug_LOG_INFO("starting test_app_server...");
+
+    // can't make this "static const" or even "static" because the data ports
+    // are allocated at runtime
+    OS_network_client_lib_config_t network_client_lib_cfg = {
+        .wait_init_done = event_network_stack_init_done_wait,
+        .api = SETUP_SOCKET_SOCKET_API_INSTANCE(network_stack_rpc),
+        .port = {
+            .buffer = NwAppDataPort,
+            .len    = PAGE_SIZE
+        }
+    };
+
+    OS_network_client_lib_init(&network_client_lib_cfg);
+
+    seos_err_t ret = run_app();
+    if (SEOS_SUCCESS != ret)
+    {
+        Debug_LOG_ERROR("run_app() failed, error %d", ret);
+        return -1;
+    }
+
+    Debug_LOG_INFO("finished test_app_server");
+    return 0;
 }
