@@ -138,21 +138,27 @@ ChanMux_getInstance(void)
 }
 
 
+//==============================================================================
+// CAmkES Interface "ChanMuxOut" (ChanMUX bottom)
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// function takeByte() of interface
 void
 ChanMuxOut_takeByte(char byte)
 {
+    // process the byte. May trigger the notifications defined in cfgChanMux if
+    // there is data in the channel or the state of the channel changed    
     ChanMux_takeByte(ChanMux_getInstance(), byte);
 }
 
 
-
 //==============================================================================
-// CAmkES Interface
+// CAmkES Interface "ChanMux_driver" (ChanMUX top)
 //==============================================================================
 
 //------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
+// function write() of interface
 seos_err_t
 ChanMux_driver_write(
     unsigned int  chanNum,
@@ -191,6 +197,7 @@ ChanMux_driver_write(
 
 
 //------------------------------------------------------------------------------
+// function write() of interface
 seos_err_t
 ChanMux_driver_read(
     unsigned int  chanNum,
