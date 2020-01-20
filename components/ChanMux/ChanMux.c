@@ -110,24 +110,63 @@ ChanMux_dataAvailable_emit(
 
 //------------------------------------------------------------------------------
 static ChanMux*
-ChanMux_getInstance(void)
+ChanMux_getInstanceOrCreate(
+    unsigned int doCreate)
 {
+    // ToDo: actually, we need a mutex here to ensure all access and especially
+    //       the creation is serialized. In the current implementation, the
+    //       creation happens from the main thread before the interfaces are
+    //       up and afterward we just try to get the instance, but never try to
+    //       create it.
+
     // singleton
-    static ChanMux  theOne;
     static ChanMux* self = NULL;
+    static ChanMux  theOne;
     static Channel_t channels[CHANMUX_NUM_CHANNELS];
 
-    if ((NULL == self) && ChanMux_ctor(&theOne,
-                                       channels,
-                                       &cfgChanMux,
-                                       NULL,
-                                       ChanMux_dataAvailable_emit,
-                                       Output_write))
+    if ((NULL == self) && doCreate)
     {
+        if (!ChanMux_ctor(&theOne,
+                          channels,
+                          &cfgChanMux,
+                          NULL,
+                          ChanMux_dataAvailable_emit,
+                          Output_write))
+        {
+            Debug_LOG_ERROR("ChanMux_ctor() failed");
+            return NULL;
+        }
+
         self = &theOne;
     }
 
     return self;
+}
+
+
+//------------------------------------------------------------------------------
+static ChanMux*
+ChanMux_getInstance(void)
+{
+    return ChanMux_getInstanceOrCreate(0);
+}
+
+
+//==============================================================================
+// CAmkES component
+//==============================================================================
+
+//---------------------------------------------------------------------------
+// called before any other init function is called. Full runtime support is not
+// available, e.g. interfaces cannot be expected to be accessible.
+void pre_init(void)
+{
+    Debug_LOG_DEBUG("create ChanMUX instance");
+    ChanMux* chanMux = ChanMux_getInstanceOrCreate(1);
+    if (NULL == chanMux)
+    {
+        Debug_LOG_ERROR("ChanMUX instance creation failed");
+    }
 }
 
 
@@ -140,9 +179,16 @@ ChanMux_getInstance(void)
 void
 ChanMuxOut_takeByte(char byte)
 {
+    ChanMux* chanMux = ChanMux_getInstance();
+    if (NULL == chanMux)
+    {
+        Debug_LOG_ERROR("ChanMUX instance not available");
+        return;
+    }
+
     // process the byte. May trigger the notifications defined in cfgChanMux if
     // there is data in the channel or the state of the channel changed    
-    ChanMux_takeByte(ChanMux_getInstance(), byte);
+    ChanMux_takeByte(chanMux, byte);
 }
 
 
@@ -163,6 +209,13 @@ ChanMux_driver_write(
     // set defaults
     *lenWritten = 0;
 
+    ChanMux* chanMux = ChanMux_getInstance();
+    if (NULL == chanMux)
+    {
+        Debug_LOG_ERROR("[Channel %u] ChanMUX instance not available", chanNum);
+        return SEOS_ERROR_GENERIC;
+    }
+
     const ChannelDataport_t* dp = NULL;
     switch (chanNum)
     {
@@ -180,7 +233,7 @@ ChanMux_driver_write(
     }
 
     Debug_ASSERT( NULL != dp );
-    seos_err_t ret = ChanMux_write(ChanMux_getInstance(), chanNum, dp, &len);
+    seos_err_t ret = ChanMux_write(chanMux, chanNum, dp, &len);
     *lenWritten = len;
 
     Debug_LOG_TRACE("[Channel %u] lenWritten %u", chanNum, len);
@@ -202,6 +255,13 @@ ChanMux_driver_read(
     // set defaults
     *lenRead = 0;
 
+    ChanMux* chanMux = ChanMux_getInstance();
+    if (NULL == chanMux)
+    {
+        Debug_LOG_ERROR("[Channel %u] ChanMUX instance not available", chanNum);
+        return SEOS_ERROR_GENERIC;
+    }
+
     const ChannelDataport_t* dp = NULL;
     switch (chanNum)
     {
@@ -219,7 +279,7 @@ ChanMux_driver_read(
     }
 
     Debug_ASSERT( NULL != dp );
-    seos_err_t ret = ChanMux_read(ChanMux_getInstance(), chanNum, dp, &len);
+    seos_err_t ret = ChanMux_read(chanMux, chanNum, dp, &len);
     *lenRead = len;
 
     Debug_LOG_TRACE("[Channel %u] lenRead %u", chanNum, len);
