@@ -49,7 +49,7 @@ int run()
         return -1;
     }
 
-    Debug_LOG_INFO("send request to host...");
+    Debug_LOG_INFO("Send request to host...");
 
     const char* request =
         "GET / HTTP/1.0\r\nHost: 192.168.82.12\r\nConnection: close\r\n\r\n";
@@ -64,6 +64,7 @@ int run()
         const size_t lenRemaining = len_request - offs;
         size_t len_io = lenRemaining;
 
+
         err = Seos_socket_write(handle, &request[offs], &len_io);
 
         if (err != SEOS_SUCCESS)
@@ -74,10 +75,9 @@ int run()
         }
 
         /* fatal error, this must not happen. API broken*/
-        Debug_ASSERT( len_io > lenRemaining );
+        Debug_ASSERT( len_io <= lenRemaining );
 
         offs += len_io;
-
     }
     while (offs < len_request);
 
@@ -134,9 +134,8 @@ int run()
         }// end of switch
     }
     while (flag);
-
+    Debug_LOG_INFO("Test ended");
     /* Close the socket communication */
     err = Seos_socket_close(handle);
-
     return 0;
 }

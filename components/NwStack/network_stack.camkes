@@ -24,6 +24,8 @@ component NwStack_1 {
     emits       NwStack_RdEv            e_read;
     consumes    NwStack_RdEv            c_read;
 
+    has         mutex                   allocatorMutex;
+    has         mutex                   nwstackMutex;
 
     //-------------------------------------------------
     // interface Timer
@@ -43,7 +45,6 @@ component NwStack_1 {
     provides    seos_if_socket          network_stack_rpc;
     dataport    Buf                     port_app_io;
     emits       ServiceReady            event_network_init_done;
-
 }
 
 
@@ -64,6 +65,9 @@ component NwStack_2 {
     emits      NwStack_ConnEv           e_conn;
     consumes   NwStack_ConnEv           c_conn;
 
+    has         mutex                   allocatorMutex;
+    has         mutex                   nwstackMutex;
+
 
     //-------------------------------------------------
     // interface Timer
@@ -83,5 +87,4 @@ component NwStack_2 {
     provides   seos_if_socket          network_stack_rpc;
     dataport   Buf                     port_app_io;
     emits      ServiceReady            event_network_init_done;
-
 }

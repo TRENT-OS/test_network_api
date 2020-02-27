@@ -9,7 +9,10 @@
 #include <camkes.h>
 
 #define MSECS_TO_SLEEP      10
-#define SIGNAL_PERIOD_MS    1000
+// It looks like the events from the stack aren't coming as often as they should, and we 
+// have to be saved by the timer. Setting it to a random low value that seems to work
+// SEOS-930
+#define SIGNAL_PERIOD_MS    50
 
 static unsigned int counterMs = 0;
 
