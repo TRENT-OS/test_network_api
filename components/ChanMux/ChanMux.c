@@ -44,7 +44,8 @@ static const ChanMuxConfig_t cfgChanMux =
 };
 
 
-typedef struct {
+typedef struct
+{
     ChannelDataport_t  read;
     ChannelDataport_t  write;
 } dataport_rw_t;
@@ -88,10 +89,11 @@ static const dataport_rw_t dataports[CHANMUX_NUM_CHANNELS] =
 #define INVALID_CHANNEL     ((unsigned int)(-1))
 
 
-typedef struct {
-    ChanMux *              chanMux;
+typedef struct
+{
+    ChanMux*               chanMux;
     unsigned int           chanNum_global;
-    const dataport_rw_t *  dataport_rw;
+    const dataport_rw_t*   dataport_rw;
 } chanMux_channel_ctx_t;
 
 
@@ -250,7 +252,7 @@ static seos_err_t
 ChanMux_resolve_ctx(
     unsigned int             sender_id,
     unsigned int             chanNum_local,
-    chanMux_channel_ctx_t *  ctx)
+    chanMux_channel_ctx_t*   ctx)
 {
     Debug_ASSERT( NULL != ctx );
 
@@ -331,7 +333,7 @@ ChanMuxOut_takeByte(char byte)
     }
 
     // process the byte. May trigger the notifications defined in cfgChanMux if
-    // there is data in the channel or the state of the channel changed    
+    // there is data in the channel or the state of the channel changed
     ChanMux_takeByte(chanMux, byte);
 }
 
