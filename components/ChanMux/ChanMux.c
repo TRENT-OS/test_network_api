@@ -16,11 +16,14 @@
 #define NO_CHANMUX_FIFO         { .buffer = NULL, .len = 0 }
 #define NO_CHANMUX_DATA_PORT    { .io = NULL, .len = 0 }
 
-
-static uint8_t nwFifoBuf[PAGE_SIZE];
+// Increased FIFO size to store 1 minute of network "background" traffic (seen in wireshark)
+// And then doubled it to cover our tests
+static uint8_t nwFifoBuf[1024 * PAGE_SIZE];
 static uint8_t nwCtrFifoBuf[128];
 
-static uint8_t nwFifoBuf_2[PAGE_SIZE];
+// Increased FIFO size to store 1 minute of network "background" traffic (seen in wireshark)
+// And then doubled it to cover our tests
+static uint8_t nwFifoBuf_2[1024 * PAGE_SIZE];
 static uint8_t nwCtrFifoBuf_2[128];
 
 static const ChanMuxConfig_t cfgChanMux =
