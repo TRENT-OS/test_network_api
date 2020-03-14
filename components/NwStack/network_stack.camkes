@@ -24,6 +24,9 @@ component NwStack_1 {
     emits       NwStack_RdEv            e_read;
     consumes    NwStack_RdEv            c_read;
 
+    emits       NwStack_ConnEv          e_conn;
+    consumes    NwStack_ConnEv          c_conn;
+
     has         mutex                   allocatorMutex;
     has         mutex                   nwstackMutex;
 
