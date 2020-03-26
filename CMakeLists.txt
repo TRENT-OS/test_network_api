@@ -8,6 +8,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 seos_use_libs(
     SEOS_LIBS
+    SEOS_CHANMUX
     SEOS_NETWORK_DRIVER_TAP_PROXY
     SEOS_NW_STACK
 )
@@ -41,6 +42,7 @@ DeclareCAmkESComponent(NwDriver_1
         seos_system_config
         seos_core_api
         seos_libs
+        chanmux_client
         seos_nw_driver_tap_proxy_lib
 )
 
@@ -71,6 +73,7 @@ DeclareCAmkESComponent(NwDriver_2
         seos_system_config
         seos_core_api
         seos_libs
+        chanmux_client
         seos_nw_driver_tap_proxy_lib
 )
 
@@ -109,6 +112,7 @@ DeclareCAmkESComponent(ChanMux
         seos_system_config
         seos_core_api
         seos_libs
+        chanmux_server
 )
 
 DeclareCAmkESComponent(TimerClient

@@ -14,8 +14,8 @@ component NwDriver_1 {
 
     control;
 
-    uses        ChanMuxDriverInf        ChanMux;
-    consumes    NwDriver_DataAvailable  event_chanMux_hasData;
+    uses        ChanMuxDriverInf        ChanMuxRpc;
+    consumes    NwDriver_DataAvailable  ChanMuxSignal_dataAvailable;
     dataport    Buf                     port_chanMux_ctrl;
     dataport    Buf                     port_chanMux_data_read;
     dataport    Buf                     port_chanMux_data_write;
@@ -35,8 +35,8 @@ component NwDriver_2 {
 
     control;
 
-    uses        ChanMuxDriverInf        ChanMux;
-    consumes    NwDriver_DataAvailable  event_chanMux_hasData;
+    uses        ChanMuxDriverInf        ChanMuxRpc;
+    consumes    NwDriver_DataAvailable  ChanMuxSignal_dataAvailable;
     dataport    Buf                     port_chanMux_ctrl;
     dataport    Buf                     port_chanMux_data_read;
     dataport    Buf                     port_chanMux_data_write;
