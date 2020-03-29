@@ -5,14 +5,14 @@
  *
  */
 
-import <seos_if_socket.camkes>;
+import <if_OS_socket.camkes>;
 
 
 component NwApp_1 {
 
     control;
 
-    uses      seos_if_socket  network_stack_rpc;
+    uses      if_OS_socket    network_stack_rpc;
     dataport  Buf             NwAppDataPort;
     consumes  ServiceReady    event_network_stack_init_done;
 
