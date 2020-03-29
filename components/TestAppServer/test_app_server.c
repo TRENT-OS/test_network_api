@@ -9,7 +9,7 @@
 #include "LibDebug/Debug.h"
 #include "SeosError.h"
 
-#include "seos_nw_api.h"
+#include "OS_Network.h"
 
 /*
  * This example demonstrates a server with an incoming connection. Reads
@@ -21,7 +21,7 @@
 */
 
 
-extern seos_err_t Seos_NwAPP_RT(Seos_nw_context ctx);
+extern seos_err_t OS_NetworkAPP_RT(OS_Network_context_t ctx);
 
 
 int run()
@@ -29,23 +29,23 @@ int run()
     Debug_LOG_INFO("Starting test_app_server...");
 
     char buffer[4096];
-    Seos_NwAPP_RT(NULL);    /* Must be actullay called by SEOS Runtime */
+    OS_NetworkAPP_RT(NULL);    /* Must be actually called by SEOS Runtime */
 
-    seos_nw_server_struct  srv_socket =
+    OS_NetworkServer_socket_t  srv_socket =
     {
-        .domain = SEOS_AF_INET,
-        .type   = SEOS_SOCK_STREAM,
+        .domain = OS_AF_INET,
+        .type   = OS_SOCK_STREAM,
         .listen_port = 5555,
         .backlog = 1,
     };
 
     /* Gets filled when accept is called */
-    seos_socket_handle_t  seos_socket_handle ;
+    OS_NetworkSocket_handle_t  seos_socket_handle ;
     /* Gets filled when server socket create is called */
-    seos_nw_server_handle_t  seos_nw_server_handle ;
+    OS_NetworkServer_handle_t  seos_nw_server_handle ;
 
-    seos_err_t err = Seos_server_socket_create(NULL, &srv_socket,
-                                               &seos_nw_server_handle);
+    seos_err_t err = OS_NetworkServerSocket_create(NULL, &srv_socket,
+                                                   &seos_nw_server_handle);
 
     if (err != SEOS_SUCCESS)
     {
@@ -55,9 +55,9 @@ int run()
 
     Debug_LOG_INFO("launching echo server");
 
-    for(;;)
+    for (;;)
     {
-        err = Seos_socket_accept(seos_nw_server_handle, &seos_socket_handle);
+        err = OS_NetworkServerSocket_accept(seos_nw_server_handle, &seos_socket_handle);
         if (err != SEOS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_accept() failed, error %d", err);
@@ -85,11 +85,11 @@ int run()
 
         Debug_LOG_INFO("starting server read loop");
         /* Keep calling read until we receive CONNECTION_CLOSED from the stack */
-        for(;;)
+        for (;;)
         {
             Debug_LOG_DEBUG("read...");
             size_t n = 1;
-            err = Seos_socket_read(seos_socket_handle, buffer, &n);
+            err = OS_NetworkSocket_read(seos_socket_handle, buffer, &n);
             if (SEOS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("socket_read() failed, error %d", err);
@@ -99,7 +99,7 @@ int run()
             Debug_ASSERT(n == 1);
             Debug_LOG_DEBUG("Got a byte %02x, send it back", buffer[0]);
 
-            err = Seos_socket_write(seos_socket_handle, buffer, &n);
+            err = OS_NetworkSocket_write(seos_socket_handle, buffer, &n);
             if (err != SEOS_SUCCESS)
             {
                 Debug_LOG_ERROR("socket_write() failed, error %d", err);

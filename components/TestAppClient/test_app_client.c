@@ -10,9 +10,9 @@
 #include "LibDebug/Debug.h"
 #include "SeosError.h"
 
-#include "seos_nw_api.h"
+#include "OS_Network.h"
 
-extern seos_err_t Seos_NwAPP_RT(Seos_nw_context ctx);
+extern seos_err_t OS_NetworkAPP_RT(OS_Network_context_t ctx);
 
 /*
     This example demonstrates reading of a web page example.com using Nw Stack API.
@@ -28,20 +28,20 @@ int run()
     Debug_LOG_INFO("Starting test_app_client...");
 
     char buffer[4096];
-    Seos_NwAPP_RT(NULL);   // Must be actullay called by SEOS Runtime
+    OS_NetworkAPP_RT(NULL);   // Must be actullay called by SEOS Runtime
 
-    seos_nw_client_struct cli_socket =
+    OS_NetworkClient_socket_t cli_socket =
     {
-        .domain = SEOS_AF_INET,
-        .type   = SEOS_SOCK_STREAM,
+        .domain = OS_AF_INET,
+        .type   = OS_SOCK_STREAM,
         .name   = CFG_TEST_HTTP_SERVER,
         .port   = HTTP_PORT
     };
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
-    seos_socket_handle_t handle;
-    seos_err_t err = Seos_client_socket_create(NULL, &cli_socket, &handle);
+    OS_NetworkSocket_handle_t handle;
+    seos_err_t err = OS_NetworkClientSocket_create(NULL, &cli_socket, &handle);
 
     if (err != SEOS_SUCCESS)
     {
@@ -65,12 +65,12 @@ int run()
         size_t len_io = lenRemaining;
 
 
-        err = Seos_socket_write(handle, &request[offs], &len_io);
+        err = OS_NetworkSocket_write(handle, &request[offs], &len_io);
 
         if (err != SEOS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_write() failed, code %d", err);
-            Seos_socket_close(handle);
+            OS_NetworkSocket_close(handle);
             return -1;
         }
 
@@ -110,7 +110,7 @@ int run()
         /* Keep calling read until we receive CONNECTION_CLOSED from the stack */
         memset(buffer, 0, sizeof(buffer));
 
-        seos_err_t err = Seos_socket_read(handle, buffer, &len);
+        seos_err_t err = OS_NetworkSocket_read(handle, buffer, &len);
 
         switch (err)
         {
@@ -136,6 +136,6 @@ int run()
     while (flag);
     Debug_LOG_INFO("Test ended");
     /* Close the socket communication */
-    err = Seos_socket_close(handle);
+    err = OS_NetworkSocket_close(handle);
     return 0;
 }
