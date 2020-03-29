@@ -21,7 +21,7 @@
 */
 
 
-extern seos_err_t OS_NetworkAPP_RT(OS_Network_context_t ctx);
+extern seos_err_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 
 int run()
@@ -31,7 +31,7 @@ int run()
     char buffer[4096];
     OS_NetworkAPP_RT(NULL);    /* Must be actually called by SEOS Runtime */
 
-    OS_NetworkServer_socket_t  srv_socket =
+    OS_NetworkServer_Socket_t  srv_socket =
     {
         .domain = OS_AF_INET,
         .type   = OS_SOCK_STREAM,
@@ -40,9 +40,9 @@ int run()
     };
 
     /* Gets filled when accept is called */
-    OS_NetworkSocket_handle_t  seos_socket_handle ;
+    OS_NetworkSocket_Handle_t  seos_socket_handle ;
     /* Gets filled when server socket create is called */
-    OS_NetworkServer_handle_t  seos_nw_server_handle ;
+    OS_NetworkServer_Handle_t  seos_nw_server_handle ;
 
     seos_err_t err = OS_NetworkServerSocket_create(NULL, &srv_socket,
                                                    &seos_nw_server_handle);

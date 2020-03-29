@@ -12,7 +12,7 @@
 
 #include "OS_Network.h"
 
-extern seos_err_t OS_NetworkAPP_RT(OS_Network_context_t ctx);
+extern seos_err_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 /*
     This example demonstrates reading of a web page example.com using Nw Stack API.
@@ -30,7 +30,7 @@ int run()
     char buffer[4096];
     OS_NetworkAPP_RT(NULL);   // Must be actullay called by SEOS Runtime
 
-    OS_NetworkClient_socket_t cli_socket =
+    OS_Network_Socket_t cli_socket =
     {
         .domain = OS_AF_INET,
         .type   = OS_SOCK_STREAM,
@@ -40,8 +40,8 @@ int run()
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
-    OS_NetworkSocket_handle_t handle;
-    seos_err_t err = OS_NetworkClientSocket_create(NULL, &cli_socket, &handle);
+    OS_NetworkSocket_Handle_t handle;
+    seos_err_t err = OS_NetworkSocket_create(NULL, &cli_socket, &handle);
 
     if (err != SEOS_SUCCESS)
     {
