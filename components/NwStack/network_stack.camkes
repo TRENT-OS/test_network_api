@@ -8,6 +8,7 @@
 import <if_OS_nic.camkes>;
 import "../../interfaces/timer_client.camkes";
 import <if_OS_socket.camkes>;
+import <if_OS_ConfigService.camkes>;
 
 
 component NwStack_1 {
@@ -48,6 +49,12 @@ component NwStack_1 {
     provides    if_OS_socket            network_stack_rpc;
     dataport    Buf                     port_app_io;
     emits       ServiceReady            event_network_init_done;
+
+    //---------------------------------------------------
+    // Configuration server
+    uses       if_OS_ConfigService     OS_ConfigServiceServer;
+    consumes   DataAvailableEvent      config_server_ready;
+    dataport   Buf                     cfg_dataport_buf;
 }
 
 
@@ -90,4 +97,10 @@ component NwStack_2 {
     provides   if_OS_socket            network_stack_rpc;
     dataport   Buf                     port_app_io;
     emits      ServiceReady            event_network_init_done;
+
+    //---------------------------------------------------
+    // Configuration server
+    uses       if_OS_ConfigService     OS_ConfigServiceServer;
+    consumes   DataAvailableEvent      config_server_ready;
+    dataport   Buf                     cfg_dataport_buf;
 }

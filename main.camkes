@@ -8,6 +8,7 @@ import "components/TestAppServer/test_app_server.camkes";
 import "components/TimerClient/timer_client.camkes";
 import "components/Timer/timer.camkes";
 import "components/Uart/Uart.camkes";
+import "components/ConfigServer/ConfigServer.camkes";
 
 assembly {
     composition {
@@ -73,7 +74,8 @@ assembly {
         connection seL4SharedData         NwDriver_NwStack_ReadConnection  (from nwDriver_1.port_nwStack_to,       to nwStack_1.port_nic_from);
         connection seL4SharedData         NwDriver_NwStack_WriteConnection (from nwDriver_1.port_nwStack_from,     to nwStack_1.port_nic_to);
 
-
+        connection seL4RPCCall            NwStack_configuration_server_1     (from nwStack_1.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
+        connection seL4SharedData         NwStack_config_data_1              (from nwStack_1.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
         //----------------------------------------------------------------------
         // Network Stack App #1
         //----------------------------------------------------------------------
@@ -115,6 +117,8 @@ assembly {
         connection seL4SharedData         NwDriver_NwStack_WriteConnection_2 (from nwDriver_2.port_nwStack_from,     to nwStack_2.port_nic_to);
 
 
+        connection seL4RPCCall            NwStack_configuration_server_2     (from nwStack_2.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
+        connection seL4SharedData         NwStack_config_data_2              (from nwStack_2.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
         //----------------------------------------------------------------------
         // Network Stack App #2
         //----------------------------------------------------------------------
@@ -123,6 +127,15 @@ assembly {
         connection seL4Notification NwAppInitDone_2        (from nwStack_2.event_network_init_done, to nwApp_2.event_network_stack_init_done);
         connection seL4RPCCall      NwApp_nwStack_2        (from nwApp_2.network_stack_rpc,         to nwStack_2.network_stack_rpc);
         connection seL4SharedData   NwApp_dataConnection_2 (from nwApp_2.NwAppDataPort,             to nwStack_2.port_app_io);
+
+
+        //----------------------------------------------------------------------
+        // ConfigServer
+        //----------------------------------------------------------------------
+        component   ConfigServer     configServer;
+
+        connection  seL4Notification nwStack_configServer_ready_1        (from configServer.config_server_ready, to nwStack_1.config_server_ready);
+        connection  seL4Notification nwStack_configServer_ready_2        (from configServer.config_server_ready, to nwStack_2.config_server_ready);
     }
 
     configuration {

@@ -47,23 +47,19 @@ enum
     CHANMUX_NUM_CHANNELS // 9
 };
 
-//-----------------------------------------------------------------------------
-// Network Stack #1
-//-----------------------------------------------------------------------------
-
-#define ETH_1_ADDR "10.0.0.10"
-#define ETH_1_GATEWAY_ADDR "10.0.0.1"
-#define ETH_1_SUBNET_MASK "255.255.255.0"
-
-//-----------------------------------------------------------------------------
-// Network Stack #2
-//-----------------------------------------------------------------------------
-
-#define ETH_2_ADDR "10.0.0.11"
-#define ETH_2_GATEWAY_ADDR "10.0.0.1"
-#define ETH_2_SUBNET_MASK "255.255.255.0"
-
-//-----------------------------------------------------------------------------
-// Client Test App
-//-----------------------------------------------------------------------------
 #define CFG_TEST_HTTP_SERVER "192.168.82.12"
+
+//App1
+#define DOMAIN_NWSTACK "STACK"
+
+#define CFG_ETH_ADDR_CLIENT "ETH_ADDR_CLIENT"
+#define CFG_ETH_ADDR_CLIENT_VALUE "10.0.0.10"
+
+#define CFG_ETH_ADDR_SERVER "ETH_ADDR_SERVER"
+#define CFG_ETH_ADDR_SERVER_VALUE "10.0.0.11"
+
+#define CFG_ETH_GATEWAY_ADDR "ETH_GATEWAY_ADDR"
+#define CFG_ETH_GATEWAY_ADDR_VALUE "10.0.0.1"
+
+#define CFG_ETH_SUBNET_MASK "ETH_SUBNET_MASK"
+#define CFG_ETH_SUBNET_MASK_VALUE "255.255.255.0"

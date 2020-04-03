@@ -7,8 +7,9 @@ add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 seos_use_libs(
-    SEOS_LIBS
     SEOS_CHANMUX
+    SEOS_CONFIGURATION
+    SEOS_LIBS
     SEOS_NETWORK_DRIVER_TAP_PROXY
     SEOS_NW_STACK
 )
@@ -18,13 +19,14 @@ project(tests_picotcp_api C)
 DeclareCAmkESComponent(NwStack_1
     SOURCES
         components/NwStack/network_stack.c
+        components/NwStack/util/helper_func.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
-        -DCFG_ETH_ADDR=ETH_1_ADDR
-        -DCFG_ETH_GATEWAY_ADDR=ETH_1_GATEWAY_ADDR
-        -DCFG_ETH_SUBNET_MASK=ETH_1_SUBNET_MASK
+        -DOS_CONFIG_SERVICE_CAMKES_CLIENT
+
     LIBS
+        seos_configuration
         seos_system_config
         seos_core_api
         seos_libs
@@ -49,13 +51,14 @@ DeclareCAmkESComponent(NwDriver_1
 DeclareCAmkESComponent(NwStack_2
     SOURCES
         components/NwStack/network_stack.c
+        components/NwStack/util/helper_func.c
     C_FLAGS
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
-        -DCFG_ETH_ADDR=ETH_2_ADDR
-        -DCFG_ETH_GATEWAY_ADDR=ETH_2_GATEWAY_ADDR
-        -DCFG_ETH_SUBNET_MASK=ETH_2_SUBNET_MASK
+        -DOS_CONFIG_SERVICE_CAMKES_CLIENT
+
     LIBS
+        seos_configuration
         seos_system_config
         seos_core_api
         seos_libs
@@ -139,6 +142,22 @@ DeclareCAmkESComponent(UartDrv
         components/Uart/src/qemu_uart.c
     C_FLAGS
         -Wall -Werror
+)
+
+DeclareCAmkESComponent(ConfigServer
+    SOURCES
+        components/ConfigServer/src/ConfigServer.c
+        components/ConfigServer/src/init_lib_with_mem_backend.c
+        components/ConfigServer/src/create_parameters.c
+    C_FLAGS
+        -Wall -Werror
+        -DOS_CONFIG_SERVICE_BACKEND_MEMORY
+        -DOS_CONFIG_SERVICE_CAMKES_SERVER
+    LIBS
+        seos_system_config
+        seos_libs
+        seos_core_api
+        seos_configuration
 )
 
 DeclareCAmkESRootserver(main.camkes)
