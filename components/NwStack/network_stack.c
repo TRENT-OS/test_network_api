@@ -13,9 +13,11 @@
 #include "util/helper_func.h"
 #include <camkes.h>
 
+#ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
 char DEV_ADDR[20];
 char GATEWAY_ADDR[20];
 char SUBNET_MASK[20];
+#endif
 
 static const seos_network_stack_config_t config =
 {
@@ -24,6 +26,7 @@ static const seos_network_stack_config_t config =
     .subnet_mask   = SUBNET_MASK
 };
 
+#ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
 seos_err_t
 read_ip_from_config_server(void)
 {
@@ -95,7 +98,7 @@ read_ip_from_config_server(void)
 
     return SEOS_SUCCESS;
 }
-
+#endif
 //------------------------------------------------------------------------------
 int run(void)
 {
@@ -158,6 +161,7 @@ int run(void)
     };
 
     seos_err_t ret;
+#ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
     ret = read_ip_from_config_server();
     if (ret != SEOS_SUCCESS)
     {
@@ -165,7 +169,7 @@ int run(void)
                         get_instance_name(), ret);
         return -1;
     }
-
+#endif
 
     ret = seos_network_stack_run(&camkes_config, &config);
     if (ret != SEOS_SUCCESS)

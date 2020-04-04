@@ -24,7 +24,7 @@ DeclareCAmkESComponent(NwStack_1
         -Wall -Werror
         -DSEOS_NWSTACK_AS_CLIENT
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
-
+        -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
         seos_configuration
         seos_system_config
@@ -56,7 +56,7 @@ DeclareCAmkESComponent(NwStack_2
         -Wall -Werror
         -DSEOS_NWSTACK_AS_SERVER
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
-
+        -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
         seos_configuration
         seos_system_config
