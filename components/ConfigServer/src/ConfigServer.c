@@ -5,7 +5,7 @@
 */
 
 
-#include "seos_system_config.h"
+#include "system_config.h"
 
 #include "LibDebug/Debug.h"
 #include "OS_ConfigService.h"

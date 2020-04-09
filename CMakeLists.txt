@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.7.2)
 
-seos_set_config_file(seos_system_config.h)
+seos_set_config_file(system_config.h)
 
-project(seos_system_config C)
+project(system_config C)
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
@@ -26,7 +26,7 @@ DeclareCAmkESComponent(NwStack_1
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
         seos_configuration
@@ -41,7 +41,7 @@ DeclareCAmkESComponent(NwDriver_1
         -DCFG_CHANMUX_CHANNEL_CRTL=CHANMUX_CHANNEL_NIC_1_CTRL
         -DCFG_CHANMUX_CHANNEL_DATA=CHANMUX_CHANNEL_NIC_1_DATA
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
         chanmux_client
@@ -58,7 +58,7 @@ DeclareCAmkESComponent(NwStack_2
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
         seos_configuration
@@ -73,7 +73,7 @@ DeclareCAmkESComponent(NwDriver_2
         -DCFG_CHANMUX_CHANNEL_DATA=CHANMUX_CHANNEL_NIC_2_DATA
         -Wall -Werror
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
         chanmux_client
@@ -88,7 +88,7 @@ DeclareCAmkESComponent(NwApp_1
         -Wall -Werror
         -DCLIENT_CONFIG=1
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
 )
@@ -101,7 +101,7 @@ DeclareCAmkESComponent(NwApp_2
         -Wall -Werror
         -DSERVER_CONFIG=1
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
 )
@@ -112,7 +112,7 @@ DeclareCAmkESComponent(ChanMux
     C_FLAGS
         -Wall -Werror
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
         chanmux_server
@@ -124,7 +124,7 @@ DeclareCAmkESComponent(TimerClient
     C_FLAGS
         -Wall -Werror
     LIBS
-        seos_system_config
+        system_config
         seos_core_api
         seos_libs
 )
@@ -154,7 +154,7 @@ DeclareCAmkESComponent(ConfigServer
         -DOS_CONFIG_SERVICE_BACKEND_MEMORY
         -DOS_CONFIG_SERVICE_CAMKES_SERVER
     LIBS
-        seos_system_config
+        system_config
         seos_libs
         seos_core_api
         seos_configuration
