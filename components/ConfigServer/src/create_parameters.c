@@ -2,11 +2,13 @@
  * Copyright (C) 2019, Hensoldt Cyber GmbH
  */
 
-#include <string.h>
-#include <stdio.h>
+#include "seos_system_config.h"
+
 #include "LibDebug/Debug.h"
 #include "create_parameters.h"
-#include "seos_system_config.h"
+
+#include <string.h>
+#include <stdio.h>
 
 static
 void

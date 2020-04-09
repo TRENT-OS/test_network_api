@@ -5,15 +5,15 @@
 */
 
 
-#include <camkes.h>
+#include "seos_system_config.h"
 
 #include "LibDebug/Debug.h"
-
 #include "OS_ConfigService.h"
+
+#include <camkes.h>
 
 #include "init_lib_with_mem_backend.h"
 #include "create_parameters.h"
-#include "seos_system_config.h"
 
 
 static bool
