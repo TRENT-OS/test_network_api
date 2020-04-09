@@ -26,10 +26,10 @@ DeclareCAmkESComponent(NwStack_1
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
-        seos_configuration
         seos_system_config
         seos_core_api
         seos_libs
+        seos_configuration
         seos_nw_lib
 )
 
@@ -58,10 +58,10 @@ DeclareCAmkESComponent(NwStack_2
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
-        seos_configuration
         seos_system_config
         seos_core_api
         seos_libs
+        seos_configuration
         seos_nw_lib
 )
 
