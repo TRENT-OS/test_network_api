@@ -83,7 +83,6 @@ DeclareCAmkESComponent(NwDriver_2
 DeclareCAmkESComponent(NwApp_1
     SOURCES
         components/TestAppClient/test_app_client.c
-        ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
     C_FLAGS
         -Wall -Werror
         -DCLIENT_CONFIG=1
@@ -91,12 +90,12 @@ DeclareCAmkESComponent(NwApp_1
         system_config
         seos_core_api
         seos_libs
+        seos_network_api
 )
 
 DeclareCAmkESComponent(NwApp_2
     SOURCES
         components/TestAppServer/test_app_server.c
-        ${SEOS_LIBS_DIR}/seos_nwstack/network-client-lib/seos_nw_api_interface.c
     C_FLAGS
         -Wall -Werror
         -DSERVER_CONFIG=1
@@ -104,6 +103,7 @@ DeclareCAmkESComponent(NwApp_2
         system_config
         seos_core_api
         seos_libs
+        seos_network_api
 )
 
 DeclareCAmkESComponent(ChanMux
