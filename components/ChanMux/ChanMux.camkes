@@ -11,10 +11,13 @@ import "../../interfaces/UartInf.camkes";
 
 component ChanMux {
 
+    //-------------------------------------------------
+    // generic upper interface
     provides       ChanMuxDriverInf         ChanMux_driver;
 
+
     //-------------------------------------------------
-    // interface Ethernet NIC driver #1
+    // upper interface Ethernet NIC driver #1
     dataport       Buf                      port_nic_1_ctrl;
     dataport       Buf                      port_nic_1_data_read;
     dataport       Buf                      port_nic_1_data_write;
@@ -22,7 +25,7 @@ component ChanMux {
 
 
     //-------------------------------------------------
-    // interface Ethernet NIC driver #2
+    // upper interface Ethernet NIC driver #2
     dataport       Buf                      port_nic_2_ctrl;
     dataport       Buf                      port_nic_2_data_read;
     dataport       Buf                      port_nic_2_data_write;
@@ -30,8 +33,7 @@ component ChanMux {
 
 
     //-------------------------------------------------
-    // interface UART
-
+    // lower interface to UART
     dataport      Buf                       outputDataPort;
     uses          UartInf                   Output;
     provides      ChanMuxOutInf             ChanMuxOut;
