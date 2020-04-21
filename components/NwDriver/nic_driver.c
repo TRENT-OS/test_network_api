@@ -19,7 +19,7 @@ int run()
     // are allocated at runtime
     seos_camkes_chanmx_nic_drv_config_t config =
     {
-        .notify_init_complete  = event_init_done_emit,
+        .notify_init_complete  = nic_event_ready_emit,
 
         .chanmux =
         {
@@ -28,7 +28,7 @@ int run()
                 .id            = CFG_CHANMUX_CHANNEL_CRTL,
                 .port =
                 {
-                    .buffer    = port_chanMux_ctrl,
+                    .buffer    = chanMux_port_ctrl,
                     .len       = PAGE_SIZE
                 }
             },
@@ -37,36 +37,36 @@ int run()
                 .id            = CFG_CHANMUX_CHANNEL_DATA,
                 .port_read =
                 {
-                    .buffer    = port_chanMux_data_read,
+                    .buffer    = chanMux_port_data_read,
                     .len       = PAGE_SIZE
                 },
                 .port_write = {
-                    .buffer    = port_chanMux_data_write,
+                    .buffer    = chanMux_port_data_write,
                     .len       = PAGE_SIZE
                 }
             },
-            .wait              = ChanMuxSignal_dataAvailable_wait
+            .wait              = chanMux_event_hasData_wait
         },
 
         .network_stack =
         {
             .to = // driver -> network stack
             {
-                .buffer        = port_nwStack_to,
+                .buffer        = nic_port_to,
                 .len           = PAGE_SIZE
             },
             .from = // network stack -> driver
             {
-                .buffer        = port_nwStack_from,
+                .buffer        = nic_port_from,
                 .len           = PAGE_SIZE
             },
-            .notify            = event_nwstack_hasData_emit
+            .notify            = nic_event_hasData_emit
         },
 
         .nic_control_channel_mutex =
         {
-            .lock    = nic_control_channel_mutex_lock,
-            .unlock  = nic_control_channel_mutex_unlock
+            .lock    = mutex_ctrl_channel_lock,
+            .unlock  = mutex_ctrl_channel_unlock
         }
     };
 

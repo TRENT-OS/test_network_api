@@ -10,9 +10,10 @@ import "../../interfaces/timer_client.camkes";
 
 component TimerClient {
     control;
-    uses       timer_inf        Timer;
-    provides   timer_client_inf TimerClient;
 
-    emits  NwStack_DataAvailable    e_timeout_nwstacktick_1;
-    emits  NwStack_DataAvailable    e_timeout_nwstacktick_2;
+    uses       timer_inf           Timer;
+    provides   timer_client_inf    TimerClient;
+
+    emits      NwStack_TickOrData  nwStack_1_event_tick;
+    emits      NwStack_TickOrData  nwStack_2_event_tick;
 }

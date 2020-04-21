@@ -9,11 +9,12 @@ import <if_OS_ConfigService.camkes>;
 
 component ConfigServer {
 
-    provides if_OS_ConfigService OS_ConfigServiceServer;
-    emits    DataAvailableEvent  config_server_ready;
+    //------------------------
+    // config server interface. Note that the names of the CAmkES objects are
+    // hard-coded in the config server core lib
 
-    //-------------------------------------------------
-    // dataports for clients
-    dataport Buf cfg_dataport_buf;
+    provides  if_OS_ConfigService  OS_ConfigServiceServer;
+    dataport  Buf                  cfg_dataport_buf;
+    emits     EventServiceReady    event_ready;
 
 }

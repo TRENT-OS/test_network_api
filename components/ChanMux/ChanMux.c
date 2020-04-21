@@ -71,16 +71,16 @@ static const dataport_rw_t dataports[CHANMUX_NUM_CHANNELS] =
     NO_CHANMUX_DATA_PORT_RW,
     NO_CHANMUX_DATA_PORT_RW,
     NO_CHANMUX_DATA_PORT_RW,
-    CHANMUX_DATA_PORT_RW_SHARED( (void**)&port_nic_1_ctrl, PAGE_SIZE ),
+    CHANMUX_DATA_PORT_RW_SHARED( (void**)&nic_1_port_ctrl, PAGE_SIZE ),
     {
-        .read  = CHANMUX_DATA_PORT( (void**)&port_nic_1_data_read,  PAGE_SIZE ),
-        .write = CHANMUX_DATA_PORT( (void**)&port_nic_1_data_write, PAGE_SIZE )
+        .read  = CHANMUX_DATA_PORT( (void**)&nic_1_port_data_read,  PAGE_SIZE ),
+        .write = CHANMUX_DATA_PORT( (void**)&nic_1_port_data_write, PAGE_SIZE )
     },
     NO_CHANMUX_DATA_PORT_RW,
-    CHANMUX_DATA_PORT_RW_SHARED( (void**)&port_nic_2_ctrl, PAGE_SIZE ),
+    CHANMUX_DATA_PORT_RW_SHARED( (void**)&nic_2_port_ctrl, PAGE_SIZE ),
     {
-        .read  = CHANMUX_DATA_PORT( (void**) &port_nic_2_data_read,  PAGE_SIZE ),
-        .write = CHANMUX_DATA_PORT( (void**) &port_nic_2_data_write, PAGE_SIZE )
+        .read  = CHANMUX_DATA_PORT( (void**) &nic_2_port_data_read,  PAGE_SIZE ),
+        .write = CHANMUX_DATA_PORT( (void**) &nic_2_port_data_write, PAGE_SIZE )
     }
 };
 
@@ -111,13 +111,13 @@ ChanMux_dataAvailable_emit(
     //---------------------------------
     case CHANMUX_CHANNEL_NIC_1_CTRL:
     case CHANMUX_CHANNEL_NIC_1_DATA:
-        event_nic_1_hasData_emit();
+        nic_1_event_hasData_emit();
         break;
 
     //---------------------------------
     case CHANMUX_CHANNEL_NIC_2_CTRL:
     case CHANMUX_CHANNEL_NIC_2_DATA:
-        event_nic_2_hasData_emit();
+        nic_2_event_hasData_emit();
         break;
 
 

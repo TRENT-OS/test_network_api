@@ -108,12 +108,12 @@ int run(void)
     // are allocated at runtime
     seos_camkes_network_stack_config_t camkes_config =
     {
-        .notify_init_done        = event_network_init_done_emit,
-        .wait_loop_event         = event_tick_or_data_wait,
+        .notify_init_done        = nwStack_event_ready_emit,
+        .wait_loop_event         = c_tick_or_data_wait,
 
         .internal =
         {
-            .notify_loop        = event_internal_emit,
+            .notify_loop        = e_tick_or_data_emit,
 
             .notify_write       = e_write_emit,
             .wait_write         = c_write_wait,
@@ -127,17 +127,17 @@ int run(void)
 
         .drv_nic =
         {
-            .wait_init_done     = event_nic_init_done_wait,
+            .wait_init_done     = nic_event_ready_wait,
 
             .from = // NIC -> stack
             {
-                .buffer         = port_nic_from,
+                .buffer         = nic_port_from,
                 .len            = PAGE_SIZE
             },
 
             .to = // stack -> NIC
             {
-                .buffer         = port_nic_to,
+                .buffer         = nic_port_to,
                 .len            = PAGE_SIZE
             },
 
@@ -150,11 +150,11 @@ int run(void)
 
         .app =
         {
-            .notify_init_done   = event_network_init_done_emit,
+            .notify_init_done   = nwStack_event_ready_emit,
 
             .port =
             {
-                .buffer         = port_app_io,
+                .buffer         = nwStack_port,
                 .len            = PAGE_SIZE
             },
         }

@@ -15,46 +15,47 @@ component NwStack_1 {
 
     control;
 
-    consumes    NwStack_DataAvailable   event_tick_or_data;
+    emits       NwStack_TickOrData  e_tick_or_data;
+    consumes    NwStack_TickOrData  c_tick_or_data; // event also from NIC and Timer
 
-    emits       NwStack_DataAvailable   event_internal;
+    emits       NwStack_WrEv        e_write;
+    consumes    NwStack_WrEv        c_write;
 
-    emits       NwStack_WrEv            e_write;
-    consumes    NwStack_WrEv            c_write;
+    emits       NwStack_RdEv        e_read;
+    consumes    NwStack_RdEv        c_read;
 
-    emits       NwStack_RdEv            e_read;
-    consumes    NwStack_RdEv            c_read;
+    emits       NwStack_ConnEv      e_conn;
+    consumes    NwStack_ConnEv      c_conn;
 
-    emits       NwStack_ConnEv          e_conn;
-    consumes    NwStack_ConnEv          c_conn;
-
-    has         mutex                   allocatorMutex;
-    has         mutex                   nwstackMutex;
+    has         mutex               allocatorMutex;
+    has         mutex               nwstackMutex;
 
     //-------------------------------------------------
     // interface Timer
-    uses        timer_client_inf        Timer;
+    uses        timer_client_inf    Timer;
 
 
     //-------------------------------------------------
     // interface Ethernet NIC driver
-    uses        if_OS_nic               nic_driver;
-    dataport    Buf                     port_nic_from; // NIC -> stack
-    dataport    Buf                     port_nic_to;   // stack -> NIC
-    consumes    ServiceReady            event_nic_init_done;
+    uses        if_OS_nic           nic_driver;
+    dataport    Buf                 nic_port_from; // NIC -> stack
+    dataport    Buf                 nic_port_to;   // stack -> NIC
+    consumes    EventServiceReady   nic_event_ready;
+
+
+    //---------------------------------------------------
+    // Configuration server
+    uses       if_OS_ConfigService  OS_ConfigServiceServer; // name hard-coded in config server client lib
+    dataport   Buf                  cfg_dataport_buf;       // name hard-coded in config server client lib
+    consumes   EventServiceReady    cfgServer_event_ready;
 
 
     //-------------------------------------------------
     // interface Application
-    provides    if_OS_socket            network_stack_rpc;
-    dataport    Buf                     port_app_io;
-    emits       ServiceReady            event_network_init_done;
+    provides    if_OS_socket        network_stack_rpc; // name hard-coded in network client lib
+    dataport    Buf                 nwStack_port;
+    emits       EventServiceReady   nwStack_event_ready;
 
-    //---------------------------------------------------
-    // Configuration server
-    uses       if_OS_ConfigService     OS_ConfigServiceServer;
-    consumes   DataAvailableEvent      config_server_ready;
-    dataport   Buf                     cfg_dataport_buf;
 }
 
 
@@ -62,45 +63,46 @@ component NwStack_2 {
 
     control;
 
-    consumes   NwStack_DataAvailable    event_tick_or_data;
+    emits      NwStack_TickOrData   e_tick_or_data;
+    consumes   NwStack_TickOrData   c_tick_or_data; // event also from NIC and Timer
 
-    emits      NwStack_DataAvailable    event_internal;
+    emits      NwStack_WrEv         e_write;
+    consumes   NwStack_WrEv         c_write;
 
-    emits      NwStack_WrEv             e_write;
-    consumes   NwStack_WrEv             c_write;
+    emits      NwStack_RdEv         e_read;
+    consumes   NwStack_RdEv         c_read;
 
-    emits      NwStack_RdEv             e_read;
-    consumes   NwStack_RdEv             c_read;
+    emits      NwStack_ConnEv       e_conn;
+    consumes   NwStack_ConnEv       c_conn;
 
-    emits      NwStack_ConnEv           e_conn;
-    consumes   NwStack_ConnEv           c_conn;
-
-    has         mutex                   allocatorMutex;
-    has         mutex                   nwstackMutex;
+    has        mutex                allocatorMutex;
+    has        mutex                nwstackMutex;
 
 
     //-------------------------------------------------
     // interface Timer
-    uses        timer_client_inf        Timer;
+    uses       timer_client_inf     Timer;
 
 
     //-------------------------------------------------
     // interface Ethernet NIC driver
-    uses        if_OS_nic               nic_driver;
-    dataport    Buf                     port_nic_from; // NIC -> stack
-    dataport    Buf                     port_nic_to;   // stack -> NIC
-    consumes    ServiceReady            event_nic_init_done;
+    uses        if_OS_nic           nic_driver;
+    dataport    Buf                 nic_port_from; // NIC -> stack
+    dataport    Buf                 nic_port_to;   // stack -> NIC
+    consumes    EventServiceReady   nic_event_ready;
+
+
+    //---------------------------------------------------
+    // Configuration server
+    uses       if_OS_ConfigService  OS_ConfigServiceServer; // name hard-coded in config server client lib
+    dataport   Buf                  cfg_dataport_buf;       // name hard-coded in config server client lib
+    consumes   EventServiceReady    cfgServer_event_ready;
 
 
     //-------------------------------------------------
     // interface Application
-    provides   if_OS_socket            network_stack_rpc;
-    dataport   Buf                     port_app_io;
-    emits      ServiceReady            event_network_init_done;
+    provides   if_OS_socket         network_stack_rpc; // name hard-coded in network client lib
+    dataport   Buf                  nwStack_port;
+    emits      EventServiceReady    nwStack_event_ready;
 
-    //---------------------------------------------------
-    // Configuration server
-    uses       if_OS_ConfigService     OS_ConfigServiceServer;
-    consumes   DataAvailableEvent      config_server_ready;
-    dataport   Buf                     cfg_dataport_buf;
 }

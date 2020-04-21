@@ -13,29 +13,29 @@ component ChanMux {
 
     //-------------------------------------------------
     // generic upper interface
-    provides       ChanMuxDriverInf         ChanMux_driver;
+    provides       ChanMuxDriverInf    ChanMux_driver;
 
 
     //-------------------------------------------------
     // upper interface Ethernet NIC driver #1
-    dataport       Buf                      port_nic_1_ctrl;
-    dataport       Buf                      port_nic_1_data_read;
-    dataport       Buf                      port_nic_1_data_write;
-    emits          NwDriver_DataAvailable   event_nic_1_hasData;
+    dataport       Buf                 nic_1_port_ctrl;
+    dataport       Buf                 nic_1_port_data_read;
+    dataport       Buf                 nic_1_port_data_write;
+    emits          EventDataAvailable  nic_1_event_hasData;
 
 
     //-------------------------------------------------
     // upper interface Ethernet NIC driver #2
-    dataport       Buf                      port_nic_2_ctrl;
-    dataport       Buf                      port_nic_2_data_read;
-    dataport       Buf                      port_nic_2_data_write;
-    emits          NwDriver_DataAvailable   event_nic_2_hasData;
+    dataport       Buf                 nic_2_port_ctrl;
+    dataport       Buf                 nic_2_port_data_read;
+    dataport       Buf                 nic_2_port_data_write;
+    emits          EventDataAvailable  nic_2_event_hasData;
 
 
     //-------------------------------------------------
     // lower interface to UART
-    dataport      Buf                       outputDataPort;
-    uses          UartInf                   Output;
-    provides      ChanMuxOutInf             ChanMuxOut;
+    dataport      Buf                  outputDataPort;
+    uses          UartInf              Output;
+    provides      ChanMuxOutInf        ChanMuxOut;
 
 }

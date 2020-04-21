@@ -12,8 +12,13 @@ component NwApp_1 {
 
     control;
 
-    uses      if_OS_socket    network_stack_rpc;
-    dataport  Buf             NwAppDataPort;
-    consumes  ServiceReady    event_network_stack_init_done;
+
+    //------------------------
+    // network stack interface. Note that the names of the CAmkES object are
+    // hard-coded in the network client lib
+
+    uses      if_OS_socket       network_stack_rpc;
+    dataport  Buf                NwAppDataPort;
+    consumes  EventServiceReady  event_network_stack_init_done;
 
 }
