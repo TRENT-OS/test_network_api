@@ -44,7 +44,6 @@ DeclareCAmkESComponent(NwDriver_1
         system_config
         seos_core_api
         seos_libs
-        chanmux_client
         seos_nw_driver_tap_proxy_lib
 )
 
@@ -76,7 +75,6 @@ DeclareCAmkESComponent(NwDriver_2
         system_config
         seos_core_api
         seos_libs
-        chanmux_client
         seos_nw_driver_tap_proxy_lib
 )
 
