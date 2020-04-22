@@ -23,7 +23,6 @@ component NwDriver_1 {
     dataport    Buf                     chanMux_port_data_write;
 
     provides    if_OS_nic               nic_driver;
-    emits       EventServiceReady       nic_event_ready;
     emits       NwStack_TickOrData      nic_event_hasData;
     dataport    Buf                     nic_port_to;   // driver -> network stack
     dataport    Buf                     nic_port_from; // network stack -> driver
@@ -45,7 +44,6 @@ component NwDriver_2 {
     dataport    Buf                     chanMux_port_data_write;
 
     provides    if_OS_nic               nic_driver;
-    emits       EventServiceReady       nic_event_ready;
     emits       NwStack_TickOrData      nic_event_hasData;
     dataport    Buf                     nic_port_to;   // driver -> network stack
     dataport    Buf                     nic_port_from; // network stack -> driver

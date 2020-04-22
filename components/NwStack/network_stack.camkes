@@ -40,7 +40,6 @@ component NwStack_1 {
     uses        if_OS_nic           nic_driver;
     dataport    Buf                 nic_port_from; // NIC -> stack
     dataport    Buf                 nic_port_to;   // stack -> NIC
-    consumes    EventServiceReady   nic_event_ready;
 
 
     //---------------------------------------------------
@@ -89,7 +88,6 @@ component NwStack_2 {
     uses        if_OS_nic           nic_driver;
     dataport    Buf                 nic_port_from; // NIC -> stack
     dataport    Buf                 nic_port_to;   // stack -> NIC
-    consumes    EventServiceReady   nic_event_ready;
 
 
     //---------------------------------------------------

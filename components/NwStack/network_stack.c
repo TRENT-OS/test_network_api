@@ -127,8 +127,6 @@ int run(void)
 
         .drv_nic =
         {
-            .wait_init_done     = nic_event_ready_wait,
-
             .from = // NIC -> stack
             {
                 .buffer         = nic_port_from,
