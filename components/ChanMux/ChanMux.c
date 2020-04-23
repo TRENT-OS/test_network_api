@@ -84,11 +84,6 @@ static const dataport_rw_t dataports[CHANMUX_NUM_CHANNELS] =
     }
 };
 
-// sender IDs are basically the endpoint badges of the RPC connector. They are
-// defined in the main CAmkES file's configuration block as
-//   <component>.<interface>_attributes = <badge ID>
-#define SENDER_NIC_1        1
-#define SENDER_NIC_2        2
 
 #define INVALID_CHANNEL     ((unsigned int)(-1))
 

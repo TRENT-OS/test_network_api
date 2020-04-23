@@ -10,6 +10,8 @@ import "components/Timer/timer.camkes";
 import "components/Uart/Uart.camkes";
 import "components/ConfigServer/ConfigServer.camkes";
 
+#include "system_config.h"
+
 assembly {
     composition {
 
@@ -153,7 +155,7 @@ assembly {
 
         // assign endpoint badges for n:1 RPC interface of ChanMUX. The generic
         // naming scheme is <component>.<interface>_attributes = <badge ID>
-        nwDriver_1.ChanMuxRpc_attributes = 1;
-        nwDriver_2.ChanMuxRpc_attributes = 2;
+        nwDriver_1.ChanMuxRpc_attributes = SENDER_NIC_1;
+        nwDriver_2.ChanMuxRpc_attributes = SENDER_NIC_2;
     }
 }

@@ -30,7 +30,7 @@ run(void)
         {
             // Debug_LOG_DEBUG("sending tick");
             nwStack_1_event_tick_emit();
-            nwStack_1_event_tick_emit();
+            nwStack_2_event_tick_emit();
         }
     }
     return 0;

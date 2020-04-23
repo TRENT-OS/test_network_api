@@ -32,20 +32,22 @@
 // ChanMUX
 //-----------------------------------------------------------------------------
 
-enum
-{
-    CHANMUX_CHANNEL_UNUSED_0,   // 0
-    CHANMUX_CHANNEL_UNUSED_1,   // 1
-    CHANMUX_CHANNEL_UNUSED_2,   // 2
-    CHANMUX_CHANNEL_UNUSED_3,   // 3
-    CHANMUX_CHANNEL_NIC_1_CTRL, // 4
-    CHANMUX_CHANNEL_NIC_1_DATA, // 5
-    CHANMUX_CHANNEL_UNUSED_6,   // 6
-    CHANMUX_CHANNEL_NIC_2_CTRL, // 7
-    CHANMUX_CHANNEL_NIC_2_DATA, // 8
+#define CHANMUX_CHANNEL_UNUSED_0        0
+#define CHANMUX_CHANNEL_UNUSED_1        1
+#define CHANMUX_CHANNEL_UNUSED_2        2
+#define CHANMUX_CHANNEL_UNUSED_3        3
+#define CHANMUX_CHANNEL_NIC_1_CTRL      4
+#define CHANMUX_CHANNEL_NIC_1_DATA      5
+#define CHANMUX_CHANNEL_UNUSED_6        6
+#define CHANMUX_CHANNEL_NIC_2_CTRL      7
+#define CHANMUX_CHANNEL_NIC_2_DATA      8
 
-    CHANMUX_NUM_CHANNELS // 9
-};
+#define CHANMUX_NUM_CHANNELS            9
+
+
+#define SENDER_NIC_1        1
+#define SENDER_NIC_2        2
+
 
 //-----------------------------------------------------------------------------
 // Network Stack
