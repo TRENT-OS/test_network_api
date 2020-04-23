@@ -24,8 +24,6 @@
 */
 
 
-extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
-
 void init_client_api()
 {
     static OS_NetworkStackClient_SocketDataports_t config;
@@ -55,7 +53,6 @@ run()
     Debug_LOG_INFO("Starting test_app_server...");
 
     char buffer[4096];
-    OS_NetworkAPP_RT(NULL);    /* Must be actually called by OS Runtime */
 
     OS_NetworkServer_Socket_t  srv_socket =
     {

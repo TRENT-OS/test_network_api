@@ -59,7 +59,6 @@ component NwStack1 {
     //-------------------------------------------------
     // interface Application
     provides if_OS_Socket network_stack_rpc; // name hard-coded in network client lib
-    emits EventServiceReady nwStack_event_ready;
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
     GEN_ID(dataport Buf nwStack_port);
@@ -114,7 +113,6 @@ component NwStack2 {
     //-------------------------------------------------
     // interface Application
     provides if_OS_Socket network_stack_rpc; // name hard-coded in network client lib
-    emits EventServiceReady nwStack_event_ready;
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
     GEN_ID(dataport Buf nwStack_port);

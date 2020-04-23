@@ -84,10 +84,6 @@ assembly {
         //----------------------------------------------------------------------
         component  NwApp1           nwApp1;
 
-        connection seL4Notification nwApp1_nwStack1_initDone(
-            from nwStack1.nwStack_event_ready,
-            to nwApp1.event_network_stack_init_done);
-
         connection seL4RPCCall      nwApp1_nwStack1_rpc(
             from nwApp1.network_stack_rpc,
             to nwStack1.network_stack_rpc);
@@ -105,10 +101,6 @@ assembly {
         // Network Stack App #1.2
         //----------------------------------------------------------------------
         component NwApp1 nwApp1_2;
-
-        connection seL4Notification nwApp1_2_nwStack1_initDone(
-            from nwStack1.nwStack_event_ready,
-            to nwApp1_2.event_network_stack_init_done);
 
         connection seL4RPCCall nwApp1_2_nwStack1_rpc(
             from nwApp1_2.network_stack_rpc,
@@ -158,10 +150,6 @@ assembly {
         // Network Stack App #2
         //----------------------------------------------------------------------
         component NwApp2 nwApp2;
-
-        connection seL4Notification nwApp2_nwStack2_initDone(
-            from nwStack2.nwStack_event_ready,
-            to nwApp2.event_network_stack_init_done);
 
         connection seL4RPCCall      nwApp2_nwStack2_rpc(
             from nwApp2.network_stack_rpc,

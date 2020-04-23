@@ -35,6 +35,8 @@ static const if_OS_Timer_t timer =
         timeServer_rpc,
         timeServer_notify);
 
+static bool initSuccessfullyCompleted = false;
+
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
 OS_Error_t
 read_ip_from_config_server(void)
@@ -129,7 +131,8 @@ Timer_getTimeMs(void)
 
 
 //------------------------------------------------------------------------------
-int run(void)
+void
+post_init(void)
 {
     Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
 
@@ -152,7 +155,6 @@ int run(void)
 
     static const OS_NetworkStack_CamkesConfig_t camkes_config =
     {
-        .notify_init_done        = nwStack_event_ready_emit,
         .wait_loop_event         = event_tick_or_data_wait,
 
         .internal =
@@ -191,12 +193,6 @@ int run(void)
                 .dev_write      = nic_driver_tx_data,
                 .get_mac        = nic_driver_get_mac_address,
             }
-        },
-
-        .app =
-        {
-            .notify_init_done   = nwStack_event_ready_emit,
-
         }
     };
 
@@ -208,18 +204,40 @@ int run(void)
     {
         Debug_LOG_FATAL("[NwStack '%s'] Read from config failed, error %d",
                         get_instance_name(), ret);
-        return -1;
+        return;
     }
 #endif
 
     Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s", get_instance_name(), DEV_ADDR);
     Debug_LOG_INFO("[NwStack '%s'] GATEWAY ADDR: %s", get_instance_name(), GATEWAY_ADDR);
     Debug_LOG_INFO("[NwStack '%s'] SUBNETMASK: %s", get_instance_name(), SUBNET_MASK);
+
+    ret = OS_NetworkStack_init(&camkes_config, &config);
+    if (ret != OS_SUCCESS)
+    {
+        Debug_LOG_FATAL("[NwStack '%s'] OS_NetworkStack_init() failed, error %d",
+                        get_instance_name(), ret);
+        return;
+    }
+    initSuccessfullyCompleted = true;
+}
+
+//------------------------------------------------------------------------------
+int
+run(void)
+{
+    if (!initSuccessfullyCompleted)
+    {
+        Debug_LOG_FATAL("[NwStack '%s'] initialization failed",
+                        get_instance_name());
+        return -1;
+    }
+
     // The Ticker component sends us a tick every second. Currently there is
     // no dedicated interface to enable and disable the tick. because we don't
     // need this. OS_NetworkStack_run() is not supposed to return.
 
-    ret = OS_NetworkStack_run(&camkes_config, &config);
+    OS_Error_t ret = OS_NetworkStack_run();
     if (ret != OS_SUCCESS)
     {
         Debug_LOG_FATAL("[NwStack '%s'] OS_NetworkStack_run() failed, error %d",

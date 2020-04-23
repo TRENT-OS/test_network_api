@@ -19,9 +19,6 @@
 #include "util/loop_defines.h"
 #include <camkes.h>
 
-extern OS_Error_t
-OS_NetworkAPP_RT(OS_Network_Context_t ctx);
-
 static OS_NetworkStackClient_SocketDataports_t config = {
     .number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO
 };
@@ -556,8 +553,6 @@ run()
 {
     init_client_api();
     Debug_LOG_INFO("Starting test_app_client %s...", get_instance_name());
-
-    OS_NetworkAPP_RT(NULL); // Must be actually called by OS Runtime
 
     if (!strcmp(get_instance_name(), "nwApp1"))
     {
