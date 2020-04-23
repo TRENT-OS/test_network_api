@@ -45,8 +45,8 @@
 #define CHANMUX_NUM_CHANNELS            9
 
 
-#define SENDER_NIC_1        1
-#define SENDER_NIC_2        2
+#define SENDER_NIC_1        101
+#define SENDER_NIC_2        102
 
 
 //-----------------------------------------------------------------------------
