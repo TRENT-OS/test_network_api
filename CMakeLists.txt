@@ -33,18 +33,10 @@ DeclareCAmkESComponent(NwStack_1
         seos_nw_lib
 )
 
-DeclareCAmkESComponent(NwDriver_1
-    SOURCES
-        components/NwDriver/nic_driver.c
-    C_FLAGS
-        -Wall -Werror
-        -DCFG_CHANMUX_CHANNEL_CRTL=CHANMUX_CHANNEL_NIC_1_CTRL
-        -DCFG_CHANMUX_CHANNEL_DATA=CHANMUX_CHANNEL_NIC_1_DATA
-    LIBS
-        system_config
-        seos_core_api
-        seos_libs
-        seos_nw_driver_tap_proxy_lib
+DeclareCAmkESComponent_NIC_ChanMux(
+    NwDriver_1
+    CHANMUX_CHANNEL_NIC_1_CTRL
+    CHANMUX_CHANNEL_NIC_1_DATA
 )
 
 DeclareCAmkESComponent(NwStack_2
@@ -64,18 +56,10 @@ DeclareCAmkESComponent(NwStack_2
         seos_nw_lib
 )
 
-DeclareCAmkESComponent(NwDriver_2
-    SOURCES
-        components/NwDriver/nic_driver.c
-    C_FLAGS
-        -DCFG_CHANMUX_CHANNEL_CRTL=CHANMUX_CHANNEL_NIC_2_CTRL
-        -DCFG_CHANMUX_CHANNEL_DATA=CHANMUX_CHANNEL_NIC_2_DATA
-        -Wall -Werror
-    LIBS
-        system_config
-        seos_core_api
-        seos_libs
-        seos_nw_driver_tap_proxy_lib
+DeclareCAmkESComponent_NIC_ChanMux(
+    NwDriver_2
+    CHANMUX_CHANNEL_NIC_2_CTRL
+    CHANMUX_CHANNEL_NIC_2_DATA
 )
 
 DeclareCAmkESComponent(NwApp_1
@@ -158,6 +142,6 @@ DeclareCAmkESComponent(ConfigServer
         seos_configuration
 )
 
-DeclareCAmkESRootserver(main.camkes)
-GenerateCAmkESRootServer()
+
+DeclareAndCreateCamkESSystem(main.camkes)
 GenerateSimulateScript()

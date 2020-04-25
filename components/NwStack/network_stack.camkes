@@ -15,8 +15,8 @@ component NwStack_1 {
 
     control;
 
-    emits       NwStack_TickOrData  e_tick_or_data;
-    consumes    NwStack_TickOrData  c_tick_or_data; // event also from NIC and Timer
+    emits       EventDataAvailable  e_tick_or_data;
+    consumes    EventDataAvailable  c_tick_or_data; // event also from NIC and Timer
 
     emits       NwStack_WrEv        e_write;
     consumes    NwStack_WrEv        c_write;
@@ -62,8 +62,8 @@ component NwStack_2 {
 
     control;
 
-    emits      NwStack_TickOrData   e_tick_or_data;
-    consumes   NwStack_TickOrData   c_tick_or_data; // event also from NIC and Timer
+    emits      EventDataAvailable   e_tick_or_data;
+    consumes   EventDataAvailable   c_tick_or_data; // event also from NIC and Timer
 
     emits      NwStack_WrEv         e_write;
     consumes   NwStack_WrEv         c_write;
