@@ -32,21 +32,19 @@
 // ChanMUX
 //-----------------------------------------------------------------------------
 
-#define CHANMUX_CHANNEL_UNUSED_0        0
-#define CHANMUX_CHANNEL_UNUSED_1        1
-#define CHANMUX_CHANNEL_UNUSED_2        2
-#define CHANMUX_CHANNEL_UNUSED_3        3
 #define CHANMUX_CHANNEL_NIC_1_CTRL      4
 #define CHANMUX_CHANNEL_NIC_1_DATA      5
-#define CHANMUX_CHANNEL_UNUSED_6        6
+
 #define CHANMUX_CHANNEL_NIC_2_CTRL      7
 #define CHANMUX_CHANNEL_NIC_2_DATA      8
 
-#define CHANMUX_NUM_CHANNELS            9
 
+//-----------------------------------------------------------------------------
+// ChanMUX clients
+//-----------------------------------------------------------------------------
 
-#define SENDER_NIC_1        101
-#define SENDER_NIC_2        102
+#define CHANMUX_ID_NIC_1        101
+#define CHANMUX_ID_NIC_2        102
 
 
 //-----------------------------------------------------------------------------
@@ -69,3 +67,4 @@
 
 #define CFG_ETH_SUBNET_MASK "ETH_SUBNET_MASK"
 #define CFG_ETH_SUBNET_MASK_VALUE "255.255.255.0"
+
