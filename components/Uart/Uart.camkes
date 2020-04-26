@@ -4,7 +4,10 @@
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
  */
+
 import "../../interfaces/UartInf.camkes";
+import <seos_if_chanMux.camkes>;
+
 
 component UartDev {
     hardware;
