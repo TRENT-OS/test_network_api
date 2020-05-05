@@ -112,12 +112,8 @@ DeclareCAmkESComponent(Timer
         -Wall -Werror
 )
 
-DeclareCAmkESComponent(UartDrv
-    SOURCES
-        components/Uart/src/UartDrv.c
-        components/Uart/src/qemu_uart.c
-    C_FLAGS
-        -Wall -Werror
+DeclareCAmkESComponent_UART(
+    UART
 )
 
 DeclareCAmkESComponent(ConfigServer

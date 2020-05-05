@@ -5,10 +5,12 @@ import "components/TestAppClient/test_app_client.camkes";
 import "components/TestAppServer/test_app_server.camkes";
 import "components/TimerClient/timer_client.camkes";
 import "components/Timer/timer.camkes";
-import "components/Uart/Uart.camkes";
 import "components/ConfigServer/ConfigServer.camkes";
 
 #include "system_config.h"
+
+#include "UART/uart.camkes"
+DECLARE_COMPONENT_UART(UART)
 
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
 DECLARE_COMPONENT_NIC_ChanMux(NwDriver_1)
@@ -25,10 +27,8 @@ assembly {
         //----------------------------------------------------------------------
         // UART
         //----------------------------------------------------------------------
-        component  UartDev          uartDev;
-        component  UartDrv          uartDrv;
-
-        connection seL4HardwareMMIO uart_memio          (from uartDrv.uartRegBase,    to uartDev.uartRegBase);
+        DECLARE_AND_CONNECT_INSTANCE_UART(
+            UART, uartDrv)
 
         //----------------------------------------------------------------------
         // MUX
@@ -145,9 +145,7 @@ assembly {
     }
 
     configuration {
-        uartDev.uartRegBase_paddr = 0xE0000000;
-        uartDev.uartRegBase_size  = 0x1000;
-        uartDrv.inputDataPort     = "R";
+        CONFIGURE_INSTANCE_UART(uartDrv, 0xE0000000, 59)
 
         timerbase.reg_paddr      = 0xF8001000;   // paddr of mmio registers
         timerbase.reg_size       = 0x1000;        // size of mmio registers
