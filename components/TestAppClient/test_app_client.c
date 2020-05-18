@@ -22,7 +22,7 @@ OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 */
 
-#define HTTP_PORT 80
+#define HTTP_PORT 8080
 
 int
 run()
@@ -50,8 +50,9 @@ run()
 
     Debug_LOG_INFO("Send request to host...");
 
-    const char* request =
-        "GET / HTTP/1.0\r\nHost: 192.168.82.12\r\nConnection: close\r\n\r\n";
+    const char* request = "GET /test_network_api/dante.txt "
+                          "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
+                          "\r\nConnection: close\r\n\r\n";
 
     const size_t len_request = strlen(request);
     size_t       len         = len_request;

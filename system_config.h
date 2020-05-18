@@ -49,7 +49,7 @@
 // Network Stack
 //-----------------------------------------------------------------------------
 
-#define CFG_TEST_HTTP_SERVER "192.168.82.12"
+#define CFG_TEST_HTTP_SERVER "10.0.0.1"
 
 // App1
 #define DOMAIN_NWSTACK "STACK"
