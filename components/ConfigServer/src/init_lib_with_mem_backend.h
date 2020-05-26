@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "SeosError.h"
+#include "OS_Error.h"
 #include "OS_ConfigService.h"
 
-seos_err_t
+OS_Error_t
 initializeWithMemoryBackends(OS_ConfigServiceLib_t* configLib);

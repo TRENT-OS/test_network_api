@@ -8,7 +8,7 @@
 #include "system_config.h"
 
 #include "LibDebug/Debug.h"
-#include "SeosError.h"
+#include "OS_Error.h"
 #include "seos_api_network_stack.h"
 #include "util/helper_func.h"
 #include <camkes.h>
@@ -27,10 +27,10 @@ static const seos_network_stack_config_t config =
 };
 
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
-seos_err_t
+OS_Error_t
 read_ip_from_config_server(void)
 {
-    seos_err_t ret;
+    OS_Error_t ret;
     // Create a handle to the remote library instance.
     OS_ConfigServiceHandle_t serverLibWithMemBackend;
 
@@ -158,7 +158,7 @@ int run(void)
         }
     };
 
-    seos_err_t ret;
+    OS_Error_t ret;
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
     ret = read_ip_from_config_server();
     if (ret != SEOS_SUCCESS)

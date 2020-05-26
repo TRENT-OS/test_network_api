@@ -6,13 +6,13 @@
  */
 
 #include "LibDebug/Debug.h"
-#include "SeosError.h"
+#include "OS_Error.h"
 #include "stdint.h"
 #include <string.h>
 
 #include "OS_Network.h"
 
-extern seos_err_t
+extern OS_Error_t
 OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 /*
@@ -40,7 +40,7 @@ run()
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
     OS_NetworkSocket_Handle_t handle;
-    seos_err_t err = OS_NetworkSocket_create(NULL, &cli_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(NULL, &cli_socket, &handle);
 
     if (err != SEOS_SUCCESS)
     {
@@ -108,7 +108,7 @@ run()
          */
         memset(buffer, 0, sizeof(buffer));
 
-        seos_err_t err = OS_NetworkSocket_read(handle, buffer, &len);
+        OS_Error_t err = OS_NetworkSocket_read(handle, buffer, &len);
 
         switch (err)
         {

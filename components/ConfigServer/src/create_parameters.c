@@ -32,12 +32,12 @@ initializeDomain(
 }
 
 
-seos_err_t
+OS_Error_t
 initializeDomainsAndParameters(
     OS_ConfigServiceLib_t* configLib,
     char const* domainName)
 {
-    seos_err_t result;
+    OS_Error_t result;
 
     if (strcmp(domainName, DOMAIN_NWSTACK) == 0)
     {

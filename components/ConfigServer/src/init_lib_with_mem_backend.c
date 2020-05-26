@@ -18,10 +18,10 @@ static char stringBuf[2000];
 static char blobBuf[12000];
 
 static
-seos_err_t
+OS_Error_t
 formatMemoryBackends(OS_ConfigServiceLib_t* configLib)
 {
-    seos_err_t result = 0;
+    OS_Error_t result = 0;
 
     // Create the memory backends.
     result = OS_ConfigServiceBackend_createMemBackend(domainBuf, sizeof(domainBuf),
@@ -67,10 +67,10 @@ formatMemoryBackends(OS_ConfigServiceLib_t* configLib)
     return SEOS_SUCCESS;
 }
 
-seos_err_t
+OS_Error_t
 initializeWithMemoryBackends(OS_ConfigServiceLib_t* configLib)
 {
-    seos_err_t result = 0;
+    OS_Error_t result = 0;
     OS_ConfigServiceBackend_t parameterBackend;
     OS_ConfigServiceBackend_t domainBackend;
     OS_ConfigServiceBackend_t stringBackend;

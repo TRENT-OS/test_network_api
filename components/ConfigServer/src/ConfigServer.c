@@ -19,7 +19,7 @@
 static bool
 initializeConfigBackend(void)
 {
-    seos_err_t ret;
+    OS_Error_t ret;
 
     OS_ConfigServiceInstanceStore_t* serverInstanceStore =
         OS_ConfigService_getInstances();

@@ -7,7 +7,7 @@
 #include <string.h>
 #include "stdint.h"
 #include "LibDebug/Debug.h"
-#include "SeosError.h"
+#include "OS_Error.h"
 
 #include "OS_Network.h"
 
@@ -21,7 +21,7 @@
 */
 
 
-extern seos_err_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
+extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 
 int run()
@@ -44,7 +44,7 @@ int run()
     /* Gets filled when server socket create is called */
     OS_NetworkServer_Handle_t  seos_nw_server_handle ;
 
-    seos_err_t err = OS_NetworkServerSocket_create(NULL, &srv_socket,
+    OS_Error_t err = OS_NetworkServerSocket_create(NULL, &srv_socket,
                                                    &seos_nw_server_handle);
 
     if (err != SEOS_SUCCESS)
