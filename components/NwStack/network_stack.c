@@ -1,5 +1,5 @@
 /*
- *  SEOS Network Stack CAmkES wrapper
+ *  OS Network Stack CAmkES wrapper
  *
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
@@ -46,21 +46,21 @@ read_ip_from_config_server(void)
     // Get the needed param values one by one from config server, using below API
     ret = helper_func_getConfigParameter(&serverLibWithMemBackend,
                                          DOMAIN_NWSTACK,
-#ifdef SEOS_NWSTACK_AS_CLIENT
+#ifdef OS_NWSTACK_AS_CLIENT
                                          CFG_ETH_ADDR_CLIENT,
 #endif
-#ifdef SEOS_NWSTACK_AS_SERVER
+#ifdef OS_NWSTACK_AS_SERVER
                                          CFG_ETH_ADDR_SERVER,
 #endif
                                          DEV_ADDR,
                                          sizeof(DEV_ADDR));
     if (ret != OS_SUCCESS)
     {
-#ifdef SEOS_NWSTACK_AS_CLIENT
+#ifdef OS_NWSTACK_AS_CLIENT
         Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
                         CFG_ETH_ADDR_CLIENT, ret);
 #endif
-#ifdef SEOS_NWSTACK_AS_SERVER
+#ifdef OS_NWSTACK_AS_SERVER
         Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
                         CFG_ETH_ADDR_SERVER, ret);
 #endif

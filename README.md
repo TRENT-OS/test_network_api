@@ -1,6 +1,6 @@
 # test\_network\_api
 
-Test the SEOS network API
+Test the OS network API
 
 ## Getting Started
 

@@ -1,5 +1,5 @@
 /*
- *  SEOS Network Stack CAmkES App as client
+ *  OS Network Stack CAmkES App as client
  *
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
@@ -30,7 +30,7 @@ run()
     Debug_LOG_INFO("Starting test_app_client...");
 
     char buffer[4096];
-    OS_NetworkAPP_RT(NULL); // Must be actullay called by SEOS Runtime
+    OS_NetworkAPP_RT(NULL); // Must be actullay called by OS Runtime
 
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,

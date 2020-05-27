@@ -1,5 +1,5 @@
 /*
- *  SEOS Network Stack CAmkES App as Server
+ *  OS Network Stack CAmkES App as Server
  *
  *  Copyright (C) 2019, Hensoldt Cyber GmbH
  *
@@ -29,7 +29,7 @@ int run()
     Debug_LOG_INFO("Starting test_app_server...");
 
     char buffer[4096];
-    OS_NetworkAPP_RT(NULL);    /* Must be actually called by SEOS Runtime */
+    OS_NetworkAPP_RT(NULL);    /* Must be actually called by OS Runtime */
 
     OS_NetworkServer_Socket_t  srv_socket =
     {

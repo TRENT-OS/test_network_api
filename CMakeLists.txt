@@ -7,11 +7,11 @@ add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 seos_use_libs(
-    SEOS_CHANMUX
-    SEOS_CONFIGURATION
-    SEOS_LIBS
-    SEOS_NETWORK_DRIVER_TAP_PROXY
-    SEOS_NW_STACK
+    OS_CHANMUX
+    OS_CONFIGURATION
+    OS_LIBS
+    OS_NETWORK_DRIVER_TAP_PROXY
+    OS_NW_STACK
 )
 
 project(tests_picotcp_api C)
@@ -22,7 +22,7 @@ DeclareCAmkESComponent(NwStack_1
         components/NwStack/util/helper_func.c
     C_FLAGS
         -Wall -Werror
-        -DSEOS_NWSTACK_AS_CLIENT
+        -DOS_NWSTACK_AS_CLIENT
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
@@ -45,7 +45,7 @@ DeclareCAmkESComponent(NwStack_2
         components/NwStack/util/helper_func.c
     C_FLAGS
         -Wall -Werror
-        -DSEOS_NWSTACK_AS_SERVER
+        -DOS_NWSTACK_AS_SERVER
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
