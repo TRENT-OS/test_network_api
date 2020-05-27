@@ -50,7 +50,7 @@ initializeDomainsAndParameters(
                      0,
                      &domain,
                      sizeof(domain));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -76,7 +76,7 @@ initializeDomainsAndParameters(
                      0,
                      &parameter,
                      sizeof(parameter));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -85,7 +85,7 @@ initializeDomainsAndParameters(
                      parameter.parameterValue.valueString.index,
                      str,
                      sizeof(str));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -106,7 +106,7 @@ initializeDomainsAndParameters(
                      1,
                      &parameter,
                      sizeof(parameter));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -115,7 +115,7 @@ initializeDomainsAndParameters(
                      parameter.parameterValue.valueString.index,
                      str,
                      sizeof(str));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -135,7 +135,7 @@ initializeDomainsAndParameters(
                      2,
                      &parameter,
                      sizeof(parameter));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -144,7 +144,7 @@ initializeDomainsAndParameters(
                      parameter.parameterValue.valueString.index,
                      str,
                      sizeof(str));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -166,7 +166,7 @@ initializeDomainsAndParameters(
                      3,
                      &parameter,
                      sizeof(parameter));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
@@ -175,11 +175,11 @@ initializeDomainsAndParameters(
                      parameter.parameterValue.valueString.index,
                      str,
                      sizeof(str));
-        if (result != SEOS_SUCCESS)
+        if (result != OS_SUCCESS)
         {
             return result;
         }
     }
 
-    return SEOS_SUCCESS;
+    return OS_SUCCESS;
 }

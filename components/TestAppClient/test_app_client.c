@@ -42,7 +42,7 @@ run()
     OS_NetworkSocket_Handle_t handle;
     OS_Error_t err = OS_NetworkSocket_create(NULL, &cli_socket, &handle);
 
-    if (err != SEOS_SUCCESS)
+    if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
         return -1;
@@ -66,7 +66,7 @@ run()
 
         err = OS_NetworkSocket_write(handle, &request[offs], &len_io);
 
-        if (err != SEOS_SUCCESS)
+        if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_write() failed, code %d", err);
             OS_NetworkSocket_close(handle);
@@ -84,11 +84,11 @@ run()
     /*
     As of now the nw stack behavior is as below:
     Keep reading data until you receive one of the return values:
-     a. err = SEOS_ERROR_CONNECTION_CLOSED indicating end of data read
+     a. err = OS_ERROR_CONNECTION_CLOSED indicating end of data read
               and connection close
-     b. err = SEOS_ERROR_GENERIC  due to error in read
-     c. err = SEOS_SUCCESS and length = 0 indicating no data to read but there
-    is still connection d. err = SEOS_SUCCESS and length >0 , valid data
+     b. err = OS_ERROR_GENERIC  due to error in read
+     c. err = OS_SUCCESS and length = 0 indicating no data to read but there
+    is still connection d. err = OS_SUCCESS and length >0 , valid data
 
     Take appropriate actions based on the return value rxd.
 
@@ -115,13 +115,13 @@ run()
 
         /* This means end of read or nothing further to read as socket was
          * closed */
-        case SEOS_ERROR_CONNECTION_CLOSED:
+        case OS_ERROR_CONNECTION_CLOSED:
             Debug_LOG_INFO("socket_read() reported connection closed");
             flag = false; /* terminate loop and close handle*/
             break;
 
         /* Success . continue further reading */
-        case SEOS_SUCCESS:
+        case OS_SUCCESS:
             Debug_LOG_INFO("chunk read, length %d", len);
             continue;
 

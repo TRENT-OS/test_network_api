@@ -47,7 +47,7 @@ int run()
     OS_Error_t err = OS_NetworkServerSocket_create(NULL, &srv_socket,
                                                    &seos_nw_server_handle);
 
-    if (err != SEOS_SUCCESS)
+    if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("server_socket_create() failed, code %d", err);
         return -1;
@@ -58,7 +58,7 @@ int run()
     for (;;)
     {
         err = OS_NetworkServerSocket_accept(seos_nw_server_handle, &seos_socket_handle);
-        if (err != SEOS_SUCCESS)
+        if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_accept() failed, error %d", err);
             return -1;
@@ -67,12 +67,12 @@ int run()
         /*
             As of now the nw stack behavior is as below:
             Keep reading data until you receive one of the return values:
-             a. err = SEOS_ERROR_CONNECTION_CLOSED and length = 0 indicating end of data read
+             a. err = OS_ERROR_CONNECTION_CLOSED and length = 0 indicating end of data read
                       and connection close
-             b. err = SEOS_ERROR_GENERIC  due to error in read
-             c. err = SEOS_SUCCESS and length = 0 indicating no data to read but there is still
+             b. err = OS_ERROR_GENERIC  due to error in read
+             c. err = OS_SUCCESS and length = 0 indicating no data to read but there is still
                       connection
-             d. err = SEOS_SUCCESS and length >0 , valid data
+             d. err = OS_SUCCESS and length >0 , valid data
 
             Take appropriate actions based on the return value rxd.
 
@@ -90,7 +90,7 @@ int run()
             Debug_LOG_DEBUG("read...");
             size_t n = 1;
             err = OS_NetworkSocket_read(seos_socket_handle, buffer, &n);
-            if (SEOS_SUCCESS != err)
+            if (OS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("socket_read() failed, error %d", err);
                 break;
@@ -100,7 +100,7 @@ int run()
             Debug_LOG_DEBUG("Got a byte %02x, send it back", buffer[0]);
 
             err = OS_NetworkSocket_write(seos_socket_handle, buffer, &n);
-            if (err != SEOS_SUCCESS)
+            if (err != OS_SUCCESS)
             {
                 Debug_LOG_ERROR("socket_write() failed, error %d", err);
                 break;
@@ -110,7 +110,7 @@ int run()
         switch (err)
         {
         /* This means end of read as socket was closed. Exit now and close handle*/
-        case SEOS_ERROR_CONNECTION_CLOSED:
+        case OS_ERROR_CONNECTION_CLOSED:
             // the test runner checks for this string
             Debug_LOG_INFO("connection closed by server");
             break;

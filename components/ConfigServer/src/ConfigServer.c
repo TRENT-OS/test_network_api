@@ -29,7 +29,7 @@ initializeConfigBackend(void)
     // Create the backends in the instance.
     Debug_LOG_INFO("ConfigServer: Initializing with mem backend...");
     ret = initializeWithMemoryBackends(configLib);
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
         Debug_LOG_ERROR("initializeWithMemoryBackends failed with: %d", ret);
         return false;
@@ -38,7 +38,7 @@ initializeConfigBackend(void)
     // Create the parameters in the instance.
     Debug_LOG_DEBUG("Enumerating %s", DOMAIN_NWSTACK);
     ret = initializeDomainsAndParameters(configLib, DOMAIN_NWSTACK);
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
         Debug_LOG_ERROR("initializeDomainAndParameters for %s failed with: %d",
                         DOMAIN_NWSTACK, ret);

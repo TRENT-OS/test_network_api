@@ -37,7 +37,7 @@ read_ip_from_config_server(void)
     ret = OS_ConfigService_createHandle(OS_CONFIG_HANDLE_KIND_RPC,
                                         0,
                                         &serverLibWithMemBackend);
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_ConfigService_createHandle failed with :%d", ret);
         return ret;
@@ -54,7 +54,7 @@ read_ip_from_config_server(void)
 #endif
                                          DEV_ADDR,
                                          sizeof(DEV_ADDR));
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
 #ifdef SEOS_NWSTACK_AS_CLIENT
         Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
@@ -73,7 +73,7 @@ read_ip_from_config_server(void)
                                          CFG_ETH_GATEWAY_ADDR,
                                          GATEWAY_ADDR,
                                          sizeof(GATEWAY_ADDR));
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
         Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
                         CFG_ETH_GATEWAY_ADDR, ret);
@@ -87,7 +87,7 @@ read_ip_from_config_server(void)
                                          CFG_ETH_SUBNET_MASK,
                                          SUBNET_MASK,
                                          sizeof(SUBNET_MASK));
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
         Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
                         CFG_ETH_SUBNET_MASK, ret);
@@ -96,7 +96,7 @@ read_ip_from_config_server(void)
     Debug_LOG_INFO("[NwStack '%s'] SUBNETMASK: %s", get_instance_name(),
                    SUBNET_MASK);
 
-    return SEOS_SUCCESS;
+    return OS_SUCCESS;
 }
 #endif
 //------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ int run(void)
     OS_Error_t ret;
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
     ret = read_ip_from_config_server();
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
         Debug_LOG_FATAL("[NwStack '%s'] Read from config failed, error %d",
                         get_instance_name(), ret);
@@ -170,7 +170,7 @@ int run(void)
 #endif
 
     ret = seos_network_stack_run(&camkes_config, &config);
-    if (ret != SEOS_SUCCESS)
+    if (ret != OS_SUCCESS)
     {
         Debug_LOG_FATAL("[NwStack '%s'] seos_network_stack_run() failed, error %d",
                         get_instance_name(), ret);
@@ -178,7 +178,7 @@ int run(void)
     }
 
     // actually, seos_network_stack_run() is not supposed to return with
-    // SEOS_SUCCESS. We have to assume this is a graceful shutdown for some
+    // OS_SUCCESS. We have to assume this is a graceful shutdown for some
     // reason
     Debug_LOG_WARNING("[NwStack '%s'] graceful termination",
                       get_instance_name());
