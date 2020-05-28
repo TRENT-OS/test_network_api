@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.7.2)
 
-seos_set_config_file(system_config.h)
+os_set_config_file(system_config.h)
 
 project(system_config C)
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
-seos_use_libs(
+os_use_libs(
     OS_CHANMUX
     OS_CONFIGURATION
     OS_LIBS
