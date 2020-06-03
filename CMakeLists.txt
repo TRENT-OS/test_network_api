@@ -10,8 +10,6 @@ os_use_libs(
     OS_CHANMUX
     OS_CONFIGURATION
     OS_LIBS
-    OS_NETWORK_DRIVER_TAP_PROXY
-    OS_NW_STACK
 )
 
 project(tests_picotcp_api C)
@@ -30,7 +28,7 @@ DeclareCAmkESComponent(NwStack_1
         seos_core_api
         seos_libs
         seos_configuration
-        seos_nw_lib
+        os_network_lib
 )
 
 DeclareCAmkESComponent_NIC_ChanMux(
@@ -53,7 +51,7 @@ DeclareCAmkESComponent(NwStack_2
         seos_core_api
         seos_libs
         seos_configuration
-        seos_nw_lib
+        os_network_lib
 )
 
 DeclareCAmkESComponent_NIC_ChanMux(
@@ -72,7 +70,7 @@ DeclareCAmkESComponent(NwApp_1
         system_config
         seos_core_api
         seos_libs
-        seos_network_api
+        os_network_api
 )
 
 DeclareCAmkESComponent(NwApp_2
@@ -85,7 +83,7 @@ DeclareCAmkESComponent(NwApp_2
         system_config
         seos_core_api
         seos_libs
-        seos_network_api
+        os_network_api
 )
 
 DeclareCAmkESComponent_ChanMux(
