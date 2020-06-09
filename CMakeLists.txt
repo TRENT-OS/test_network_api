@@ -25,9 +25,9 @@ DeclareCAmkESComponent(NwStack_1
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
         system_config
-        seos_core_api
-        seos_libs
-        seos_configuration
+        os_core_api
+        os_libs
+        os_configuration
         os_network_lib
 )
 
@@ -48,9 +48,9 @@ DeclareCAmkESComponent(NwStack_2
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
         system_config
-        seos_core_api
-        seos_libs
-        seos_configuration
+        os_core_api
+        os_libs
+        os_configuration
         os_network_lib
 )
 
@@ -68,8 +68,8 @@ DeclareCAmkESComponent(NwApp_1
         -DCLIENT_CONFIG=1
     LIBS
         system_config
-        seos_core_api
-        seos_libs
+        os_core_api
+        os_libs
         os_network_api
 )
 
@@ -81,8 +81,8 @@ DeclareCAmkESComponent(NwApp_2
         -DSERVER_CONFIG=1
     LIBS
         system_config
-        seos_core_api
-        seos_libs
+        os_core_api
+        os_libs
         os_network_api
 )
 
@@ -99,8 +99,8 @@ DeclareCAmkESComponent(TimerClient
         -Wall -Werror
     LIBS
         system_config
-        seos_core_api
-        seos_libs
+        os_core_api
+        os_libs
 )
 
 DeclareCAmkESComponent(Timer
@@ -125,9 +125,9 @@ DeclareCAmkESComponent(ConfigServer
         -DOS_CONFIG_SERVICE_CAMKES_SERVER
     LIBS
         system_config
-        seos_libs
-        seos_core_api
-        seos_configuration
+        os_libs
+        os_core_api
+        os_configuration
 )
 
 
