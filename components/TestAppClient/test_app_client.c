@@ -88,11 +88,10 @@ run()
               and connection close
      b. err = OS_ERROR_GENERIC  due to error in read
      c. err = OS_SUCCESS and length = 0 indicating no data to read but there
-    is still connection d. err = OS_SUCCESS and length >0 , valid data
+    is still connection
+     d. err = OS_SUCCESS and length >0 , valid data
 
     Take appropriate actions based on the return value rxd.
-
-
 
     Only a single socket is supported and no multithreading !!!
     Once a webpage is read , display the contents.
@@ -104,8 +103,8 @@ run()
     {
         len = sizeof(buffer);
 
-        /* Keep calling read until we receive CONNECTION_CLOSED from the stack
-         */
+        /* Keep calling read until we receive CONNECTION_CLOSED from the
+        stack */
         memset(buffer, 0, sizeof(buffer));
 
         OS_Error_t err = OS_NetworkSocket_read(handle, buffer, &len);
