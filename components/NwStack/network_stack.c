@@ -12,6 +12,7 @@
 #include "OS_NetworkStackConf.h"
 #include "util/helper_func.h"
 #include <camkes.h>
+#include "OS_Dataport.h"
 
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
 char DEV_ADDR[20];
@@ -127,17 +128,9 @@ int run(void)
 
         .drv_nic =
         {
-            .from = // NIC -> stack
-            {
-                .buffer         = nic_port_from,
-                .len            = PAGE_SIZE
-            },
+            .from = OS_DATAPORT_ASSIGN(nic_port_from),
 
-            .to = // stack -> NIC
-            {
-                .buffer         = nic_port_to,
-                .len            = PAGE_SIZE
-            },
+            .to = OS_DATAPORT_ASSIGN(nic_port_to),
 
             .rpc =
             {
@@ -150,11 +143,8 @@ int run(void)
         {
             .notify_init_done   = nwStack_event_ready_emit,
 
-            .port =
-            {
-                .buffer         = nwStack_port,
-                .len            = PAGE_SIZE
-            },
+            .port = OS_DATAPORT_ASSIGN(nwStack_port)
+
         }
     };
 
