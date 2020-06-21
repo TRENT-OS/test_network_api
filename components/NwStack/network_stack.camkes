@@ -30,6 +30,9 @@ component NwStack_1 {
     has         mutex               allocatorMutex;
     has         mutex               nwstackMutex;
 
+    has         mutex               socketControlBlockMutex;
+    has         mutex               stackThreadSafeMutex;
+
     //-------------------------------------------------
     // interface Timer
     uses        timer_client_inf    Timer;
@@ -76,6 +79,9 @@ component NwStack_2 {
 
     has        mutex                allocatorMutex;
     has        mutex                nwstackMutex;
+
+    has        mutex                socketControlBlockMutex;
+    has        mutex                stackThreadSafeMutex;
 
 
     //-------------------------------------------------
