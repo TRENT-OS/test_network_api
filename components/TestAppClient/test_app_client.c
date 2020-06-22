@@ -267,7 +267,7 @@ run()
 
     OS_NetworkAPP_RT(NULL); // Must be actullay called by OS Runtime
 
-    Debug_LOG_INFO("TCP client test successful.");
+    Debug_LOG_INFO("TCP client test");
     if(test_tcp_client() == OS_SUCCESS)
     {
         Debug_LOG_INFO("TCP client test successful.");
