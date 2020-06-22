@@ -113,6 +113,7 @@ int run()
         case OS_ERROR_CONNECTION_CLOSED:
             // the test runner checks for this string
             Debug_LOG_INFO("connection closed by server");
+            OS_NetworkSocket_close(seos_socket_handle);
             break;
         /* Any other value is a failure in read, hence exit and close handle  */
         default :
