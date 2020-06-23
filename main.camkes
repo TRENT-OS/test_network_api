@@ -9,7 +9,7 @@ import "components/ConfigServer/ConfigServer.camkes";
 
 #include "system_config.h"
 
-#include "UART/uart.camkes"
+#include "UART/Uart.camkes"
 DECLARE_COMPONENT_UART(UART)
 
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
