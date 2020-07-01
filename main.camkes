@@ -13,8 +13,8 @@ import "components/ConfigServer/ConfigServer.camkes";
 DECLARE_COMPONENT_UART(UART)
 
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
-DECLARE_COMPONENT_NIC_ChanMux(NwDriver_1)
-DECLARE_COMPONENT_NIC_ChanMux(NwDriver_2)
+DECLARE_COMPONENT_NIC_ChanMux(NwDriver1)
+DECLARE_COMPONENT_NIC_ChanMux(NwDriver2)
 
 #define CHANMUX_COMPONENT_NAME  ChanMux
 #define CHANMUX_UPPER_INTERFACES "components/ChanMux/ChanMux_upper_interface.camkes"
@@ -58,22 +58,19 @@ assembly {
         //----------------------------------------------------------------------
         // Network Driver #1
         //----------------------------------------------------------------------
-        component  NwDriver_1       nwDriver_1;
+        component  NwDriver1        nwDriver1;
 
-        connection seL4Notification NwDriver_1_chanmux_dataAvail       (from chanMux.nic_1_event_hasData,        to nwDriver_1.chanMux_event_hasData);
-        connection seL4RPCCall      nwDriver_1_chanmux_rpc             (from nwDriver_1.chanMux_rpc,             to chanMux.chanMux_rpc);
-        connection seL4SharedData   NwDriver_1_chanmux_port_ctrl       (from nwDriver_1.chanMux_port_ctrl,       to chanMux.nic_1_port_ctrl);
-        connection seL4SharedData   NwDriver_1_chanmux_port_data_read  (from nwDriver_1.chanMux_port_data_read,  to chanMux.nic_1_port_data_read);
-        connection seL4SharedData   NwDriver_1_chanmux_port_data_write (from nwDriver_1.chanMux_port_data_write, to chanMux.nic_1_port_data_write);
-
+        CHANMUX_INSTANCE_CONNECT_INTERFACE(chanMux, nwDriver1)
+        CHANMUX_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver1, data)
+        CHANMUX_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver1, ctrl)
 
         //----------------------------------------------------------------------
         // Network Stack #1
         //----------------------------------------------------------------------
-        component  NwStack_1              nwStack_1;
+        component  NwStack1               nwStack1;
 
-        connection seL4NotificationNative nwStack_1_internal_hasData      (from nwStack_1.e_tick_or_data,         to nwStack_1.c_tick_or_data);
-#define COMPONENT nwStack_1
+        connection seL4NotificationNative nwStack1_internal_hasData      (from nwStack1.e_tick_or_data,         to nwStack1.c_tick_or_data);
+#define COMPONENT nwStack1
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
         connection seL4Notification GEN_NAME(COMPONENT, _a)(from COMPONENT.GEN_ID(e_write), to COMPONENT.GEN_ID(c_write)); \
@@ -82,65 +79,64 @@ assembly {
 #include "util/loop.h"
 #undef COMPONENT
 
-        connection seL4Notification       nwStack_1_configServer_ready    (from configServer.event_ready,         to nwStack_1.cfgServer_event_ready);
-        connection seL4RPCCall            NwStack_1_configServer_rpc      (from nwStack_1.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
-        connection seL4SharedData         NwStack_1_configServer_data     (from nwStack_1.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
+        connection seL4Notification       nwStack1_configServer_ready    (from configServer.event_ready,        to nwStack1.cfgServer_event_ready);
+        connection seL4RPCCall            nwStack1_configServer_rpc      (from nwStack1.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
+        connection seL4SharedData         nwStack1_configServer_data     (from nwStack1.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
 
-        connection seL4RPCCall            nwStack_1_timer_rpc             (from nwStack_1.Timer,                  to timerclient.TimerClient);
-        connection seL4NotificationNative nwStack_1_timer_hasData         (from timerclient.nwStack_1_event_tick, to nwStack_1.c_tick_or_data);
+        connection seL4RPCCall            nwStack1_timer_rpc             (from nwStack1.Timer,                  to timerclient.TimerClient);
+        connection seL4NotificationNative nwStack1_timer_hasData         (from timerclient.nwStack1_event_tick, to nwStack1.c_tick_or_data);
 
-        connection seL4RPCCall            nwStack_1_nwDriver_1_rpc        (from nwStack_1.nic_driver,             to nwDriver_1.nic_rpc);
-        connection seL4SharedData         nwStack_1_nwDriver_1_port_read  (from nwDriver_1.nic_port_to,           to nwStack_1.nic_port_from);
-        connection seL4SharedData         nwStack_1_nwDriver_1_port_write (from nwDriver_1.nic_port_from,         to nwStack_1.nic_port_to);
-        connection seL4NotificationNative nwStack_1_nwDriver_1_hasData    (from nwDriver_1.nic_event_hasData,     to nwStack_1.c_tick_or_data);
+        connection seL4RPCCall            nwStack1_nwDriver1_rpc         (from nwStack1.nic_driver,             to nwDriver1.nic_rpc);
+        connection seL4SharedData         nwStack1_nwDriver1_port_read   (from nwDriver1.nic_port_to,           to nwStack1.nic_port_from);
+        connection seL4SharedData         nwStack1_nwDriver1_port_write  (from nwDriver1.nic_port_from,         to nwStack1.nic_port_to);
+        connection seL4NotificationNative nwStack1_nwDriver1_hasData     (from nwDriver1.nic_event_hasData,     to nwStack1.c_tick_or_data);
 
         //----------------------------------------------------------------------
         // Network Stack App #1
         //----------------------------------------------------------------------
-        component  NwApp_1          nwApp_1;
+        component  NwApp1           nwApp1;
 
-        connection seL4Notification nwApp_1_nwStack_1_initDone (from nwStack_1.nwStack_event_ready, to nwApp_1.event_network_stack_init_done);
-        connection seL4RPCCall      nwApp_1_nwStack_1_rpc      (from nwApp_1.network_stack_rpc,     to nwStack_1.network_stack_rpc);
+        connection seL4Notification nwApp1_nwStack1_initDone (from nwStack1.nwStack_event_ready, to nwApp1.event_network_stack_init_done);
+        connection seL4RPCCall      nwApp1_nwStack1_rpc      (from nwApp1.network_stack_rpc,     to nwStack1.network_stack_rpc);
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
-        connection seL4SharedData GEN_NAME(nwApp_1, nwStack_1)(from nwApp_1.GEN_ID(NwAppDataPort), to nwStack_1.GEN_ID(nwStack_port));
+        connection seL4SharedData GEN_NAME(nwApp1, nwStack1)(from nwApp1.GEN_ID(NwAppDataPort), to nwStack1.GEN_ID(nwStack_port));
 #include "util/loop.h"
 
         //----------------------------------------------------------------------
         // Network Stack App #1.2
         //----------------------------------------------------------------------
-        component NwApp_1 nwApp_1_2;
+        component NwApp1 nwApp1_2;
 
-        connection seL4Notification nwApp_1_2_nwStack_1_initDone(from nwStack_1.nwStack_event_ready, to nwApp_1_2.event_network_stack_init_done);
-        connection seL4RPCCall nwApp_1_2_nwStack_1_rpc(from nwApp_1_2.network_stack_rpc, to nwStack_1.network_stack_rpc);
+        connection seL4Notification nwApp1_2_nwStack1_initDone(from nwStack1.nwStack_event_ready, to nwApp1_2.event_network_stack_init_done);
+        connection seL4RPCCall nwApp1_2_nwStack1_rpc(from nwApp1_2.network_stack_rpc, to nwStack1.network_stack_rpc);
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
-        connection seL4SharedData GEN_NAME(nwApp_1_2, nwStack_1)(from nwApp_1_2.GEN_ID(NwAppDataPort), to nwStack_1.GEN_ID(nwStack_port));
+        connection seL4SharedData GEN_NAME(nwApp1_2, nwStack1)(from nwApp1_2.GEN_ID(NwAppDataPort), to nwStack1.GEN_ID(nwStack_port));
 #include "util/loop.h"
 
         //----------------------------------------------------------------------
         // Network Driver #2
         //----------------------------------------------------------------------
-        component  NwDriver_2       nwDriver_2;
+        component  NwDriver2        nwDriver2;
 
-        connection seL4Notification nwDriver_2_chanmux_hasData         (from chanMux.nic_2_event_hasData,        to nwDriver_2.chanMux_event_hasData);
-        connection seL4RPCCall      nwDriver_2_chanmux_rpc             (from nwDriver_2.chanMux_rpc,             to chanMux.chanMux_rpc);
-        connection seL4SharedData   nwDriver_2_chanmux_port_ctrl       (from nwDriver_2.chanMux_port_ctrl,       to chanMux.nic_2_port_ctrl);
-        connection seL4SharedData   nwDriver_2_chanmux_port_data_read  (from nwDriver_2.chanMux_port_data_read,  to chanMux.nic_2_port_data_read);
-        connection seL4SharedData   nwDriver_2_chanmux_port_data_write (from nwDriver_2.chanMux_port_data_write, to chanMux.nic_2_port_data_write);
+        CHANMUX_INSTANCE_CONNECT_INTERFACE(chanMux, nwDriver2)
+        CHANMUX_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver2, data)
+        CHANMUX_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver2, ctrl)
 
 
         //----------------------------------------------------------------------
         // Network Stack #2
         //----------------------------------------------------------------------
-        component  NwStack_2              nwStack_2;
+        component  NwStack2               nwStack2;
 
-        connection seL4NotificationNative nwStack_2_internal_hasData        (from nwStack_2.e_tick_or_data,         to nwStack_2.c_tick_or_data);
+        connection seL4NotificationNative nwStack2_internal_hasData        (from nwStack2.e_tick_or_data,         to nwStack2.c_tick_or_data);
 
-#define COMPONENT nwStack_2
+#define COMPONENT nwStack2
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+
 #define LOOP_ELEMENT \
         connection seL4Notification GEN_NAME(COMPONENT, _a)(from COMPONENT.GEN_ID(e_write), to COMPONENT.GEN_ID(c_write)); \
         connection seL4Notification GEN_NAME(COMPONENT, _b)(from COMPONENT.GEN_ID(e_read), to COMPONENT.GEN_ID(c_read));   \
@@ -148,29 +144,29 @@ assembly {
 #include "util/loop.h"
 #undef COMPONENT
 
-        connection seL4Notification       nwStack_2_configServer_ready      (from configServer.event_ready,         to nwStack_2.cfgServer_event_ready);
-        connection seL4RPCCall            NwStack_2_configServer_rpc        (from nwStack_2.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
-        connection seL4SharedData         NwStack_2_configServer_data       (from nwStack_2.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
+        connection seL4Notification       nwStack2_configServer_ready       (from configServer.event_ready,         to nwStack2.cfgServer_event_ready);
+        connection seL4RPCCall            nwStack2_configServer_rpc         (from nwStack2.OS_ConfigServiceServer,  to configServer.OS_ConfigServiceServer);
+        connection seL4SharedData         nwStack2_configServer_data        (from nwStack2.cfg_dataport_buf,        to configServer.cfg_dataport_buf);
 
-        connection seL4RPCCall            nwStack_2_timer_rpc               (from nwStack_2.Timer,                  to timerclient.TimerClient);
-        connection seL4NotificationNative nwStack_2_timer_hasData           (from timerclient.nwStack_2_event_tick, to nwStack_2.c_tick_or_data);
+        connection seL4RPCCall            nwStack2_timer_rpc                (from nwStack2.Timer,                   to timerclient.TimerClient);
+        connection seL4NotificationNative nwStack2_timer_hasData            (from timerclient.nwStack2_event_tick,  to nwStack2.c_tick_or_data);
 
-        connection seL4RPCCall            nwStack_2_nwDriver_2_rpc          (from nwStack_2.nic_driver,             to nwDriver_2.nic_rpc);
-        connection seL4SharedData         nwStack_2_nwDriver_2_port_read    (from nwDriver_2.nic_port_to,           to nwStack_2.nic_port_from);
-        connection seL4SharedData         nwStack_2_nwDriver_2_port_write   (from nwDriver_2.nic_port_from,         to nwStack_2.nic_port_to);
-        connection seL4NotificationNative nwStack_2_nwDriver_2_hasData      (from nwDriver_2.nic_event_hasData,     to nwStack_2.c_tick_or_data);
+        connection seL4RPCCall            nwStack2_nwDriver2_rpc            (from nwStack2.nic_driver,              to nwDriver2.nic_rpc);
+        connection seL4SharedData         nwStack2_nwDriver2_port_read      (from nwDriver2.nic_port_to,            to nwStack2.nic_port_from);
+        connection seL4SharedData         nwStack2_nwDriver2_port_write     (from nwDriver2.nic_port_from,          to nwStack2.nic_port_to);
+        connection seL4NotificationNative nwStack2_nwDriver2_hasData        (from nwDriver2.nic_event_hasData,      to nwStack2.c_tick_or_data);
 
         //----------------------------------------------------------------------
         // Network Stack App #2
         //----------------------------------------------------------------------
-        component  NwApp_2          nwApp_2;
+        component  NwApp2          nwApp2;
 
-        connection seL4Notification nwApp_2_nwStack_2_initDone (from nwStack_2.nwStack_event_ready, to nwApp_2.event_network_stack_init_done);
-        connection seL4RPCCall      nwApp_2_nwStack_2_rpc      (from nwApp_2.network_stack_rpc,     to nwStack_2.network_stack_rpc);
+        connection seL4Notification nwApp2_nwStack2_initDone (from nwStack2.nwStack_event_ready, to nwApp2.event_network_stack_init_done);
+        connection seL4RPCCall      nwApp2_nwStack2_rpc      (from nwApp2.network_stack_rpc,     to nwStack2.network_stack_rpc);
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
-        connection seL4SharedData GEN_NAME(nwApp_2, nwStack_2)(from nwApp_2.GEN_ID(NwAppDataPort), to nwStack_2.GEN_ID(nwStack_port));
+        connection seL4SharedData GEN_NAME(nwApp2, nwStack2)(from nwApp2.GEN_ID(NwAppDataPort), to nwStack2.GEN_ID(nwStack_port));
 #include "util/loop.h"
 
      }
@@ -190,7 +186,7 @@ assembly {
 
         // assign endpoint badges for n:1 RPC interface of ChanMUX. The generic
         // naming scheme is <component>.<interface>_attributes = <badge ID>
-        nwDriver_1.chanMux_rpc_attributes = CHANMUX_ID_NIC_1;
-        nwDriver_2.chanMux_rpc_attributes = CHANMUX_ID_NIC_2;
+        CHANMUX_ASSIGN_CLIENT_BADGE(chanMux, nwDriver1, CHANMUX_ID_NIC_1)
+        CHANMUX_ASSIGN_CLIENT_BADGE(chanMux, nwDriver2, CHANMUX_ID_NIC_2)
     }
 }

@@ -29,8 +29,8 @@ run(void)
         if ((counterMs % SIGNAL_PERIOD_MS) == 0)
         {
             // Debug_LOG_DEBUG("sending tick");
-            nwStack_1_event_tick_emit();
-            nwStack_2_event_tick_emit();
+            nwStack1_event_tick_emit();
+            nwStack2_event_tick_emit();
         }
     }
     return 0;

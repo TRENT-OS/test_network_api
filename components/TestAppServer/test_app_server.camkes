@@ -9,7 +9,7 @@ import <if_OS_Socket.camkes>;
 #include "util/loop_defines.h"
 #include "system_config.h"
 
-component NwApp_2 {
+component NwApp2 {
 
     control;
 

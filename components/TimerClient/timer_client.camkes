@@ -14,6 +14,6 @@ component TimerClient {
     uses       timer_inf           Timer;
     provides   timer_client_inf    TimerClient;
 
-    emits      EventDataAvailable  nwStack_1_event_tick;
-    emits      EventDataAvailable  nwStack_2_event_tick;
+    emits      EventDataAvailable  nwStack1_event_tick;
+    emits      EventDataAvailable  nwStack2_event_tick;
 }

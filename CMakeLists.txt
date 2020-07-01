@@ -19,7 +19,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 project(tests_picotcp_api C)
 
 DeclareCAmkESComponent(
-    NwStack_1
+    NwStack1
     SOURCES
         components/NwStack/network_stack.c
         components/NwStack/util/helper_func.c
@@ -38,13 +38,13 @@ DeclareCAmkESComponent(
 )
 
 DeclareCAmkESComponent_NIC_ChanMux(
-    NwDriver_1
+    NwDriver1
     CHANMUX_CHANNEL_NIC_1_CTRL
     CHANMUX_CHANNEL_NIC_1_DATA
 )
 
 DeclareCAmkESComponent(
-    NwStack_2
+    NwStack2
     SOURCES
         components/NwStack/network_stack.c
         components/NwStack/util/helper_func.c
@@ -63,13 +63,13 @@ DeclareCAmkESComponent(
 )
 
 DeclareCAmkESComponent_NIC_ChanMux(
-    NwDriver_2
+    NwDriver2
     CHANMUX_CHANNEL_NIC_2_CTRL
     CHANMUX_CHANNEL_NIC_2_DATA
 )
 
 DeclareCAmkESComponent(
-    NwApp_1
+    NwApp1
     SOURCES
         components/TestAppClient/test_app_client.c
     C_FLAGS
@@ -83,7 +83,7 @@ DeclareCAmkESComponent(
 )
 
 DeclareCAmkESComponent(
-    NwApp_2
+    NwApp2
     SOURCES
         components/TestAppServer/test_app_server.c
     C_FLAGS
