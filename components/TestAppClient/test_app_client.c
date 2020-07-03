@@ -14,7 +14,7 @@
 #include "OS_Network.h"
 #include "math.h"
 
-#include "OS_Network_client_api.h"
+#include "OS_NetworkStackClient.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
 
@@ -297,7 +297,7 @@ void init_client_api()
 #include "util/loop.h"
 
     config.dataport = dataports;
-    OS_Network_client_api_init(&config);
+    OS_NetworkStackClient_init(&config);
 }
 
 int

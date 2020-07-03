@@ -9,7 +9,7 @@
 
 #include "LibDebug/Debug.h"
 #include "OS_Error.h"
-#include "OS_NetworkStackConf.h"
+#include "OS_NetworkStack.h"
 #include "util/helper_func.h"
 #include <camkes.h>
 #include "OS_Dataport.h"
