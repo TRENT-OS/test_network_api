@@ -76,7 +76,7 @@ test_tcp_client()
             const size_t lenRemaining = len_request - offs;
             size_t       len_io       = lenRemaining;
 
-            err = OS_NetworkSocket_write(handle[i], &request[offs], &len_io);
+            err = OS_NetworkSocket_write(handle[i], &request[offs], len_io, &len_io);
 
             if (err != OS_SUCCESS)
             {
@@ -121,7 +121,7 @@ test_tcp_client()
             memset(buffer, 0, sizeof(buffer));
             OS_Error_t err = OS_ERROR_CONNECTION_CLOSED;
             if (!(flag & (1 << i)))
-                err = OS_NetworkSocket_read(handle[i], buffer, &len);
+                err = OS_NetworkSocket_read(handle[i], buffer, len, &len);
             switch (err)
             {
 
@@ -194,7 +194,7 @@ test_udp_recvfrom()
 
     len = sizeof(buffer);
     Debug_LOG_INFO("UDP Receive test handle: %d", handle);
-    err = OS_NetworkSocket_recvfrom(handle, buffer, &len, &receive_udp_socket);
+    err = OS_NetworkSocket_recvfrom(handle, buffer, len, &len, &receive_udp_socket);
 
     if (err != OS_SUCCESS)
     {
@@ -249,7 +249,7 @@ test_udp_sendto()
 
     len = sizeof(buffer);
     Debug_LOG_INFO("UDP Send test");
-    err = OS_NetworkSocket_recvfrom(handle, buffer, &len, &receive_udp_socket);
+    err = OS_NetworkSocket_recvfrom(handle, buffer,len, &len, &receive_udp_socket);
 
     if (err != OS_SUCCESS)
     {
@@ -261,7 +261,7 @@ test_udp_sendto()
                          receive_udp_socket.name, receive_udp_socket.port);
 
     len = sizeof(test_message);
-    err = OS_NetworkSocket_sendto(handle, test_message, &len, receive_udp_socket);
+    err = OS_NetworkSocket_sendto(handle, test_message, len, &len, receive_udp_socket);
 
     if (err != OS_SUCCESS)
     {

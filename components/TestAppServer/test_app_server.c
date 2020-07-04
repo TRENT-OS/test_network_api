@@ -115,7 +115,7 @@ run()
         {
             Debug_LOG_DEBUG("read...");
             size_t n = 1;
-            err = OS_NetworkSocket_read(seos_socket_handle, buffer, &n);
+            err = OS_NetworkSocket_read(seos_socket_handle, buffer, n, &n);
             if (OS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("socket_read() failed, error %d", err);
@@ -125,7 +125,7 @@ run()
             Debug_ASSERT(n == 1);
             Debug_LOG_DEBUG("Got a byte %02x, send it back", buffer[0]);
 
-            err = OS_NetworkSocket_write(seos_socket_handle, buffer, &n);
+            err = OS_NetworkSocket_write(seos_socket_handle, buffer, n, &n);
             if (err != OS_SUCCESS)
             {
                 Debug_LOG_ERROR("socket_write() failed, error %d", err);
