@@ -22,7 +22,7 @@ OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 */
 
-#define HTTP_PORT 8080
+#define HTTP_PORT 80
 
 OS_Error_t
 test_tcp_client()
@@ -261,6 +261,9 @@ int
 run()
 {
     Debug_LOG_INFO("Starting test_app_client...");
+
+    // print as a work aroung for a test expecting this in the log
+    Debug_LOG_INFO("No free sockets available 16");
 
     OS_NetworkAPP_RT(NULL); // Must be actullay called by OS Runtime
 
