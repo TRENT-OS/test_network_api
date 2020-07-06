@@ -5,11 +5,10 @@
  *
  */
 
-import <if_OS_nic.camkes>;
+import <if_OS_Nic.camkes>;
 import "../../interfaces/timer_client.camkes";
-import <if_OS_socket.camkes>;
+import <if_OS_Socket.camkes>;
 import <if_OS_ConfigService.camkes>;
-
 #include "util/loop_defines.h"
 #include "system_config.h"
 
@@ -43,9 +42,9 @@ component NwStack_1 {
 
     //-------------------------------------------------
     // interface Ethernet NIC driver
-    uses        if_OS_nic           nic_driver;
-    dataport    Buf                 nic_port_from; // NIC -> stack
-    dataport    Buf                 nic_port_to;   // stack -> NIC
+    uses if_OS_Nic nic_driver;
+    dataport Buf nic_port_from; // NIC -> stack
+    dataport Buf nic_port_to;   // stack -> NIC
 
 
     //---------------------------------------------------
@@ -97,9 +96,9 @@ component NwStack_2 {
 
     //-------------------------------------------------
     // interface Ethernet NIC driver
-    uses        if_OS_nic           nic_driver;
-    dataport    Buf                 nic_port_from; // NIC -> stack
-    dataport    Buf                 nic_port_to;   // stack -> NIC
+    uses if_OS_Nic nic_driver;
+    dataport Buf nic_port_from; // NIC -> stack
+    dataport Buf nic_port_to;   // stack -> NIC
 
 
     //---------------------------------------------------

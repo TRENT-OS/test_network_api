@@ -5,7 +5,7 @@
  *
  */
 
-import <if_OS_socket.camkes>;
+import <if_OS_Socket.camkes>;
 #include "util/loop_defines.h"
 #include "system_config.h"
 
@@ -18,9 +18,8 @@ component NwApp_2 {
     // network stack interface. Note that the names of the CAmkES object are
     // hard-coded in the network client lib
 
-    uses      if_OS_socket       network_stack_rpc;
-    dataport  Buf                NwAppDataPort;
-    consumes  EventServiceReady  event_network_stack_init_done;
+    uses if_OS_Socket network_stack_rpc;
+    consumes EventServiceReady event_network_stack_init_done;
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
