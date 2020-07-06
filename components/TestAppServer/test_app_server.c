@@ -10,6 +10,9 @@
 #include "OS_Error.h"
 
 #include "OS_Network.h"
+#include "OS_Network_client_api.h"
+#include "util/loop_defines.h"
+#include <camkes.h>
 
 /*
  * This example demonstrates a server with an incoming connection. Reads
@@ -23,9 +26,32 @@
 
 extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
-
-int run()
+void init_client_api()
 {
+    static os_network_dataports_socket_t config;
+
+    config.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
+    static OS_Dataport_t dataports[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
+
+
+    int i = 0;
+
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT                                                     \
+    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_ID(NwAppDataPort)); \
+    dataports[i] = GEN_ID(t);                                            \
+    i++;
+#include "util/loop.h"
+
+    config.dataport = dataports;
+    OS_Network_client_api_init(&config);
+}
+
+int
+run()
+{
+    init_client_api();
+
     Debug_LOG_INFO("Starting test_app_server...");
 
     char buffer[4096];

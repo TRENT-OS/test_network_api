@@ -9,8 +9,14 @@
 #include "OS_Error.h"
 #include "stdint.h"
 #include <string.h>
+#include "system_config.h"
 
 #include "OS_Network.h"
+#include "math.h"
+
+#include "OS_Network_client_api.h"
+#include "util/loop_defines.h"
+#include <camkes.h>
 
 extern OS_Error_t
 OS_NetworkAPP_RT(OS_Network_Context_t ctx);
@@ -27,26 +33,32 @@ OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 OS_Error_t
 test_tcp_client()
 {
-    char buffer[4096];
+    char buffer[2048];
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,
-                                       .name   = CFG_TEST_HTTP_SERVER,
-                                       .port   = HTTP_PORT };
+                                       .name   = "10.0.0.1",
+                                       .port   = 80 };
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
-    OS_NetworkSocket_Handle_t handle;
-    OS_Error_t err = OS_NetworkSocket_create(NULL, &cli_socket, &handle);
-
-    if (err != OS_SUCCESS)
+    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
+    OS_Error_t err;
+    int socket_max = 0;
+    int i;
+    for (i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
-        return OS_ERROR_GENERIC;
-    }
+        err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
 
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("client_socket_create() failed, code %d for %d socket", err,i);
+            break;
+        }
+    }
+    socket_max = i;
     Debug_LOG_INFO("Send request to host...");
 
-    const char* request = "GET /test_network_api/dante.txt "
+    char* request = "GET /network/a.txt "
                           "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                           "\r\nConnection: close\r\n\r\n";
 
@@ -54,27 +66,31 @@ test_tcp_client()
     size_t       len         = len_request;
 
     /* Send the request to the host */
-    size_t offs = 0;
-    do
+    for (int i = 0; i < socket_max ; i++)
     {
-        const size_t lenRemaining = len_request - offs;
-        size_t       len_io       = lenRemaining;
-
-        err = OS_NetworkSocket_write(handle, &request[offs], &len_io);
-
-        if (err != OS_SUCCESS)
+        size_t offs = 0;
+        Debug_LOG_INFO("Writing request to socket %d for %.*s", i, 17, request);
+        request[13] = 'a' + i;
+        do
         {
-            Debug_LOG_ERROR("socket_write() failed, code %d", err);
-            OS_NetworkSocket_close(handle);
-            return OS_ERROR_GENERIC;
-        }
+            const size_t lenRemaining = len_request - offs;
+            size_t       len_io       = lenRemaining;
 
-        /* fatal error, this must not happen. API broken*/
-        Debug_ASSERT(len_io <= lenRemaining);
+            err = OS_NetworkSocket_write(handle[i], &request[offs], &len_io);
 
-        offs += len_io;
-    } while (offs < len_request);
+            if (err != OS_SUCCESS)
+            {
+                Debug_LOG_ERROR("socket_write() failed, code %d", err);
+                OS_NetworkSocket_close(handle[i]);
+                return OS_ERROR_GENERIC;
+            }
 
+            /* fatal error, this must not happen. API broken*/
+            Debug_ASSERT(len_io <= lenRemaining);
+
+            offs += len_io;
+        } while (offs < len_request);
+    }
     Debug_LOG_INFO("read response...");
 
     /*
@@ -93,49 +109,55 @@ test_tcp_client()
     Once a webpage is read , display the contents.
     */
 
-    int flag = true;
+    int flag = 0;
 
     do
     {
-        len = sizeof(buffer);
-
-        /* Keep calling read until we receive CONNECTION_CLOSED from the
-        stack */
-        memset(buffer, 0, sizeof(buffer));
-
-        OS_Error_t err = OS_NetworkSocket_read(handle, buffer, &len);
-
-        switch (err)
+        for (int i = 0; i < socket_max ; i++)
         {
+            len = sizeof(buffer);
+            /* Keep calling read until we receive CONNECTION_CLOSED from the
+            stack */
+            memset(buffer, 0, sizeof(buffer));
+            OS_Error_t err = OS_ERROR_CONNECTION_CLOSED;
+            if (!(flag & (1 << i)))
+                err = OS_NetworkSocket_read(handle[i], buffer, &len);
+            switch (err)
+            {
 
-        /* This means end of read or nothing further to read as socket was
-         * closed */
-        case OS_ERROR_CONNECTION_CLOSED:
-            Debug_LOG_INFO("socket_read() reported connection closed");
-            flag = false; /* terminate loop and close handle*/
-            break;
+            /* This means end of read or nothing further to read as socket was
+            * closed */
+            case OS_ERROR_CONNECTION_CLOSED:
+                Debug_LOG_INFO("socket_read() reported connection closed for handle %d", i);
+                flag |= 1<<i; /* terminate loop and close handle*/
+                break;
 
-        /* Success . continue further reading */
-        case OS_SUCCESS:
-            Debug_LOG_INFO("chunk read, length %d", len);
-            continue;
+            /* Success . continue further reading */
+            case OS_SUCCESS:
+                Debug_LOG_INFO("chunk read, length %d, handle %d", len, i);
+                continue;
 
-        /* Error case, break and close the handle */
-        default:
-            Debug_LOG_INFO("socket_read() failed, error %d", err);
-            flag = false; /* terminate loop and close handle */
-            break;
-        } // end of switch
-    } while (flag);
+            /* Error case, break and close the handle */
+            default:
+                Debug_LOG_INFO("socket_read() failed for handle %d, error %d", i, err);
+                flag |= 1<<i; /* terminate loop and close handle */
+                break;
+            } // end of switch
+        }
+    } while (flag != pow(2,socket_max)-1);
     Debug_LOG_INFO("Test ended");
-    /* Close the socket communication */
-    err = OS_NetworkSocket_close(handle);
-    if (err != OS_SUCCESS)
+
+    for (int i = 0; i < socket_max ; i++)
     {
-        Debug_LOG_ERROR("close() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        /* Close the socket communication */
+        err = OS_NetworkSocket_close(handle[i]);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("close() failed for handle %d, code %d", i, err);
+            return OS_ERROR_GENERIC;
+        }
     }
-    return 0;
+    return OS_SUCCESS;
 }
 
 OS_Error_t
@@ -171,7 +193,7 @@ test_udp_recvfrom()
     }
 
     len = sizeof(buffer);
-    Debug_LOG_INFO("UDP Receive test");
+    Debug_LOG_INFO("UDP Receive test handle: %d", handle);
     err = OS_NetworkSocket_recvfrom(handle, buffer, &len, &receive_udp_socket);
 
     if (err != OS_SUCCESS)
@@ -257,9 +279,31 @@ test_udp_sendto()
     return OS_SUCCESS;
 }
 
+void init_client_api()
+{
+    static os_network_dataports_socket_t config;
+
+    config.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
+    static OS_Dataport_t dataports[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
+
+
+    int i = 0;
+
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT                                                     \
+    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_ID(NwAppDataPort));         \
+    dataports[i] = GEN_ID(t);                                            \
+    i++;
+#include "util/loop.h"
+
+    config.dataport = dataports;
+    OS_Network_client_api_init(&config);
+}
+
 int
 run()
 {
+    init_client_api();
     Debug_LOG_INFO("Starting test_app_client...");
 
     // print as a work aroung for a test expecting this in the log

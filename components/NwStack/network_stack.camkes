@@ -10,6 +10,8 @@ import "../../interfaces/timer_client.camkes";
 import <if_OS_socket.camkes>;
 import <if_OS_ConfigService.camkes>;
 
+#include "util/loop_defines.h"
+#include "system_config.h"
 
 component NwStack_1 {
 
@@ -18,20 +20,21 @@ component NwStack_1 {
     emits       EventDataAvailable  e_tick_or_data;
     consumes    EventDataAvailable  c_tick_or_data; // event also from NIC and Timer
 
-    emits       NwStack_WrEv        e_write;
-    consumes    NwStack_WrEv        c_write;
-
-    emits       NwStack_RdEv        e_read;
-    consumes    NwStack_RdEv        c_read;
-
-    emits       NwStack_ConnEv      e_conn;
-    consumes    NwStack_ConnEv      c_conn;
-
     has         mutex               allocatorMutex;
     has         mutex               nwstackMutex;
 
     has         mutex               socketControlBlockMutex;
     has         mutex               stackThreadSafeMutex;
+
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT                       \
+    GEN_ID(emits NwStack_WrEv e_write);    \
+    GEN_ID(consumes NwStack_WrEv c_write); \
+    GEN_ID(emits NwStack_RdEv e_read);     \
+    GEN_ID(consumes NwStack_RdEv c_read);  \
+    GEN_ID(emits NwStack_ConnEv e_conn);   \
+    GEN_ID(consumes NwStack_ConnEv c_conn);
+#include "util/loop.h"
 
     //-------------------------------------------------
     // interface Timer
@@ -54,9 +57,12 @@ component NwStack_1 {
 
     //-------------------------------------------------
     // interface Application
-    provides    if_OS_socket        network_stack_rpc; // name hard-coded in network client lib
-    dataport    Buf                 nwStack_port;
-    emits       EventServiceReady   nwStack_event_ready;
+    provides if_OS_Socket network_stack_rpc; // name hard-coded in network client lib
+    emits EventServiceReady nwStack_event_ready;
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT \
+    GEN_ID(dataport Buf nwStack_port);
+#include "util/loop.h"
 
 }
 
@@ -68,21 +74,21 @@ component NwStack_2 {
     emits      EventDataAvailable   e_tick_or_data;
     consumes   EventDataAvailable   c_tick_or_data; // event also from NIC and Timer
 
-    emits      NwStack_WrEv         e_write;
-    consumes   NwStack_WrEv         c_write;
-
-    emits      NwStack_RdEv         e_read;
-    consumes   NwStack_RdEv         c_read;
-
-    emits      NwStack_ConnEv       e_conn;
-    consumes   NwStack_ConnEv       c_conn;
-
     has        mutex                allocatorMutex;
     has        mutex                nwstackMutex;
 
     has        mutex                socketControlBlockMutex;
     has        mutex                stackThreadSafeMutex;
 
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT                       \
+    GEN_ID(emits NwStack_WrEv e_write);    \
+    GEN_ID(consumes NwStack_WrEv c_write); \
+    GEN_ID(emits NwStack_RdEv e_read);     \
+    GEN_ID(consumes NwStack_RdEv c_read);  \
+    GEN_ID(emits NwStack_ConnEv e_conn);   \
+    GEN_ID(consumes NwStack_ConnEv c_conn);
+#include "util/loop.h"
 
     //-------------------------------------------------
     // interface Timer
@@ -105,8 +111,11 @@ component NwStack_2 {
 
     //-------------------------------------------------
     // interface Application
-    provides   if_OS_socket         network_stack_rpc; // name hard-coded in network client lib
-    dataport   Buf                  nwStack_port;
-    emits      EventServiceReady    nwStack_event_ready;
+    provides if_OS_Socket network_stack_rpc; // name hard-coded in network client lib
+    emits EventServiceReady nwStack_event_ready;
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT \
+    GEN_ID(dataport Buf nwStack_port);
+#include "util/loop.h"
 
 }

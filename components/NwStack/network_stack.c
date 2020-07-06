@@ -13,6 +13,8 @@
 #include "util/helper_func.h"
 #include <camkes.h>
 #include "OS_Dataport.h"
+#include "OS_Network.h"
+#include "util/loop_defines.h"
 
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
 char DEV_ADDR[20];
@@ -116,15 +118,6 @@ int run(void)
         {
             .notify_loop        = e_tick_or_data_emit,
 
-            .notify_write       = e_write_emit,
-            .wait_write         = c_write_wait,
-
-            .notify_read        = e_read_emit,
-            .wait_read          = c_read_wait,
-
-            .notify_connection  = e_conn_emit,
-            .wait_connection    = c_conn_wait,
-
             .allocator_lock     = allocatorMutex_lock,
             .allocator_unlock   = allocatorMutex_unlock,
 
@@ -155,10 +148,26 @@ int run(void)
         {
             .notify_init_done   = nwStack_event_ready_emit,
 
-            .port = OS_DATAPORT_ASSIGN(nwStack_port)
-
         }
     };
+
+    #define LOOP_ELEMENT          {            \
+        .notify_write = GEN_EMIT(e_write),     \
+        .wait_write = GEN_WAIT(c_write),       \
+        .notify_read = GEN_EMIT(e_read),       \
+        .wait_read = GEN_WAIT(c_read),         \
+        .notify_connection = GEN_EMIT(e_conn), \
+        .wait_connection = GEN_WAIT(c_conn),   \
+        .buf = OS_DATAPORT_ASSIGN(GEN_ID(nwStack_port)), \
+        .accepted_handle = -1, \
+    },
+
+    static os_network_socket_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO] = {
+        #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+        #include "util/loop.h"
+    };
+    camkes_config.internal.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
+    camkes_config.internal.sockets = socks;
 
     OS_Error_t ret;
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER

@@ -20,6 +20,8 @@ DECLARE_COMPONENT_NIC_ChanMux(NwDriver_2)
 #define CHANMUX_UPPER_INTERFACES "components/ChanMux/ChanMux_upper_interface.camkes"
 #include "ChanMux/ChanMux.camkes"
 
+#include "util/loop_defines.h"
+#include "system_config.h"
 
 assembly {
     composition {
@@ -71,9 +73,14 @@ assembly {
         component  NwStack_1              nwStack_1;
 
         connection seL4NotificationNative nwStack_1_internal_hasData      (from nwStack_1.e_tick_or_data,         to nwStack_1.c_tick_or_data);
-        connection seL4Notification       nwStack_1_internal_conn         (from nwStack_1.e_conn,                 to nwStack_1.c_conn);
-        connection seL4Notification       nwStack_1_internal_read         (from nwStack_1.e_read,                 to nwStack_1.c_read);
-        connection seL4Notification       nwStack_1_internal_write        (from nwStack_1.e_write,                to nwStack_1.c_write);
+#define COMPONENT nwStack_1
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT \
+        connection seL4Notification GEN_NAME(COMPONENT, _a)(from COMPONENT.GEN_ID(e_write), to COMPONENT.GEN_ID(c_write)); \
+        connection seL4Notification GEN_NAME(COMPONENT, _b)(from COMPONENT.GEN_ID(e_read), to COMPONENT.GEN_ID(c_read));   \
+        connection seL4Notification GEN_NAME(COMPONENT, _c)(from COMPONENT.GEN_ID(e_conn), to COMPONENT.GEN_ID(c_conn));
+#include "util/loop.h"
+#undef COMPONENT
 
         connection seL4Notification       nwStack_1_configServer_ready    (from configServer.event_ready,         to nwStack_1.cfgServer_event_ready);
         connection seL4RPCCall            NwStack_1_configServer_rpc      (from nwStack_1.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
@@ -94,8 +101,24 @@ assembly {
 
         connection seL4Notification nwApp_1_nwStack_1_initDone (from nwStack_1.nwStack_event_ready, to nwApp_1.event_network_stack_init_done);
         connection seL4RPCCall      nwApp_1_nwStack_1_rpc      (from nwApp_1.network_stack_rpc,     to nwStack_1.network_stack_rpc);
-        connection seL4SharedData   nwApp_1_nwStack_1_port     (from nwApp_1.NwAppDataPort,         to nwStack_1.nwStack_port);
 
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT \
+        connection seL4SharedData GEN_NAME(nwApp_1, nwStack_1)(from nwApp_1.GEN_ID(NwAppDataPort), to nwStack_1.GEN_ID(nwStack_port));
+#include "util/loop.h"
+
+        //----------------------------------------------------------------------
+        // Network Stack App #1.2
+        //----------------------------------------------------------------------
+        component NwApp_1 nwApp_1_2;
+
+        connection seL4Notification nwApp_1_2_nwStack_1_initDone(from nwStack_1.nwStack_event_ready, to nwApp_1_2.event_network_stack_init_done);
+        connection seL4RPCCall nwApp_1_2_nwStack_1_rpc(from nwApp_1_2.network_stack_rpc, to nwStack_1.network_stack_rpc);
+
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT \
+        connection seL4SharedData GEN_NAME(nwApp_1_2, nwStack_1)(from nwApp_1_2.GEN_ID(NwAppDataPort), to nwStack_1.GEN_ID(nwStack_port));
+#include "util/loop.h"
 
         //----------------------------------------------------------------------
         // Network Driver #2
@@ -115,9 +138,15 @@ assembly {
         component  NwStack_2              nwStack_2;
 
         connection seL4NotificationNative nwStack_2_internal_hasData        (from nwStack_2.e_tick_or_data,         to nwStack_2.c_tick_or_data);
-        connection seL4Notification       nwStack_2_internal_conn           (from nwStack_2.e_conn,                 to nwStack_2.c_conn);
-        connection seL4Notification       nwStack_2_internal_read           (from nwStack_2.e_read,                 to nwStack_2.c_read);
-        connection seL4Notification       nwStack_2_internal_write          (from nwStack_2.e_write,                to nwStack_2.c_write);
+
+#define COMPONENT nwStack_2
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT \
+        connection seL4Notification GEN_NAME(COMPONENT, _a)(from COMPONENT.GEN_ID(e_write), to COMPONENT.GEN_ID(c_write)); \
+        connection seL4Notification GEN_NAME(COMPONENT, _b)(from COMPONENT.GEN_ID(e_read), to COMPONENT.GEN_ID(c_read));   \
+        connection seL4Notification GEN_NAME(COMPONENT, _c)(from COMPONENT.GEN_ID(e_conn), to COMPONENT.GEN_ID(c_conn));
+#include "util/loop.h"
+#undef COMPONENT
 
         connection seL4Notification       nwStack_2_configServer_ready      (from configServer.event_ready,         to nwStack_2.cfgServer_event_ready);
         connection seL4RPCCall            NwStack_2_configServer_rpc        (from nwStack_2.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
@@ -138,8 +167,13 @@ assembly {
 
         connection seL4Notification nwApp_2_nwStack_2_initDone (from nwStack_2.nwStack_event_ready, to nwApp_2.event_network_stack_init_done);
         connection seL4RPCCall      nwApp_2_nwStack_2_rpc      (from nwApp_2.network_stack_rpc,     to nwStack_2.network_stack_rpc);
-        connection seL4SharedData   nwApp_2_nwStack_2_port     (from nwApp_2.NwAppDataPort,         to nwStack_2.nwStack_port);
-    }
+
+#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
+#define LOOP_ELEMENT \
+        connection seL4SharedData GEN_NAME(nwApp_2, nwStack_2)(from nwApp_2.GEN_ID(NwAppDataPort), to nwStack_2.GEN_ID(nwStack_port));
+#include "util/loop.h"
+
+     }
 
     configuration {
         CONFIGURE_INSTANCE_UART(
