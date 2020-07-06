@@ -28,7 +28,7 @@ extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 void init_client_api()
 {
-    static os_network_dataports_socket_t config;
+    static OS_NetworkStackClient_SocketDataports_t config;
 
     config.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
     static OS_Dataport_t dataports[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};

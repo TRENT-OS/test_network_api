@@ -22,7 +22,7 @@ char GATEWAY_ADDR[20];
 char SUBNET_MASK[20];
 #endif
 
-static const os_network_stack_config_t config =
+static const OS_NetworkStack_AddressConfig_t config =
 {
     .dev_addr      = DEV_ADDR,
     .gateway_addr  = GATEWAY_ADDR,
@@ -109,7 +109,7 @@ int run(void)
 
     // can't make this "static const" or even "static" because the data ports
     // are allocated at runtime
-    os_camkes_network_stack_config_t camkes_config =
+    OS_NetworkStack_CamkesConfig_t camkes_config =
     {
         .notify_init_done        = nwStack_event_ready_emit,
         .wait_loop_event         = c_tick_or_data_wait,
@@ -162,7 +162,7 @@ int run(void)
         .accepted_handle = -1, \
     },
 
-    static os_network_socket_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO] = {
+    static OS_NetworkStack_SocketResources_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO] = {
         #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
         #include "util/loop.h"
     };
