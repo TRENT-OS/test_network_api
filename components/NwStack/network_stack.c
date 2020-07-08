@@ -37,12 +37,12 @@ read_ip_from_config_server(void)
     // Create a handle to the remote library instance.
     OS_ConfigServiceHandle_t serverLibWithMemBackend;
 
-    ret = OS_ConfigService_createHandle(OS_CONFIG_HANDLE_KIND_RPC,
+    ret = OS_ConfigService_createHandleRemote(
                                         0,
                                         &serverLibWithMemBackend);
     if (ret != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_ConfigService_createHandle failed with :%d", ret);
+        Debug_LOG_ERROR("OS_ConfigService_createHandleRemote failed with :%d", ret);
         return ret;
     }
 
