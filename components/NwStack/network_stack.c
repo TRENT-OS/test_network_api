@@ -37,8 +37,13 @@ read_ip_from_config_server(void)
     // Create a handle to the remote library instance.
     OS_ConfigServiceHandle_t serverLibWithMemBackend;
 
+    static OS_ConfigService_ClientCtx_t ctx =
+    {
+        .dataport = OS_DATAPORT_ASSIGN(cfg_dataport_buf)
+    };
     ret = OS_ConfigService_createHandleRemote(
                                         0,
+                                        &ctx,
                                         &serverLibWithMemBackend);
     if (ret != OS_SUCCESS)
     {
