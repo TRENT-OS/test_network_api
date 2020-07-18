@@ -107,6 +107,8 @@ read_ip_from_config_server(void)
     return OS_SUCCESS;
 }
 #endif
+
+
 //------------------------------------------------------------------------------
 int run(void)
 {
@@ -175,6 +177,7 @@ int run(void)
     camkes_config.internal.sockets = socks;
 
     OS_Error_t ret;
+
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
     ret = read_ip_from_config_server();
     if (ret != OS_SUCCESS)
