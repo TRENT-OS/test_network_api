@@ -130,9 +130,7 @@ int run(void)
         #include "util/loop.h" // places LOOP_ELEMENT here for LOOP_COUNT times
     };
 
-    // can't make this "static const" or even "static" because the data ports
-    // are allocated at runtime
-    OS_NetworkStack_CamkesConfig_t camkes_config =
+    static const OS_NetworkStack_CamkesConfig_t camkes_config =
     {
         .notify_init_done        = nwStack_event_ready_emit,
         .wait_loop_event         = c_tick_or_data_wait,
