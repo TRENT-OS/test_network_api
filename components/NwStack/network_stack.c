@@ -114,16 +114,17 @@ int run(void)
 {
     Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
 
-    #define LOOP_ELEMENT          {            \
-        .notify_write = GEN_EMIT(e_write),     \
-        .wait_write = GEN_WAIT(c_write),       \
-        .notify_read = GEN_EMIT(e_read),       \
-        .wait_read = GEN_WAIT(c_read),         \
-        .notify_connection = GEN_EMIT(e_conn), \
-        .wait_connection = GEN_WAIT(c_conn),   \
-        .buf = OS_DATAPORT_ASSIGN(GEN_ID(nwStack_port)), \
-        .accepted_handle = -1, \
-    },
+    #define LOOP_ELEMENT \
+        { \
+            .notify_write      = GEN_EMIT(e_write), \
+            .wait_write        = GEN_WAIT(c_write), \
+            .notify_read       = GEN_EMIT(e_read), \
+            .wait_read         = GEN_WAIT(c_read), \
+            .notify_connection = GEN_EMIT(e_conn), \
+            .wait_connection   = GEN_WAIT(c_conn), \
+            .buf               = OS_DATAPORT_ASSIGN(GEN_ID(nwStack_port)), \
+            .accepted_handle   = -1, \
+        },
 
     static OS_NetworkStack_SocketResources_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO] = {
         #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
