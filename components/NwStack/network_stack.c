@@ -171,7 +171,7 @@ int run(void)
 
     static OS_NetworkStack_SocketResources_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO] = {
         #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
-        #include "util/loop.h"
+        #include "util/loop.h" // places LOOP_ELEMENT here for LOOP_COUNT times
     };
     camkes_config.internal.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
     camkes_config.internal.sockets = socks;
