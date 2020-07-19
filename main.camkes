@@ -1,16 +1,18 @@
 import <std_connector.camkes>;
 
+import "components/Ticker/Ticker.camkes";
 import "components/NwStack/network_stack.camkes";
 import "components/TestAppClient/test_app_client.camkes";
 import "components/TestAppServer/test_app_server.camkes";
-import "components/TimerClient/timer_client.camkes";
-import "components/Timer/timer.camkes";
 import "components/ConfigServer/ConfigServer.camkes";
 
 #include "system_config.h"
 
 #include "UART/Uart.camkes"
 DECLARE_COMPONENT_UART(UART)
+
+#include "TimeServer/camkes/TimeServer.camkes"
+DECLARE_COMPONENT_TimeServer(TimeServer)
 
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
 DECLARE_COMPONENT_NIC_ChanMux(NwDriver1)
@@ -39,18 +41,6 @@ assembly {
         // MUX
         //----------------------------------------------------------------------
         ChanMux_DECLARE_AND_CONNECT_INSTANCE_TO_UART(ChanMux, chanMux, uartDrv)
-
-        //----------------------------------------------------------------------
-        // Timer
-        //----------------------------------------------------------------------
-        component  Timerbase             timerbase;
-        component  Timer                 timer;
-        connection seL4HardwareMMIO      timer_mem            (from timer.reg,         to timerbase.reg);
-        connection seL4HardwareInterrupt timer_irq            (from timerbase.irq,     to timer.irq);
-
-        component  TimerClient           timerclient;
-        connection seL4RPCCall           timerclient_timer    (from timerclient.Timer, to timer.Timer);
-
 
         //----------------------------------------------------------------------
         // ConfigServer
@@ -85,9 +75,6 @@ assembly {
         connection seL4Notification       nwStack1_configServer_ready    (from configServer.event_ready,        to nwStack1.cfgServer_event_ready);
         connection seL4RPCCall            nwStack1_configServer_rpc      (from nwStack1.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
         connection seL4SharedData         nwStack1_configServer_data     (from nwStack1.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
-
-        connection seL4RPCCall            nwStack1_timer_rpc             (from nwStack1.Timer,                  to timerclient.TimerClient);
-        connection seL4NotificationNative nwStack1_timer_hasData         (from timerclient.nwStack1_event_tick, to nwStack1.c_tick_or_data);
 
         connection seL4RPCCall            nwStack1_nwDriver1_rpc         (from nwStack1.nic_driver,             to nwDriver1.nic_rpc);
         connection seL4SharedData         nwStack1_nwDriver1_port_read   (from nwDriver1.nic_port_to,           to nwStack1.nic_port_from);
@@ -151,9 +138,6 @@ assembly {
         connection seL4RPCCall            nwStack2_configServer_rpc         (from nwStack2.OS_ConfigServiceServer,  to configServer.OS_ConfigServiceServer);
         connection seL4SharedData         nwStack2_configServer_data        (from nwStack2.cfg_dataport_buf,        to configServer.cfg_dataport_buf);
 
-        connection seL4RPCCall            nwStack2_timer_rpc                (from nwStack2.Timer,                   to timerclient.TimerClient);
-        connection seL4NotificationNative nwStack2_timer_hasData            (from timerclient.nwStack2_event_tick,  to nwStack2.c_tick_or_data);
-
         connection seL4RPCCall            nwStack2_nwDriver2_rpc            (from nwStack2.nic_driver,              to nwDriver2.nic_rpc);
         connection seL4SharedData         nwStack2_nwDriver2_port_read      (from nwDriver2.nic_port_to,            to nwStack2.nic_port_from);
         connection seL4SharedData         nwStack2_nwDriver2_port_write     (from nwDriver2.nic_port_from,          to nwStack2.nic_port_to);
@@ -171,6 +155,29 @@ assembly {
 #define LOOP_ELEMENT \
         connection seL4SharedData GEN_NAME(nwApp2, nwStack2)(from nwApp2.GEN_ID(NwAppDataPort), to nwStack2.GEN_ID(nwStack_port));
 #include "util/loop.h"
+
+
+        //----------------------------------------------------------------------
+        // Ticker
+        // It's a very pragmatic approach to create a 1 second tick for each
+        // network stack. Actually, we don't need this, because the TimeServer
+        // should provide two timers per client, one for timeouts and once for
+        // the periodic tick.
+        //----------------------------------------------------------------------
+        component Ticker ticker;
+        connection seL4NotificationNative nwStack1_tick (from ticker.nwStack1_event_tick, to nwStack1.c_tick_or_data);
+        connection seL4NotificationNative nwStack2_tick (from ticker.nwStack2_event_tick, to nwStack2.c_tick_or_data);
+
+        //----------------------------------------------------------------------
+        // TimeServer
+        //----------------------------------------------------------------------
+        DECLARE_AND_CONNECT_INSTANCE_TimeServer(
+            TimeServer,
+            timeServer,
+            ticker.timeServer_rpc,
+            nwStack1.timeServer_rpc,
+            nwStack2.timeServer_rpc)
+
 
      }
 

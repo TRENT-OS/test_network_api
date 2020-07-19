@@ -18,6 +18,23 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 #-------------------------------------------------------------------------------
 project(tests_picotcp_api C)
 
+DeclareCAmkESComponent_TimeServer(
+    TimeServer
+)
+
+DeclareCAmkESComponent(
+    Ticker
+    SOURCES
+        components/Ticker/Ticker.c
+    C_FLAGS
+        -Wall
+        -Werror
+    LIBS
+        os_core_api
+        os_libs
+        TimeServer_client
+)
+
 DeclareCAmkESComponent(
     NwStack1
     SOURCES
@@ -35,6 +52,7 @@ DeclareCAmkESComponent(
         os_libs
         os_configuration
         os_network_lib
+        TimeServer_client
 )
 
 DeclareCAmkESComponent_NIC_ChanMux(
@@ -60,6 +78,7 @@ DeclareCAmkESComponent(
         os_libs
         os_configuration
         os_network_lib
+        TimeServer_client
 )
 
 DeclareCAmkESComponent_NIC_ChanMux(
@@ -100,28 +119,6 @@ DeclareCAmkESComponent_ChanMux(
     ChanMux
     components/ChanMux/ChanMux_config.c
     system_config
-)
-
-DeclareCAmkESComponent(
-    TimerClient
-    SOURCES
-        components/TimerClient/timer_client.c
-    C_FLAGS
-        -Wall
-        -Werror
-    LIBS
-        system_config
-        os_core_api
-        os_libs
-)
-
-DeclareCAmkESComponent(
-    Timer
-    SOURCES
-        components/Timer/timer.c
-    C_FLAGS
-        -Wall
-        -Werror
 )
 
 DeclareCAmkESComponent_UART(

@@ -10,6 +10,7 @@
 #include "LibDebug/Debug.h"
 #include "OS_Error.h"
 #include "OS_NetworkStack.h"
+#include "TimeServer.h"
 #include "util/helper_func.h"
 #include <camkes.h>
 #include "OS_Dataport.h"
@@ -110,6 +111,15 @@ read_ip_from_config_server(void)
 
 
 //------------------------------------------------------------------------------
+// network stack's PicTCP OS adaption layer calls this.
+uint64_t
+Timer_getTimeMs(void)
+{
+    return TimeServer_getTime(TimeServer_PRECISION_MSEC);
+}
+
+
+//------------------------------------------------------------------------------
 int run(void)
 {
     Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
@@ -188,6 +198,10 @@ int run(void)
         return -1;
     }
 #endif
+
+    // The Ticker component sends us a tick every second. Currently there is
+    // no dedicated interface to enable and disable the tick. because we don't
+    // need this. OS_NetworkStack_run() is not supposed to return.
 
     ret = OS_NetworkStack_run(&camkes_config, &config);
     if (ret != OS_SUCCESS)

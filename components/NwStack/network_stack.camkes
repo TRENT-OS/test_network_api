@@ -6,7 +6,7 @@
  */
 
 import <if_OS_Nic.camkes>;
-import "../../interfaces/timer_client.camkes";
+import <if_OS_Timer.camkes>;
 import <if_OS_Socket.camkes>;
 import <if_OS_ConfigService.camkes>;
 #include "util/loop_defines.h"
@@ -36,8 +36,8 @@ component NwStack1 {
 #include "util/loop.h"
 
     //-------------------------------------------------
-    // interface Timer
-    uses        timer_client_inf    Timer;
+    // interface TimeServer
+    uses        if_OS_Timer           timeServer_rpc;
 
 
     //-------------------------------------------------
@@ -90,8 +90,8 @@ component NwStack2 {
 #include "util/loop.h"
 
     //-------------------------------------------------
-    // interface Timer
-    uses       timer_client_inf     Timer;
+    // interface TimeServer
+    uses        if_OS_Timer           timeServer_rpc;
 
 
     //-------------------------------------------------
