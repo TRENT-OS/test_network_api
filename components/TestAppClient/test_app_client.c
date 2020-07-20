@@ -21,6 +21,9 @@
 extern OS_Error_t
 OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
+static OS_NetworkStackClient_SocketDataports_t config;
+
+
 /*
     This example demonstrates reading of a web page example.com using Nw Stack
    API. Currently only a single socket is supported per stack instance. i.e. no
@@ -281,8 +284,6 @@ test_udp_sendto()
 
 void init_client_api()
 {
-    static OS_NetworkStackClient_SocketDataports_t config;
-
     config.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
     static OS_Dataport_t dataports[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
 
@@ -298,6 +299,97 @@ void init_client_api()
 
     config.dataport = dataports;
     OS_NetworkStackClient_init(&config);
+}
+
+OS_Error_t
+test_dataport_size_check_client_functions()
+{
+    char buffer[4096];
+    OS_Network_Socket_t udp_socket;
+    OS_NetworkSocket_Handle_t handle = 0;
+
+
+    const OS_Dataport_t dp = config.dataport[handle];
+    size_t len = OS_Dataport_getSize(dp) + 1;
+
+    if(OS_NetworkSocket_read(handle, buffer, len, NULL) != OS_ERROR_INVALID_PARAMETER )
+    {
+        Debug_LOG_ERROR("Client socket read with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+
+    if(OS_NetworkSocket_recvfrom(handle, buffer, len, NULL, &udp_socket) != OS_ERROR_INVALID_PARAMETER )
+    {
+        Debug_LOG_ERROR("Client socket recvfrom with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+
+    if(OS_NetworkSocket_write(handle, buffer, len, NULL) != OS_ERROR_INVALID_PARAMETER)
+    {
+        Debug_LOG_ERROR("Client socket write with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+
+    if(OS_NetworkSocket_sendto(handle, buffer, len, NULL, udp_socket) != OS_ERROR_INVALID_PARAMETER)
+    {
+        Debug_LOG_ERROR("Client socket sendto with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+
+    return OS_SUCCESS;
+}
+
+OS_Error_t
+test_dataport_size_check_lib_functions()
+{
+    OS_NetworkSocket_Handle_t handle;
+    OS_Network_Socket_t udp_socket = { .domain = OS_AF_INET,
+                                       .type   = OS_SOCK_DGRAM,
+                                       .name   = "10.0.0.10",
+                                       .port   = 8888 };
+
+    OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
+
+    const OS_Dataport_t dp = config.dataport[handle];
+    size_t len = OS_Dataport_getSize(dp) + 1;
+
+
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
+        return OS_ERROR_GENERIC;
+    }
+
+    if(network_stack_rpc_socket_read(handle, &len) != OS_ERROR_INVALID_PARAMETER )
+    {
+        Debug_LOG_ERROR("Lib socket read with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+    if(network_stack_rpc_socket_recvfrom(handle, &len, &udp_socket) != OS_ERROR_INVALID_PARAMETER )
+    {
+        Debug_LOG_ERROR("Lib socket recvfrom with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+    if(network_stack_rpc_socket_write(handle, &len) != OS_ERROR_INVALID_PARAMETER )
+    {
+        Debug_LOG_ERROR("Lib socket write with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+    if(network_stack_rpc_socket_sendto(handle, &len, udp_socket) != OS_ERROR_INVALID_PARAMETER )
+    {
+        Debug_LOG_ERROR("Lib socket sendto with invalid dataport size failed");
+        return OS_ERROR_GENERIC;
+    }
+
+    err = OS_NetworkSocket_close(handle);
+
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("close() failed, code %d", err);
+        return OS_ERROR_GENERIC;
+    }
+
+    return OS_SUCCESS;
 }
 
 int
@@ -334,6 +426,24 @@ run()
     else
     {
         Debug_LOG_ERROR("UDP sendto test failed.");
+    }
+
+    if(test_dataport_size_check_client_functions() == OS_SUCCESS)
+    {
+        Debug_LOG_INFO("Client dataport test successful.");
+    }
+    else
+    {
+        Debug_LOG_ERROR("Client dataport test failed.");
+    }
+
+    if(test_dataport_size_check_lib_functions() == OS_SUCCESS)
+    {
+        Debug_LOG_INFO("Lib dataport test successful.");
+    }
+    else
+    {
+        Debug_LOG_ERROR("Lib dataport test failed.");
     }
 
     return 0;
