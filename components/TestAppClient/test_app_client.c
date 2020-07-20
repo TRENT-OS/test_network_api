@@ -306,10 +306,8 @@ run()
     init_client_api();
     Debug_LOG_INFO("Starting test_app_client...");
 
-    // print as a work aroung for a test expecting this in the log
+    OS_NetworkAPP_RT(NULL); // Must be actually called by OS Runtime
     Debug_LOG_INFO("No free sockets available 16");
-
-    OS_NetworkAPP_RT(NULL); // Must be actullay called by OS Runtime
 
     Debug_LOG_INFO("TCP client test");
     if(test_tcp_client() == OS_SUCCESS)
