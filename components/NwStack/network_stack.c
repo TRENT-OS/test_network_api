@@ -43,7 +43,6 @@ read_ip_from_config_server(void)
         .dataport = OS_DATAPORT_ASSIGN(cfg_dataport_buf)
     };
     ret = OS_ConfigService_createHandleRemote(
-                                        0,
                                         &ctx,
                                         &serverLibWithMemBackend);
     if (ret != OS_SUCCESS)

@@ -20,11 +20,8 @@ static bool
 initializeConfigBackend(void)
 {
     OS_Error_t ret;
-
-    OS_ConfigServiceInstanceStore_t* serverInstanceStore =
-        OS_ConfigService_getInstances();
     OS_ConfigServiceLib_t* configLib =
-        OS_ConfigServiceInstanceStore_getInstance(serverInstanceStore, 0);
+        OS_ConfigService_getInstance();
 
     // Create the backends in the instance.
     Debug_LOG_INFO("ConfigServer: Initializing with mem backend...");
