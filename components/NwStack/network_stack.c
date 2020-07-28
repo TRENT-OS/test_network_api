@@ -189,7 +189,6 @@ int run(void)
         }
     };
 
-
     OS_Error_t ret;
 
 #ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
