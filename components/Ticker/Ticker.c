@@ -34,7 +34,7 @@ int run(void)
 
         uint64_t timestamp_new = TimeServer_getTime(TimeServer_PRECISION_NSEC);
         uint64_t  delta = timestamp_new - timestamp;
-        Debug_LOG_INFO(
+        Debug_LOG_DEBUG(
             "tick, delta %" PRIu64 ".%" PRIu64 " sec",
             delta / NS_IN_S,
             delta % NS_IN_S);
