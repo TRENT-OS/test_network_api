@@ -21,7 +21,9 @@
 extern OS_Error_t
 OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
-static OS_NetworkStackClient_SocketDataports_t config;
+static OS_NetworkStackClient_SocketDataports_t config = {
+    .number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO
+};
 
 /*
     This example demonstrates reading of a web page example.com using Nw Stack
@@ -177,8 +179,8 @@ test_tcp_client()
 OS_Error_t
 test_udp_recvfrom()
 {
-    char   buffer[4096];
-    size_t len;
+    static char buffer[4096];
+    size_t      len;
 
     OS_NetworkSocket_Handle_t handle;
 
@@ -240,9 +242,9 @@ test_udp_recvfrom()
 OS_Error_t
 test_udp_sendto()
 {
-    char   buffer[4096];
-    char   test_message[] = "Hello there";
-    size_t len;
+    static char buffer[4096];
+    char        test_message[] = "Hello there";
+    size_t      len;
 
     OS_NetworkSocket_Handle_t handle;
 
@@ -319,7 +321,6 @@ test_udp_sendto()
 void
 init_client_api()
 {
-    config.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
     static OS_Dataport_t dataports[OS_NETWORK_MAXIMUM_SOCKET_NO] = { 0 };
 
     int i = 0;
@@ -338,41 +339,53 @@ init_client_api()
 OS_Error_t
 test_dataport_size_check_client_functions()
 {
-    char                      buffer[4096];
+    static char               buffer[4096];
     OS_Network_Socket_t       udp_socket;
     OS_NetworkSocket_Handle_t handle = 0;
+    OS_Error_t                err;
 
-    const OS_Dataport_t dp  = config.dataport[handle];
-    size_t              len = OS_Dataport_getSize(dp) + 1;
+    const OS_Dataport_t dp = config.dataport[handle];
+    // creates a length guaranteed larger than that of the dataport, which won't
+    // fit in the dataport and will generate an error case
+    size_t len = OS_Dataport_getSize(dp) + 1;
 
-    if (OS_NetworkSocket_read(handle, buffer, len, NULL) !=
-        OS_ERROR_INVALID_PARAMETER)
+    err = OS_NetworkSocket_read(handle, buffer, len, NULL);
+    if (err != OS_ERROR_INVALID_PARAMETER)
     {
-        Debug_LOG_ERROR("Client socket read with invalid dataport size failed");
+        Debug_LOG_ERROR(
+            "Client socket read with invalid dataport size failed, error %d",
+            err);
         return OS_ERROR_GENERIC;
     }
 
-    if (OS_NetworkSocket_recvfrom(handle, buffer, len, NULL, &udp_socket) !=
-        OS_ERROR_INVALID_PARAMETER)
+    err = OS_NetworkSocket_recvfrom(handle, buffer, len, NULL, &udp_socket);
+    if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
-            "Client socket recvfrom with invalid dataport size failed");
+            "Client socket recvfrom with invalid dataport size failed, "
+            "error "
+            "%d",
+            err);
         return OS_ERROR_GENERIC;
     }
 
-    if (OS_NetworkSocket_write(handle, buffer, len, NULL) !=
-        OS_ERROR_INVALID_PARAMETER)
+    err = OS_NetworkSocket_write(handle, buffer, len, NULL);
+    if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
-            "Client socket write with invalid dataport size failed");
+            "Client socket write with invalid dataport size failed, error "
+            "%d",
+            err);
         return OS_ERROR_GENERIC;
     }
 
-    if (OS_NetworkSocket_sendto(handle, buffer, len, NULL, udp_socket) !=
-        OS_ERROR_INVALID_PARAMETER)
+    err = OS_NetworkSocket_sendto(handle, buffer, len, NULL, udp_socket);
+    if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
-            "Client socket sendto with invalid dataport size failed");
+            "Client socket sendto with invalid dataport size failed, error "
+            "%d",
+            err);
         return OS_ERROR_GENERIC;
     }
 
@@ -389,39 +402,50 @@ test_dataport_size_check_lib_functions()
                                        .port   = 8888 };
 
     OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
-
-    const OS_Dataport_t dp  = config.dataport[handle];
-    size_t              len = OS_Dataport_getSize(dp) + 1;
-
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
         return OS_ERROR_GENERIC;
     }
 
-    if (network_stack_rpc_socket_read(handle, &len) !=
-        OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR("Lib socket read with invalid dataport size failed");
-        return OS_ERROR_GENERIC;
-    }
-    if (network_stack_rpc_socket_recvfrom(handle, &len, &udp_socket) !=
-        OS_ERROR_INVALID_PARAMETER)
+    const OS_Dataport_t dp = config.dataport[handle];
+    // creates a length guaranteed larger than that of the dataport, which won't
+    // fit in the dataport and will generate an error case
+    size_t len = OS_Dataport_getSize(dp) + 1;
+
+    err = network_stack_rpc_socket_read(handle, &len);
+    if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
-            "Lib socket recvfrom with invalid dataport size failed");
+            "Lib socket read with invalid dataport size failed, error %d",
+            err);
         return OS_ERROR_GENERIC;
     }
-    if (network_stack_rpc_socket_write(handle, &len) !=
-        OS_ERROR_INVALID_PARAMETER)
+
+    err = network_stack_rpc_socket_recvfrom(handle, &len, &udp_socket);
+    if (err != OS_ERROR_INVALID_PARAMETER)
     {
-        Debug_LOG_ERROR("Lib socket write with invalid dataport size failed");
+        Debug_LOG_ERROR(
+            "Lib socket recvfrom with invalid dataport size failed, error %d",
+            err);
         return OS_ERROR_GENERIC;
     }
-    if (network_stack_rpc_socket_sendto(handle, &len, udp_socket) !=
-        OS_ERROR_INVALID_PARAMETER)
+
+    err = network_stack_rpc_socket_write(handle, &len);
+    if (err != OS_ERROR_INVALID_PARAMETER)
     {
-        Debug_LOG_ERROR("Lib socket sendto with invalid dataport size failed");
+        Debug_LOG_ERROR(
+            "Lib socket write with invalid dataport size failed, error %d",
+            err);
+        return OS_ERROR_GENERIC;
+    }
+
+    err = network_stack_rpc_socket_sendto(handle, &len, udp_socket);
+    if (err != OS_ERROR_INVALID_PARAMETER)
+    {
+        Debug_LOG_ERROR(
+            "Lib socket sendto with invalid dataport size failed, error %d",
+            err);
         return OS_ERROR_GENERIC;
     }
 
