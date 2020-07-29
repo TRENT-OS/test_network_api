@@ -9,11 +9,11 @@ import <if_OS_Nic.camkes>;
 import <if_OS_Timer.camkes>;
 import <if_OS_Socket.camkes>;
 import <if_OS_ConfigService.camkes>;
-#include "util/loop_defines.h"
+
 #include "system_config.h"
+#include "util/loop_defines.h"
 
 component NwStack1 {
-
     control;
 
     emits       EventDataAvailable  e_tick_or_data;
@@ -43,8 +43,9 @@ component NwStack1 {
     //-------------------------------------------------
     // interface Ethernet NIC driver
     uses if_OS_Nic nic_driver;
-    dataport Buf nic_port_from; // NIC -> stack
-    dataport Buf nic_port_to;   // stack -> NIC
+
+    dataport Buf(NIC_DRIVER_RINGBUFFER_SIZE) nic_port_from; // NIC -> stack
+    dataport Buf                             nic_port_to;   // stack -> NIC
 
 
     //---------------------------------------------------
@@ -67,7 +68,6 @@ component NwStack1 {
 
 
 component NwStack2 {
-
     control;
 
     emits      EventDataAvailable   e_tick_or_data;
@@ -97,8 +97,9 @@ component NwStack2 {
     //-------------------------------------------------
     // interface Ethernet NIC driver
     uses if_OS_Nic nic_driver;
-    dataport Buf nic_port_from; // NIC -> stack
-    dataport Buf nic_port_to;   // stack -> NIC
+
+    dataport Buf(NIC_DRIVER_RINGBUFFER_SIZE) nic_port_from; // NIC -> stack
+    dataport Buf                             nic_port_to;   // stack -> NIC
 
 
     //---------------------------------------------------
