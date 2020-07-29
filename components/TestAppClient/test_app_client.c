@@ -179,6 +179,7 @@ test_tcp_client()
 OS_Error_t
 test_udp_recvfrom()
 {
+    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096];
     size_t      len;
 
@@ -242,6 +243,7 @@ test_udp_recvfrom()
 OS_Error_t
 test_udp_sendto()
 {
+    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096];
     char        test_message[] = "Hello there";
     size_t      len;
@@ -339,6 +341,7 @@ init_client_api()
 OS_Error_t
 test_dataport_size_check_client_functions()
 {
+    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char               buffer[4096];
     OS_Network_Socket_t       udp_socket;
     OS_NetworkSocket_Handle_t handle = 0;
