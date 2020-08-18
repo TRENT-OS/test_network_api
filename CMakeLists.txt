@@ -6,13 +6,7 @@
 
 cmake_minimum_required(VERSION 3.7.2)
 
-os_set_config_file(system_config.h)
-
-
-#-------------------------------------------------------------------------------
-project(system_config C)
-add_library(${PROJECT_NAME} INTERFACE)
-target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+os_set_config_file(system_config.h CREATE_CONFIG_PROJECT)
 
 
 #-------------------------------------------------------------------------------
