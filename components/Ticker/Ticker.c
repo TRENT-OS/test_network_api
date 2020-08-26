@@ -6,7 +6,6 @@
  */
 
 #include "LibDebug/Debug.h"
-#include "TimeServer.h"
 #include <camkes.h>
 
 
@@ -23,17 +22,17 @@ int run(void)
         return -1;
     }
 
-    seL4_CPtr timeServer_notification = timeServer_rpc_notification();
-
-    uint64_t timestamp = TimeServer_getTime(TimeServer_PRECISION_NSEC);
+    uint64_t timestamp;
+    timeServer_rpc_time(&timestamp);
     for(;;)
     {
-        seL4_Word badge = 0;
+        timeServer_notify_wait();
 
-        seL4_Wait(timeServer_notification, &badge);
+        uint64_t timestamp_new, delta;
 
-        uint64_t timestamp_new = TimeServer_getTime(TimeServer_PRECISION_NSEC);
-        uint64_t  delta = timestamp_new - timestamp;
+        timeServer_rpc_time(&timestamp_new);
+        delta = timestamp_new - timestamp;
+
         Debug_LOG_DEBUG(
             "tick, delta %" PRIu64 ".%" PRIu64 " sec",
             delta / NS_IN_S,

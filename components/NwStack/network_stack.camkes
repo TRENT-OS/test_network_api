@@ -38,6 +38,7 @@ component NwStack1 {
     //-------------------------------------------------
     // interface TimeServer
     uses        if_OS_Timer           timeServer_rpc;
+    consumes    TimerReady            timeServer_notify;
 
 
     //-------------------------------------------------
@@ -92,6 +93,7 @@ component NwStack2 {
     //-------------------------------------------------
     // interface TimeServer
     uses        if_OS_Timer           timeServer_rpc;
+    consumes    TimerReady            timeServer_notify;
 
 
     //-------------------------------------------------
