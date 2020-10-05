@@ -22,22 +22,9 @@ int run(void)
         return -1;
     }
 
-    uint64_t timestamp;
-    timeServer_rpc_time(&timestamp);
     for(;;)
     {
         timeServer_notify_wait();
-
-        uint64_t timestamp_new, delta;
-
-        timeServer_rpc_time(&timestamp_new);
-        delta = timestamp_new - timestamp;
-
-        Debug_LOG_DEBUG(
-            "tick, delta %" PRIu64 ".%" PRIu64 " sec",
-            delta / NS_IN_S,
-            delta % NS_IN_S);
-        timestamp = timestamp_new;
 
         // send tick to both network stacks
         nwStack1_event_tick_emit();
