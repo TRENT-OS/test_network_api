@@ -8,9 +8,6 @@ import "components/ConfigServer/ConfigServer.camkes";
 
 #include "system_config.h"
 
-#include "UART/Uart.camkes"
-DECLARE_COMPONENT_UART(UART)
-
 #include "TimeServer/camkes/TimeServer.camkes"
 DECLARE_COMPONENT_TimeServer(TimeServer)
 
@@ -32,15 +29,9 @@ assembly {
     composition {
 
         //----------------------------------------------------------------------
-        // UART
+        // ChanMux + UART
         //----------------------------------------------------------------------
-        DECLARE_AND_CONNECT_INSTANCE_UART(
-            UART, uartDrv)
-
-        //----------------------------------------------------------------------
-        // MUX
-        //----------------------------------------------------------------------
-        ChanMux_DECLARE_AND_CONNECT_INSTANCE_TO_UART(ChanMux, chanMux, uartDrv)
+        ChanMux_DECLARE_AND_CONNECT_INSTANCE_TO_UART(ChanMux, chanMux)
 
         //----------------------------------------------------------------------
         // ConfigServer
@@ -182,11 +173,6 @@ assembly {
      }
 
     configuration {
-        CONFIGURE_INSTANCE_UART(
-            uartDrv,
-            CFG_CHANMUX_DEFAULT_UART_PHYS_ADDR,
-            CFG_CHANMUX_DEFAULT_UART_INTR)
-
         ASSIGN_CLIENT_BADGE_TimeServer(
             ticker, timeServer_rpc, TIMESERVER_TK_ID)
         ASSIGN_CLIENT_BADGE_TimeServer(

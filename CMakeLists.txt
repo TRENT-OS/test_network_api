@@ -108,14 +108,10 @@ DeclareCAmkESComponent(
         os_network_api
 )
 
-DeclareCAmkESComponent_ChanMux(
+DeclareCAmkESComponents_ChanMux_UART(
     ChanMux
     components/ChanMux/ChanMux_config.c
     system_config
-)
-
-DeclareCAmkESComponent_UART(
-    UART
 )
 
 DeclareCAmkESComponent(
