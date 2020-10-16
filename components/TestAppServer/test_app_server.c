@@ -139,11 +139,12 @@ run()
             // the test runner checks for this string
             Debug_LOG_INFO("connection closed by server");
             OS_NetworkSocket_close(seos_socket_handle);
-            break;
+            continue;
         /* Any other value is a failure in read, hence exit and close handle  */
         default :
             Debug_LOG_ERROR("server socket failure, error %d", err);
-            break;
+            OS_NetworkSocket_close(seos_socket_handle);
+            continue;
         } //end of switch
     }
     return -1;
