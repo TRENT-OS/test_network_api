@@ -114,7 +114,8 @@ run()
         for (;;)
         {
             Debug_LOG_DEBUG("read...");
-            size_t n = 1;
+            // Try to read the whole frame
+            size_t n = 1600;
             err = OS_NetworkSocket_read(seos_socket_handle, buffer, n, &n);
             if (OS_SUCCESS != err)
             {
@@ -122,8 +123,6 @@ run()
                 break;
             }
 
-            Debug_ASSERT(n == 1);
-            Debug_LOG_DEBUG("Got a byte %02x, send it back", buffer[0]);
 
             err = OS_NetworkSocket_write(seos_socket_handle, buffer, n, &n);
             if (err != OS_SUCCESS)
