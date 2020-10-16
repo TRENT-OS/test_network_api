@@ -123,7 +123,6 @@ run()
                 break;
             }
 
-
             err = OS_NetworkSocket_write(seos_socket_handle, buffer, n, &n);
             if (err != OS_SUCCESS)
             {
