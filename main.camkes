@@ -9,7 +9,7 @@ import "components/ConfigServer/ConfigServer.camkes";
 #include "system_config.h"
 
 #include "TimeServer/camkes/TimeServer.camkes"
-DECLARE_COMPONENT_TimeServer(TimeServer)
+TimeServer_COMPONENT_DECLARE(TimeServer)
 
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
 DECLARE_COMPONENT_NIC_ChanMux(NwDriver1, NIC_DRIVER_RINGBUFFER_SIZE)
@@ -162,23 +162,28 @@ assembly {
         //----------------------------------------------------------------------
         // TimeServer
         //----------------------------------------------------------------------
-        DECLARE_AND_CONNECT_INSTANCE_TimeServer(
-            TimeServer,
+        component TimeServer timeServer;
+
+        TimeServer_INSTANCE_CONNECT_CLIENTS(
             timeServer,
             ticker.timeServer_rpc, ticker.timeServer_notify,
             nwStack1.timeServer_rpc, nwStack1.timeServer_notify,
-            nwStack2.timeServer_rpc, nwStack2.timeServer_notify)
+            nwStack2.timeServer_rpc, nwStack2.timeServer_notify
+        )
 
 
      }
 
     configuration {
-        ASSIGN_CLIENT_BADGE_TimeServer(
-            ticker, timeServer_rpc, TIMESERVER_TK_ID)
-        ASSIGN_CLIENT_BADGE_TimeServer(
-            nwStack1, timeServer_rpc, TIMESERVER_NS1_ID)
-        ASSIGN_CLIENT_BADGE_TimeServer(
-            nwStack2, timeServer_rpc, TIMESERVER_NS2_ID)
+        TimeServer_CLIENT_ASSIGN_BADGE(
+            ticker.timeServer_rpc, TIMESERVER_TK_ID
+        )
+        TimeServer_CLIENT_ASSIGN_BADGE(
+            nwStack1.timeServer_rpc, TIMESERVER_NS1_ID
+        )
+        TimeServer_CLIENT_ASSIGN_BADGE(
+            nwStack2.timeServer_rpc, TIMESERVER_NS2_ID
+        )
 
         // assign endpoint badges for n:1 RPC interface of ChanMUX. The generic
         // naming scheme is <component>.<interface>_attributes = <badge ID>
