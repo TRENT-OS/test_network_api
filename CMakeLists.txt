@@ -12,7 +12,7 @@ os_set_config_file(system_config.h CREATE_CONFIG_PROJECT)
 #-------------------------------------------------------------------------------
 project(tests_picotcp_api C)
 
-DeclareCAmkESComponent_TimeServer(
+TimeServer_DeclareCAmkESComponent(
     TimeServer
 )
 
