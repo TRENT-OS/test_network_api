@@ -48,7 +48,7 @@ DeclareCAmkESComponent(
         TimeServer_client
 )
 
-DeclareCAmkESComponent_NIC_ChanMux(
+NIC_ChanMux_DeclareCAmkESComponent(
     NwDriver1
     CHANMUX_CHANNEL_NIC_1_CTRL
     CHANMUX_CHANNEL_NIC_1_DATA
@@ -74,7 +74,7 @@ DeclareCAmkESComponent(
         TimeServer_client
 )
 
-DeclareCAmkESComponent_NIC_ChanMux(
+NIC_ChanMux_DeclareCAmkESComponent(
     NwDriver2
     CHANMUX_CHANNEL_NIC_2_CTRL
     CHANMUX_CHANNEL_NIC_2_DATA
