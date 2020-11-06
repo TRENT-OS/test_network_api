@@ -175,14 +175,10 @@ assembly {
      }
 
     configuration {
-        TimeServer_CLIENT_ASSIGN_BADGE(
-            ticker.timeServer_rpc, TIMESERVER_TK_ID
-        )
-        TimeServer_CLIENT_ASSIGN_BADGE(
-            nwStack1.timeServer_rpc, TIMESERVER_NS1_ID
-        )
-        TimeServer_CLIENT_ASSIGN_BADGE(
-            nwStack2.timeServer_rpc, TIMESERVER_NS2_ID
+        TimeServer_CLIENT_ASSIGN_BADGES(
+            ticker.timeServer_rpc
+            nwStack1.timeServer_rpc,
+            nwStack2.timeServer_rpc,
         )
 
         // assign endpoint badges for n:1 RPC interface of ChanMUX. The generic
