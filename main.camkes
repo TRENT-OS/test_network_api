@@ -21,8 +21,8 @@ ChanMux_UART_COMPONENT_DEFINE(
 )
 
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
-DECLARE_COMPONENT_NIC_ChanMux(NwDriver1, NIC_DRIVER_RINGBUFFER_SIZE)
-DECLARE_COMPONENT_NIC_ChanMux(NwDriver2, NIC_DRIVER_RINGBUFFER_SIZE)
+NIC_ChanMux_COMPONENT_DECLARE(NwDriver1, NIC_DRIVER_RINGBUFFER_SIZE)
+NIC_ChanMux_COMPONENT_DECLARE(NwDriver2, NIC_DRIVER_RINGBUFFER_SIZE)
 
 #include "util/loop_defines.h"
 #include "system_config.h"
@@ -76,10 +76,10 @@ assembly {
         connection seL4RPCCall            nwStack1_configServer_rpc      (from nwStack1.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
         connection seL4SharedData         nwStack1_configServer_data     (from nwStack1.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
 
-        connection seL4RPCCall            nwStack1_nwDriver1_rpc         (from nwStack1.nic_driver,             to nwDriver1.nic_rpc);
-        connection seL4SharedData         nwStack1_nwDriver1_port_read   (from nwDriver1.nic_port_to,           to nwStack1.nic_port_from);
-        connection seL4SharedData         nwStack1_nwDriver1_port_write  (from nwDriver1.nic_port_from,         to nwStack1.nic_port_to);
-        connection seL4NotificationNative nwStack1_nwDriver1_hasData     (from nwDriver1.nic_event_hasData,     to nwStack1.c_tick_or_data);
+        NIC_ChanMux_INSTANCE_CONNECT_CLIENT(
+            nwDriver1,
+            nwStack1.nic_driver, nwStack1.nic_port_to, nwStack1.nic_port_from, nwStack1.c_tick_or_data
+        )
 
         //----------------------------------------------------------------------
         // Network Stack App #1
@@ -138,10 +138,10 @@ assembly {
         connection seL4RPCCall            nwStack2_configServer_rpc         (from nwStack2.OS_ConfigServiceServer,  to configServer.OS_ConfigServiceServer);
         connection seL4SharedData         nwStack2_configServer_data        (from nwStack2.cfg_dataport_buf,        to configServer.cfg_dataport_buf);
 
-        connection seL4RPCCall            nwStack2_nwDriver2_rpc            (from nwStack2.nic_driver,              to nwDriver2.nic_rpc);
-        connection seL4SharedData         nwStack2_nwDriver2_port_read      (from nwDriver2.nic_port_to,            to nwStack2.nic_port_from);
-        connection seL4SharedData         nwStack2_nwDriver2_port_write     (from nwDriver2.nic_port_from,          to nwStack2.nic_port_to);
-        connection seL4NotificationNative nwStack2_nwDriver2_hasData        (from nwDriver2.nic_event_hasData,      to nwStack2.c_tick_or_data);
+        NIC_ChanMux_INSTANCE_CONNECT_CLIENT(
+            nwDriver2,
+            nwStack2.nic_driver,  nwStack2.nic_port_to, nwStack2.nic_port_from, nwStack2.c_tick_or_data
+        )
 
         //----------------------------------------------------------------------
         // Network Stack App #2
@@ -185,9 +185,9 @@ assembly {
 
     configuration {
         TimeServer_CLIENT_ASSIGN_BADGES(
-            ticker.timeServer_rpc
+            ticker.timeServer_rpc,
             nwStack1.timeServer_rpc,
-            nwStack2.timeServer_rpc,
+            nwStack2.timeServer_rpc
         )
         ChanMux_UART_CLIENT_ASSIGN_BADGES(
             nwDriver1.chanMux_Rpc,
