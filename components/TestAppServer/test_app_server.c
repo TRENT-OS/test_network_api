@@ -114,9 +114,9 @@ run()
         for (;;)
         {
             Debug_LOG_DEBUG("read...");
-            // Try to read the whole frame
-            size_t n = 1600;
-            err = OS_NetworkSocket_read(seos_socket_handle, buffer, n, &n);
+            size_t n = 0;
+            // Try to read as much as fits into the buffer
+            err = OS_NetworkSocket_read(seos_socket_handle, buffer, sizeof(buffer), &n);
             if (OS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("socket_read() failed, error %d", err);
