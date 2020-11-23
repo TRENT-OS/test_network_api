@@ -193,7 +193,7 @@ int run(void)
             .rpc =
             {
                 .dev_write      = nic_driver_tx_data,
-                .get_mac        = nic_driver_get_mac,
+                .get_mac        = nic_driver_get_mac_address,
             }
         },
 
