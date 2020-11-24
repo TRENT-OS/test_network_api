@@ -11,16 +11,18 @@ import "components/ConfigServer/ConfigServer.camkes";
 #include "TimeServer/camkes/TimeServer.camkes"
 TimeServer_COMPONENT_DECLARE(TimeServer)
 
+#include "ChanMux/ChanMux_UART.camkes"
+ChanMux_UART_COMPONENT_DEFINE(
+    ChanMux_UART,
+    nwDriver1, ctrl,
+    nwDriver1, data,
+    nwDriver2, ctrl,
+    nwDriver2, data
+)
+
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
 DECLARE_COMPONENT_NIC_ChanMux(NwDriver1, NIC_DRIVER_RINGBUFFER_SIZE)
 DECLARE_COMPONENT_NIC_ChanMux(NwDriver2, NIC_DRIVER_RINGBUFFER_SIZE)
-
-#include "ChanMux/ChanMux.camkes"
-ChanMux_DEFINE_COMPONENT(ChanMux,
-        nwDriver1, ctrl,
-        nwDriver1, data,
-        nwDriver2, ctrl,
-        nwDriver2, data)
 
 #include "util/loop_defines.h"
 #include "system_config.h"
@@ -31,7 +33,13 @@ assembly {
         //----------------------------------------------------------------------
         // ChanMux + UART
         //----------------------------------------------------------------------
-        ChanMux_DECLARE_AND_CONNECT_INSTANCE_TO_UART(ChanMux, chanMux)
+        component ChanMux_UART chanMux_UART;
+        component UART_CHANMUX uart;
+
+        ChanMux_UART_INSTANCE_CONNECT(
+                chanMux_UART,
+                uart
+        )
 
         //----------------------------------------------------------------------
         // ConfigServer
@@ -44,9 +52,10 @@ assembly {
         //----------------------------------------------------------------------
         component  NwDriver1        nwDriver1;
 
-        ChanMux_INSTANCE_CONNECT_INTERFACE(chanMux, nwDriver1)
-        ChanMux_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver1, data)
-        ChanMux_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver1, ctrl)
+        ChanMux_INSTANCE_CONNECT_CLIENTS(
+            chanMux_UART,
+            nwDriver1, data, ctrl
+        )
 
         //----------------------------------------------------------------------
         // Network Stack #1
@@ -103,10 +112,10 @@ assembly {
         //----------------------------------------------------------------------
         component  NwDriver2        nwDriver2;
 
-        ChanMux_INSTANCE_CONNECT_INTERFACE(chanMux, nwDriver2)
-        ChanMux_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver2, data)
-        ChanMux_INSTANCE_CONNECT_CHANNEL(chanMux, nwDriver2, ctrl)
-
+        ChanMux_INSTANCE_CONNECT_CLIENTS(
+            chanMux_UART,
+            nwDriver2, data, ctrl
+        )
 
         //----------------------------------------------------------------------
         // Network Stack #2
@@ -180,10 +189,9 @@ assembly {
             nwStack1.timeServer_rpc,
             nwStack2.timeServer_rpc,
         )
-
-        // assign endpoint badges for n:1 RPC interface of ChanMUX. The generic
-        // naming scheme is <component>.<interface>_attributes = <badge ID>
-        ChanMux_ASSIGN_CLIENT_BADGE(chanMux, nwDriver1, CHANMUX_ID_NIC_1)
-        ChanMux_ASSIGN_CLIENT_BADGE(chanMux, nwDriver2, CHANMUX_ID_NIC_2)
+        ChanMux_UART_CLIENT_ASSIGN_BADGES(
+            nwDriver1.chanMux_Rpc,
+            nwDriver2.chanMux_Rpc
+        )
     }
 }
