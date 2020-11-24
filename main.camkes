@@ -9,7 +9,7 @@ import "components/ConfigServer/ConfigServer.camkes";
 #include "system_config.h"
 
 #include "TimeServer/camkes/TimeServer.camkes"
-TimeServer_COMPONENT_DECLARE(TimeServer)
+TimeServer_COMPONENT_DEFINE(TimeServer)
 
 #include "ChanMux/ChanMux_UART.camkes"
 ChanMux_UART_COMPONENT_DEFINE(
@@ -21,8 +21,8 @@ ChanMux_UART_COMPONENT_DEFINE(
 )
 
 #include "NIC_ChanMux/NIC_ChanMux.camkes"
-NIC_ChanMux_COMPONENT_DECLARE(NwDriver1, NIC_DRIVER_RINGBUFFER_SIZE)
-NIC_ChanMux_COMPONENT_DECLARE(NwDriver2, NIC_DRIVER_RINGBUFFER_SIZE)
+NIC_ChanMux_COMPONENT_DEFINE(NwDriver1, NIC_DRIVER_RINGBUFFER_SIZE)
+NIC_ChanMux_COMPONENT_DEFINE(NwDriver2, NIC_DRIVER_RINGBUFFER_SIZE)
 
 #include "util/loop_defines.h"
 #include "system_config.h"
