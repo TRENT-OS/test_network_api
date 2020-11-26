@@ -79,7 +79,6 @@ read_ip_from_config_server(void)
 #endif
         return ret;
     }
-    Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s", get_instance_name(), DEV_ADDR);
 
     ret = helper_func_getConfigParameter(&serverLibWithMemBackend,
                                          DOMAIN_NWSTACK,
@@ -92,8 +91,6 @@ read_ip_from_config_server(void)
                         CFG_ETH_GATEWAY_ADDR, ret);
         return ret;
     }
-    Debug_LOG_INFO("[NwStack '%s'] GATEWAY ADDR: %s", get_instance_name(),
-                   GATEWAY_ADDR);
 
     ret = helper_func_getConfigParameter(&serverLibWithMemBackend,
                                          DOMAIN_NWSTACK,
@@ -106,8 +103,6 @@ read_ip_from_config_server(void)
                         CFG_ETH_SUBNET_MASK, ret);
         return ret;
     }
-    Debug_LOG_INFO("[NwStack '%s'] SUBNETMASK: %s", get_instance_name(),
-                   SUBNET_MASK);
 
     return OS_SUCCESS;
 }
@@ -217,6 +212,9 @@ int run(void)
     }
 #endif
 
+    Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s", get_instance_name(), DEV_ADDR);
+    Debug_LOG_INFO("[NwStack '%s'] GATEWAY ADDR: %s", get_instance_name(), GATEWAY_ADDR);
+    Debug_LOG_INFO("[NwStack '%s'] SUBNETMASK: %s", get_instance_name(), SUBNET_MASK);
     // The Ticker component sends us a tick every second. Currently there is
     // no dedicated interface to enable and disable the tick. because we don't
     // need this. OS_NetworkStack_run() is not supposed to return.
