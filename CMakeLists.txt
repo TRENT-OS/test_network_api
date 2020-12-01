@@ -38,6 +38,9 @@ DeclareCAmkESComponent(
         -Werror
         -DOS_NWSTACK_AS_CLIENT
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
+        #-DDEV_ADDR="192.168.82.231"
+        #-DGATEWAY_ADDR="192.168.82.1"
+        #-DSUBNET_MASK="255.255.255.0"
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
         system_config
@@ -64,6 +67,9 @@ DeclareCAmkESComponent(
         -Werror
         -DOS_NWSTACK_AS_SERVER
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
+        #-DDEV_ADDR="192.168.82.232"
+        #-DGATEWAY_ADDR="192.168.82.1"
+        #-DSUBNET_MASK="255.255.255.0"
         -DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
         system_config
