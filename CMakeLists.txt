@@ -12,6 +12,8 @@ os_set_config_file(system_config.h CREATE_CONFIG_PROJECT)
 #-------------------------------------------------------------------------------
 project(tests_picotcp_api C)
 
+include("plat/${PLATFORM}/plat_nic.cmake" OPTIONAL)
+
 TimeServer_DeclareCAmkESComponent(
     TimeServer
 )
@@ -51,12 +53,6 @@ DeclareCAmkESComponent(
         TimeServer_client
 )
 
-NIC_ChanMux_DeclareCAmkESComponent(
-    NwDriver1
-    CHANMUX_CHANNEL_NIC_1_CTRL
-    CHANMUX_CHANNEL_NIC_1_DATA
-)
-
 DeclareCAmkESComponent(
     NwStack2
     SOURCES
@@ -78,12 +74,6 @@ DeclareCAmkESComponent(
         os_configuration
         os_network_lib
         TimeServer_client
-)
-
-NIC_ChanMux_DeclareCAmkESComponent(
-    NwDriver2
-    CHANMUX_CHANNEL_NIC_2_CTRL
-    CHANMUX_CHANNEL_NIC_2_DATA
 )
 
 DeclareCAmkESComponent(
@@ -114,11 +104,6 @@ DeclareCAmkESComponent(
         os_network_api
 )
 
-ChanMux_UART_DeclareCAmkESComponents(
-    ChanMux_UART
-    components/ChanMux/ChanMux_config.c
-    system_config
-)
 
 DeclareCAmkESComponent(
     ConfigServer

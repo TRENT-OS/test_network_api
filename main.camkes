@@ -4,8 +4,6 @@
  *  Copyright (C) 2020, Hensoldt Cyber GmbH
  */
 
-import <std_connector.camkes>;
-
 import "components/Ticker/Ticker.camkes";
 import "components/NwStack/network_stack.camkes";
 import "components/TestAppClient/test_app_client.camkes";
@@ -17,56 +15,30 @@ import "components/ConfigServer/ConfigServer.camkes";
 #include "TimeServer/camkes/TimeServer.camkes"
 TimeServer_COMPONENT_DEFINE(TimeServer)
 
-#include "ChanMux/ChanMux_UART.camkes"
-ChanMux_UART_COMPONENT_DEFINE(
-    ChanMux_UART,
-    nwDriver1, ctrl,
-    nwDriver1, data,
-    nwDriver2, ctrl,
-    nwDriver2, data
-)
-
-#include "NIC_ChanMux/NIC_ChanMux.camkes"
-NIC_ChanMux_COMPONENT_DEFINE(NwDriver1, NIC_DRIVER_RINGBUFFER_SIZE)
-NIC_ChanMux_COMPONENT_DEFINE(NwDriver2, NIC_DRIVER_RINGBUFFER_SIZE)
+#include "plat_nic.camkes"
 
 #include "util/loop_defines.h"
-#include "system_config.h"
 
 assembly {
     composition {
 
         //----------------------------------------------------------------------
-        // ChanMux + UART
+        // NICs
         //----------------------------------------------------------------------
-        component ChanMux_UART chanMux_UART;
-        component UART_CHANMUX uart;
-
-        ChanMux_UART_INSTANCE_CONNECT(
-                chanMux_UART,
-                uart
-        )
+        NETWORK_TEST_NIC_INSTANCES(nwDriver1, nwDriver2)
 
         //----------------------------------------------------------------------
         // ConfigServer
         //----------------------------------------------------------------------
         component   ConfigServer     configServer;
 
-
-        //----------------------------------------------------------------------
-        // Network Driver #1
-        //----------------------------------------------------------------------
-        component  NwDriver1        nwDriver1;
-
-        ChanMux_INSTANCE_CONNECT_CLIENTS(
-            chanMux_UART,
-            nwDriver1, data, ctrl
-        )
+#ifndef NETWORK_TEST_ONE_NIC
 
         //----------------------------------------------------------------------
         // Network Stack #1
         //----------------------------------------------------------------------
         component  NwStack1               nwStack1;
+        NETWORK_TEST_NIC_CONNECT(nwDriver1, nwStack1)
 
         connection seL4NotificationNative nwStack1_internal_hasData      (from nwStack1.e_tick_or_data,         to nwStack1.c_tick_or_data);
 #define COMPONENT nwStack1
@@ -81,11 +53,6 @@ assembly {
         connection seL4Notification       nwStack1_configServer_ready    (from configServer.event_ready,        to nwStack1.cfgServer_event_ready);
         connection seL4RPCCall            nwStack1_configServer_rpc      (from nwStack1.OS_ConfigServiceServer, to configServer.OS_ConfigServiceServer);
         connection seL4SharedData         nwStack1_configServer_data     (from nwStack1.cfg_dataport_buf,       to configServer.cfg_dataport_buf);
-
-        NIC_ChanMux_INSTANCE_CONNECT_CLIENT(
-            nwDriver1,
-            nwStack1.nic_driver, nwStack1.nic_port_to, nwStack1.nic_port_from, nwStack1.c_tick_or_data
-        )
 
         //----------------------------------------------------------------------
         // Network Stack App #1
@@ -113,21 +80,13 @@ assembly {
         connection seL4SharedData GEN_NAME(nwApp1_2, nwStack1)(from nwApp1_2.GEN_ID(NwAppDataPort), to nwStack1.GEN_ID(nwStack_port));
 #include "util/loop.h"
 
-        //----------------------------------------------------------------------
-        // Network Driver #2
-        //----------------------------------------------------------------------
-        component  NwDriver2        nwDriver2;
-
-        ChanMux_INSTANCE_CONNECT_CLIENTS(
-            chanMux_UART,
-            nwDriver2, data, ctrl
-        )
+#endif // not defined NETWORK_TEST_ONE_NIC
 
         //----------------------------------------------------------------------
         // Network Stack #2
         //----------------------------------------------------------------------
         component  NwStack2               nwStack2;
-
+        NETWORK_TEST_NIC_CONNECT(nwDriver2, nwStack2)
         connection seL4NotificationNative nwStack2_internal_hasData        (from nwStack2.e_tick_or_data,         to nwStack2.c_tick_or_data);
 
 #define COMPONENT nwStack2
@@ -143,11 +102,6 @@ assembly {
         connection seL4Notification       nwStack2_configServer_ready       (from configServer.event_ready,         to nwStack2.cfgServer_event_ready);
         connection seL4RPCCall            nwStack2_configServer_rpc         (from nwStack2.OS_ConfigServiceServer,  to configServer.OS_ConfigServiceServer);
         connection seL4SharedData         nwStack2_configServer_data        (from nwStack2.cfg_dataport_buf,        to configServer.cfg_dataport_buf);
-
-        NIC_ChanMux_INSTANCE_CONNECT_CLIENT(
-            nwDriver2,
-            nwStack2.nic_driver,  nwStack2.nic_port_to, nwStack2.nic_port_from, nwStack2.c_tick_or_data
-        )
 
         //----------------------------------------------------------------------
         // Network Stack App #2
@@ -171,7 +125,9 @@ assembly {
         // the periodic tick.
         //----------------------------------------------------------------------
         component Ticker ticker;
+#ifndef NETWORK_TEST_ONE_NIC
         connection seL4NotificationNative nwStack1_tick (from ticker.nwStack1_event_tick, to nwStack1.c_tick_or_data);
+#endif
         connection seL4NotificationNative nwStack2_tick (from ticker.nwStack2_event_tick, to nwStack2.c_tick_or_data);
 
         //----------------------------------------------------------------------
@@ -182,11 +138,11 @@ assembly {
         TimeServer_INSTANCE_CONNECT_CLIENTS(
             timeServer,
             ticker.timeServer_rpc, ticker.timeServer_notify,
+#ifndef NETWORK_TEST_ONE_NIC
             nwStack1.timeServer_rpc, nwStack1.timeServer_notify,
+#endif
             nwStack2.timeServer_rpc, nwStack2.timeServer_notify
         )
-
-
      }
 
     configuration {
@@ -195,9 +151,7 @@ assembly {
             nwStack1.timeServer_rpc,
             nwStack2.timeServer_rpc
         )
-        ChanMux_UART_CLIENT_ASSIGN_BADGES(
-            nwDriver1.chanMux_Rpc,
-            nwDriver2.chanMux_Rpc
-        )
+
+        NETWORK_TEST_NIC_CONFIG(nwDriver1, nwDriver2)
     }
 }
