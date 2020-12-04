@@ -60,6 +60,8 @@ assembly {
             to nwStack1.GEN_ID(c_conn));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
+#undef LOOP_ELEMENT
+#undef LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 
 
         connection seL4Notification nwStack1_configServer_ready(
@@ -95,6 +97,8 @@ assembly {
             to nwStack1.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
+#undef LOOP_ELEMENT
+#undef LOOP_COUNT
 
 
         //----------------------------------------------------------------------
@@ -117,6 +121,8 @@ assembly {
             to nwStack1.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
+#undef LOOP_ELEMENT
+#undef LOOP_COUNT
 
 
 #endif // not defined NETWORK_TEST_ONE_NIC
@@ -145,6 +151,8 @@ assembly {
             to nwStack2.GEN_ID(c_conn));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
+#undef LOOP_ELEMENT
+#undef LOOP_COUNT
 
         connection seL4Notification nwStack2_configServer_ready(
             from configServer.event_ready,
@@ -179,6 +187,8 @@ assembly {
             to nwStack2.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
+#undef LOOP_ELEMENT
+#undef LOOP_COUNT
 
 
         //----------------------------------------------------------------------
