@@ -47,6 +47,7 @@ assembly {
         connection seL4Notification GEN_NAME(COMPONENT, _a)(from COMPONENT.GEN_ID(e_write), to COMPONENT.GEN_ID(c_write)); \
         connection seL4Notification GEN_NAME(COMPONENT, _b)(from COMPONENT.GEN_ID(e_read), to COMPONENT.GEN_ID(c_read));   \
         connection seL4Notification GEN_NAME(COMPONENT, _c)(from COMPONENT.GEN_ID(e_conn), to COMPONENT.GEN_ID(c_conn));
+/* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
 #undef COMPONENT
 
@@ -65,6 +66,7 @@ assembly {
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
         connection seL4SharedData GEN_NAME(nwApp1, nwStack1)(from nwApp1.GEN_ID(NwAppDataPort), to nwStack1.GEN_ID(nwStack_port));
+/* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
 
         //----------------------------------------------------------------------
@@ -78,6 +80,7 @@ assembly {
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
         connection seL4SharedData GEN_NAME(nwApp1_2, nwStack1)(from nwApp1_2.GEN_ID(NwAppDataPort), to nwStack1.GEN_ID(nwStack_port));
+/* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
 
 #endif // not defined NETWORK_TEST_ONE_NIC
@@ -96,6 +99,7 @@ assembly {
         connection seL4Notification GEN_NAME(COMPONENT, _a)(from COMPONENT.GEN_ID(e_write), to COMPONENT.GEN_ID(c_write)); \
         connection seL4Notification GEN_NAME(COMPONENT, _b)(from COMPONENT.GEN_ID(e_read), to COMPONENT.GEN_ID(c_read));   \
         connection seL4Notification GEN_NAME(COMPONENT, _c)(from COMPONENT.GEN_ID(e_conn), to COMPONENT.GEN_ID(c_conn));
+/* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
 #undef COMPONENT
 
@@ -114,6 +118,7 @@ assembly {
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
         connection seL4SharedData GEN_NAME(nwApp2, nwStack2)(from nwApp2.GEN_ID(NwAppDataPort), to nwStack2.GEN_ID(nwStack_port));
+/* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
 
 

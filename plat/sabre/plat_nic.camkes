@@ -8,6 +8,7 @@
 
 #define NETWORK_TEST_ONE_NIC
 
+/* there is only one NIC */
 #define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \
     component  NIC_IMX6  _nic2_;
 

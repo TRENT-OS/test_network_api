@@ -23,9 +23,14 @@
     connection  seL4NotificationNative _nic_ ## _stack_ ## _nic_ev( \
                                     from _nic_.nic_event_hasData,\
                                     to   _stack_.c_tick_or_data);
-
-
-
+/* Memory used
+ *   RX Buffers          524288 bytes (256 * 2048)
+ *   TX Buffers          262144 bytes (128 * 2048)
+ *   RX Descriptor Ring    1024 bytes
+ *   TX Descriptor Ring    1024 bytes
+ *   ---------------------------------------------
+ *   Total               788480 bytes (= 0xC0800)
+ */
 #define NETWORK_TEST_NIC_GENERIC_CONFIG(_nic_, _skip_hw_init_, _phys_addr_) \
     _nic_.simple = true; \
     _nic_.cnode_size_bits = 12; \

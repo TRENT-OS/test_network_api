@@ -42,7 +42,7 @@ component NwStack1 {
 
 
     //-------------------------------------------------
-    // interface Ethernet NIC driver
+    // interface NIC driver (in addition to NIC triggering event_tick_or_data)
     uses if_OS_Nic nic_driver;
 
     dataport Buf(NIC_DRIVER_RINGBUFFER_SIZE) nic_port_from; // NIC -> stack
@@ -97,7 +97,7 @@ component NwStack2 {
 
 
     //-------------------------------------------------
-    // interface Ethernet NIC driver
+    // interface NIC driver (in addition to NIC triggering event_tick_or_data)
     uses if_OS_Nic nic_driver;
 
     dataport Buf(NIC_DRIVER_RINGBUFFER_SIZE) nic_port_from; // NIC -> stack
