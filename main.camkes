@@ -47,21 +47,20 @@ assembly {
             from nwStack1.e_tick_or_data,
             to nwStack1.c_tick_or_data);
 
-#define COMPONENT nwStack1
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
-        connection seL4Notification GEN_NAME(COMPONENT, _a)( \
-            from COMPONENT.GEN_ID(e_write), \
-            to COMPONENT.GEN_ID(c_write)); \
-        connection seL4Notification GEN_NAME(COMPONENT, _b)( \
-            from COMPONENT.GEN_ID(e_read), \
-            to COMPONENT.GEN_ID(c_read));   \
-        connection seL4Notification GEN_NAME(COMPONENT, _c)( \
-            from COMPONENT.GEN_ID(e_conn), \
-            to COMPONENT.GEN_ID(c_conn));
+        connection seL4Notification GEN_NAME(nwStack1, _a)( \
+            from nwStack1.GEN_ID(e_write), \
+            to nwStack1.GEN_ID(c_write)); \
+        connection seL4Notification GEN_NAME(nwStack1, _b)( \
+            from nwStack1.GEN_ID(e_read), \
+            to nwStack1.GEN_ID(c_read));   \
+        connection seL4Notification GEN_NAME(nwStack1, _c)( \
+            from nwStack1.GEN_ID(e_conn), \
+            to nwStack1.GEN_ID(c_conn));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-#undef COMPONENT
+
 
         connection seL4Notification nwStack1_configServer_ready(
             from configServer.event_ready,
@@ -133,21 +132,19 @@ assembly {
             from nwStack2.e_tick_or_data,
             to nwStack2.c_tick_or_data);
 
-#define COMPONENT nwStack2
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
-        connection seL4Notification GEN_NAME(COMPONENT, _a)( \
-            from COMPONENT.GEN_ID(e_write), \
-            to COMPONENT.GEN_ID(c_write)); \
-        connection seL4Notification GEN_NAME(COMPONENT, _b)( \
-            from COMPONENT.GEN_ID(e_read), \
-            to COMPONENT.GEN_ID(c_read));   \
-        connection seL4Notification GEN_NAME(COMPONENT, _c)( \
-            from COMPONENT.GEN_ID(e_conn), \
-            to COMPONENT.GEN_ID(c_conn));
+        connection seL4Notification GEN_NAME(nwStack2, _a)( \
+            from nwStack2.GEN_ID(e_write), \
+            to nwStack2.GEN_ID(c_write)); \
+        connection seL4Notification GEN_NAME(nwStack2, _b)( \
+            from nwStack2.GEN_ID(e_read), \
+            to nwStack2.GEN_ID(c_read));   \
+        connection seL4Notification GEN_NAME(nwStack2, _c)( \
+            from nwStack2.GEN_ID(e_conn), \
+            to nwStack2.GEN_ID(c_conn));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-#undef COMPONENT
 
         connection seL4Notification nwStack2_configServer_ready(
             from configServer.event_ready,
