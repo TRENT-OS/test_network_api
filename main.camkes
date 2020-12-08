@@ -203,12 +203,12 @@ assembly {
 #ifndef NETWORK_TEST_ONE_NIC
         connection seL4NotificationNative nwStack1_tick(
             from ticker.nwStack1_event_tick,
-            to nwStack1.c_tick_or_data);
+            to nwStack1.event_tick_or_data);
 #endif
 
         connection seL4NotificationNative nwStack2_tick(
             from ticker.nwStack2_event_tick,
-            to nwStack2.c_tick_or_data);
+            to nwStack2.event_tick_or_data);
 
 
         //----------------------------------------------------------------------

@@ -42,7 +42,7 @@ NIC_ChanMux_COMPONENT_DEFINE(
         _stack_.nic_driver, \
         _stack_.nic_port_to, \
         _stack_.nic_port_from, \
-        _stack_.c_tick_or_data \
+        _stack_.event_tick_or_data \
     )
 
 #define NETWORK_TEST_NIC_CONFIG(_nic1_, _nic2_) \

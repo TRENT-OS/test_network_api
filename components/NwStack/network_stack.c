@@ -153,7 +153,7 @@ int run(void)
     static const OS_NetworkStack_CamkesConfig_t camkes_config =
     {
         .notify_init_done        = nwStack_event_ready_emit,
-        .wait_loop_event         = c_tick_or_data_wait,
+        .wait_loop_event         = event_tick_or_data_wait,
 
         .internal =
         {

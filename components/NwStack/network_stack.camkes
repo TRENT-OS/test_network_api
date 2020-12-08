@@ -17,7 +17,7 @@ component NwStack1 {
     control;
 
     emits       EventDataAvailable  e_tick_or_data;
-    consumes    EventDataAvailable  c_tick_or_data; // event also from NIC and Timer
+    consumes    EventDataAvailable  event_tick_or_data; // event also from NIC and Timer
 
     has         mutex               allocatorMutex;
     has         mutex               nwstackMutex;
@@ -72,7 +72,7 @@ component NwStack2 {
     control;
 
     emits      EventDataAvailable   e_tick_or_data;
-    consumes   EventDataAvailable   c_tick_or_data; // event also from NIC and Timer
+    consumes   EventDataAvailable   event_tick_or_data; // event also from NIC and Timer
 
     has        mutex                allocatorMutex;
     has        mutex                nwstackMutex;
