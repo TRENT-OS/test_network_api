@@ -4,6 +4,8 @@
  *  Copyright (C) 2020, Hensoldt Cyber GmbH
  */
 
+#pragma once
+
 #include "ChanMux/ChanMux_UART.camkes"
 
 ChanMux_UART_COMPONENT_DEFINE(

@@ -4,6 +4,8 @@
  *  Copyright (C) 2020, Hensoldt Cyber GmbH
  */
 
+#pragma once
+
 #include "NIC_iMX6/NIC_iMX6.camkes"
 
 #define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \
