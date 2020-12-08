@@ -8,43 +8,34 @@
 
 #include "NIC_iMX6/NIC_iMX6.camkes"
 
-#define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \
-    component  NIC_IMX6        _nic1_;
-    component  NIC_IMX6_port2  _nic2_;
+
+// we support using one or two NICs. For one NIC, the network test expects it
+// to be the second NIC/Network stack instances it creates. It's a bit
+// misleading that we don't use the first instance here, that should be fixed
+// one day...
+
+// #define NETWORK_TEST_ONE_NIC
+
 
 #define NETWORK_TEST_NIC_CONNECT(_nic_, _stack_) \
-    connection  seL4Ethdriver   con_ ## _nic_ ## _stack_( \
-                                    from _stack_.nic_driver, \
-                                    to   _nic_.client); \
-    connection  seL4SharedData  _nic_ ## _stack_ ## _port_read( \
-                                    from _nic_.nic_port_to, \
-                                    to   _stack_.nic_port_from); \
-    connection  seL4SharedData  _nic_ ## _stack_ ## _port_write( \
-                                    from _nic_.nic_port_from, \
-                                    to   _stack_.nic_port_to); \
-    connection  seL4NotificationNative _nic_ ## _stack_ ## _nic_ev( \
-                                    from _nic_.nic_event_hasData,\
-                                    to   _stack_.c_tick_or_data);
-/* Memory used
- *   RX Buffers          524288 bytes (256 * 2048)
- *   TX Buffers          262144 bytes (128 * 2048)
- *   RX Descriptor Ring    1024 bytes
- *   TX Descriptor Ring    1024 bytes
- *   ---------------------------------------------
- *   Total               788480 bytes (= 0xC0800)
- */
-#define NETWORK_TEST_NIC_GENERIC_CONFIG(_nic_, _skip_hw_init_, _phys_addr_) \
-    _nic_.simple = true; \
-    _nic_.cnode_size_bits = 12; \
-    _nic_.simple_untyped20_pool = 2; \
-    _nic_.heap_size = 0x10000; \
-    _nic_.dma_pool = 0xC0800; \
-    _nic_.MAC_address = "\xDE\xAD\xDE\xAD\x00\x00"; \
-    _nic_.nic_promiscuous_mode = 1; \
-    _nic_.nic_skip_hardware_init = _skip_hw_init_; \
-    _nic_.nic_phy_address = _phys_addr_;
+    NIC_IMX6_INSTANCE_CONNECT_CLIENT(_nic_, _stack_)
 
+
+#ifdef NETWORK_TEST_ONE_NIC
+
+#define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \
+    NIC_IMX6_INSTANCE(_nic2_)
 
 #define NETWORK_TEST_NIC_CONFIG(_nic1_, _nic2_) \
-    NETWORK_TEST_NIC_GENERIC_CONFIG(_nic1_, 0, 4) \
-    NETWORK_TEST_NIC_GENERIC_CONFIG(_nic2_, 1, 5)
+    NIC_IMX6_MEMORY_CONFIG(_nic2_)
+
+#else
+
+#define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \
+    NIC_IMX6_INSTANCE(_nic1_, _nic2_)
+
+#define NETWORK_TEST_NIC_CONFIG(_nic1_, _nic2_) \
+    NIC_IMX6_MEMORY_CONFIG(_nic1_) \
+    NIC_IMX6_MEMORY_CONFIG(_nic2_)
+
+#endif

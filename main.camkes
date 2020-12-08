@@ -19,6 +19,28 @@ TimeServer_COMPONENT_DEFINE(TimeServer)
 
 #include "util/loop_defines.h"
 
+
+// create a network stack instance, connect it to the specific NIC and the
+// global config server
+#define NETWORK_TEST_STACK(_stackType_, _stack_, _nic_) \
+    \
+    component _stackType_ _stack_; \
+    \
+    NETWORK_TEST_NIC_CONNECT(_nic_, _stack_) \
+    \
+    connection seL4Notification conn_ ## _stack_ ## _configServer_ready( \
+        from configServer.event_ready, \
+        to _stack_.cfgServer_event_ready); \
+    \
+    connection seL4RPCCall conn_ ## _stack_ ## _configServer_rpc( \
+        from _stack_.OS_ConfigServiceServer, \
+        to configServer.OS_ConfigServiceServer); \
+    \
+    connection seL4SharedData conn_ ## _stack_ ## _configServer_port( \
+        from _stack_.cfg_dataport_buf, \
+        to configServer.cfg_dataport_buf);
+
+
 assembly {
     composition {
 
@@ -40,12 +62,7 @@ assembly {
         //----------------------------------------------------------------------
         // Network Stack #1
         //----------------------------------------------------------------------
-        component NwStack1 nwStack1;
-        NETWORK_TEST_NIC_CONNECT(nwDriver1, nwStack1)
-
-        connection seL4NotificationNative nwStack1_internal_hasData(
-            from nwStack1.e_tick_or_data,
-            to nwStack1.c_tick_or_data);
+        NETWORK_TEST_STACK(NwStack1, nwStack1, nwDriver1)
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
@@ -62,19 +79,6 @@ assembly {
 #include "util/loop.h"
 #undef LOOP_ELEMENT
 #undef LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
-
-
-        connection seL4Notification nwStack1_configServer_ready(
-            from configServer.event_ready,
-            to nwStack1.cfgServer_event_ready);
-
-        connection seL4RPCCall nwStack1_configServer_rpc(
-            from nwStack1.OS_ConfigServiceServer,
-            to configServer.OS_ConfigServiceServer);
-
-        connection seL4SharedData nwStack1_configServer_data(
-            from nwStack1.cfg_dataport_buf,
-            to configServer.cfg_dataport_buf);
 
 
         //----------------------------------------------------------------------
@@ -131,12 +135,7 @@ assembly {
         //----------------------------------------------------------------------
         // Network Stack #2
         //----------------------------------------------------------------------
-        component NwStack2 nwStack2;
-        NETWORK_TEST_NIC_CONNECT(nwDriver2, nwStack2)
-
-        connection seL4NotificationNative nwStack2_internal_hasData(
-            from nwStack2.e_tick_or_data,
-            to nwStack2.c_tick_or_data);
+        NETWORK_TEST_STACK(NwStack2, nwStack2, nwDriver2)
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
@@ -153,18 +152,6 @@ assembly {
 #include "util/loop.h"
 #undef LOOP_ELEMENT
 #undef LOOP_COUNT
-
-        connection seL4Notification nwStack2_configServer_ready(
-            from configServer.event_ready,
-            to nwStack2.cfgServer_event_ready);
-
-        connection seL4RPCCall nwStack2_configServer_rpc(
-            from nwStack2.OS_ConfigServiceServer,
-            to configServer.OS_ConfigServiceServer);
-
-        connection seL4SharedData nwStack2_configServer_data(
-            from nwStack2.cfg_dataport_buf,
-            to configServer.cfg_dataport_buf);
 
 
         //----------------------------------------------------------------------
