@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "LibDebug/Debug.h"
+#include "lib_debug/Debug.h"
 
 #include "init_lib_with_mem_backend.h"
 

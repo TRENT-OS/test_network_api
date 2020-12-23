@@ -4,7 +4,7 @@
 
 #include "system_config.h"
 
-#include "LibDebug/Debug.h"
+#include "lib_debug/Debug.h"
 #include "create_parameters.h"
 
 #include <string.h>

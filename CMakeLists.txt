@@ -27,7 +27,7 @@ DeclareCAmkESComponent(
         -Werror
     LIBS
         os_core_api
-        os_libs
+        lib_debug
 )
 
 DeclareCAmkESComponent(
@@ -47,7 +47,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
-        os_libs
+        lib_debug
         os_configuration
         os_network_lib
         TimeServer_client
@@ -70,7 +70,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
-        os_libs
+        lib_debug
         os_configuration
         os_network_lib
         TimeServer_client
@@ -86,7 +86,8 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
-        os_libs
+        lib_debug
+        lib_macros
         os_network_api
 )
 
@@ -100,7 +101,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
-        os_libs
+        lib_debug
         os_network_api
 )
 
@@ -118,7 +119,7 @@ DeclareCAmkESComponent(
         -DOS_CONFIG_SERVICE_CAMKES_SERVER
     LIBS
         system_config
-        os_libs
+        lib_debug
         os_core_api
         os_configuration
 )

@@ -7,7 +7,7 @@
 
 #include "system_config.h"
 
-#include "LibDebug/Debug.h"
+#include "lib_debug/Debug.h"
 #include "OS_ConfigService.h"
 
 #include <camkes.h>
