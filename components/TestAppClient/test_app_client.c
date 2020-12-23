@@ -6,6 +6,7 @@
  */
 
 #include "LibDebug/Debug.h"
+#include "LibMacros/Test.h"
 #include "OS_Error.h"
 #include "stdint.h"
 #include "system_config.h"
@@ -34,9 +35,11 @@ static OS_NetworkStackClient_SocketDataports_t config = {
 
 #define HTTP_PORT 80
 
-OS_Error_t
+void
 test_tcp_client()
 {
+    TEST_START();
+
     char                buffer[2048];
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,
@@ -93,11 +96,11 @@ test_tcp_client()
             {
                 Debug_LOG_ERROR("socket_write() failed, code %d", err);
                 OS_NetworkSocket_close(handle[i]);
-                return OS_ERROR_GENERIC;
+                return;
             }
 
             /* fatal error, this must not happen. API broken*/
-            Debug_ASSERT(len_io <= lenRemaining);
+            ASSERT_LE_SZ(len_io, lenRemaining);
 
             offs += len_io;
         } while (offs < len_request);
@@ -170,15 +173,18 @@ test_tcp_client()
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("close() failed for handle %d, code %d", i, err);
-            return OS_ERROR_GENERIC;
+            return;
         }
     }
-    return OS_SUCCESS;
+
+    TEST_FINISH();
 }
 
-OS_Error_t
+void
 test_udp_recvfrom()
 {
+    TEST_START();
+
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096];
     size_t      len;
@@ -197,7 +203,7 @@ test_udp_recvfrom()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
     err = OS_NetworkSocket_bind(handle, udp_socket.port);
@@ -205,7 +211,7 @@ test_udp_recvfrom()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("bind() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
     len = sizeof(buffer);
@@ -220,7 +226,7 @@ test_udp_recvfrom()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("recvfrom() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
     Debug_LOG_INFO(
@@ -235,14 +241,17 @@ test_udp_recvfrom()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("close() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
-    return OS_SUCCESS;
+
+    TEST_FINISH();
 }
 
-OS_Error_t
+void
 test_udp_sendto()
 {
+    TEST_START();
+
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096];
     char        test_message[] = "Hello there";
@@ -262,7 +271,7 @@ test_udp_sendto()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
     err = OS_NetworkSocket_bind(handle, udp_socket.port);
@@ -270,7 +279,7 @@ test_udp_sendto()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("bind() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
     len = sizeof(buffer);
@@ -285,7 +294,7 @@ test_udp_sendto()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("recvfrom() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
     Debug_LOG_INFO(
@@ -307,17 +316,17 @@ test_udp_sendto()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("close() failed, code %d", err);
-        return OS_ERROR_GENERIC;
+        return;
     }
 
-    return OS_SUCCESS;
+    TEST_FINISH();
 }
 
 void
@@ -338,9 +347,11 @@ init_client_api()
     OS_NetworkStackClient_init(&config);
 }
 
-OS_Error_t
+void
 test_dataport_size_check_client_functions()
 {
+    TEST_START();
+
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char               buffer[4096];
     OS_Network_Socket_t       udp_socket;
@@ -358,8 +369,8 @@ test_dataport_size_check_client_functions()
         Debug_LOG_ERROR(
             "Client socket read with invalid dataport size failed, error %d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = OS_NetworkSocket_recvfrom(handle, buffer, len, NULL, &udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
@@ -369,8 +380,8 @@ test_dataport_size_check_client_functions()
             "error "
             "%d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = OS_NetworkSocket_write(handle, buffer, len, NULL);
     if (err != OS_ERROR_INVALID_PARAMETER)
@@ -379,8 +390,8 @@ test_dataport_size_check_client_functions()
             "Client socket write with invalid dataport size failed, error "
             "%d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = OS_NetworkSocket_sendto(handle, buffer, len, NULL, udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
@@ -389,15 +400,17 @@ test_dataport_size_check_client_functions()
             "Client socket sendto with invalid dataport size failed, error "
             "%d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    return OS_SUCCESS;
+    TEST_FINISH();
 }
 
-OS_Error_t
+void
 test_dataport_size_check_lib_functions()
 {
+    TEST_START();
+
     OS_NetworkSocket_Handle_t handle;
     OS_Network_Socket_t       udp_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_DGRAM,
@@ -408,8 +421,8 @@ test_dataport_size_check_lib_functions()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     const OS_Dataport_t dp = config.dataport[handle];
     // creates a length guaranteed larger than that of the dataport, which won't
@@ -422,8 +435,8 @@ test_dataport_size_check_lib_functions()
         Debug_LOG_ERROR(
             "Lib socket read with invalid dataport size failed, error %d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = network_stack_rpc_socket_recvfrom(handle, &len, &udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
@@ -431,8 +444,8 @@ test_dataport_size_check_lib_functions()
         Debug_LOG_ERROR(
             "Lib socket recvfrom with invalid dataport size failed, error %d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = network_stack_rpc_socket_write(handle, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
@@ -440,8 +453,8 @@ test_dataport_size_check_lib_functions()
         Debug_LOG_ERROR(
             "Lib socket write with invalid dataport size failed, error %d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = network_stack_rpc_socket_sendto(handle, &len, udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
@@ -449,18 +462,18 @@ test_dataport_size_check_lib_functions()
         Debug_LOG_ERROR(
             "Lib socket sendto with invalid dataport size failed, error %d",
             err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = OS_NetworkSocket_close(handle);
 
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("close() failed, code %d", err);
-        return OS_ERROR_GENERIC;
     }
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    return OS_SUCCESS;
+    TEST_FINISH();
 }
 
 int
@@ -471,51 +484,11 @@ run()
 
     OS_NetworkAPP_RT(NULL); // Must be actually called by OS Runtime
 
-    Debug_LOG_INFO("TCP client test");
-    if (test_tcp_client() == OS_SUCCESS)
-    {
-        Debug_LOG_INFO("TCP client test successful.");
-    }
-    else
-    {
-        Debug_LOG_ERROR("TCP client test failed.");
-    }
-
-    if (test_udp_recvfrom() == OS_SUCCESS)
-    {
-        Debug_LOG_INFO("UDP recvfrom test successful.");
-    }
-    else
-    {
-        Debug_LOG_ERROR("UDP recvfrom test failed.");
-    }
-
-    if (test_udp_sendto() == OS_SUCCESS)
-    {
-        Debug_LOG_INFO("UDP sendto test successful.");
-    }
-    else
-    {
-        Debug_LOG_ERROR("UDP sendto test failed.");
-    }
-
-    if (test_dataport_size_check_client_functions() == OS_SUCCESS)
-    {
-        Debug_LOG_INFO("Client dataport test successful.");
-    }
-    else
-    {
-        Debug_LOG_ERROR("Client dataport test failed.");
-    }
-
-    if (test_dataport_size_check_lib_functions() == OS_SUCCESS)
-    {
-        Debug_LOG_INFO("Lib dataport test successful.");
-    }
-    else
-    {
-        Debug_LOG_ERROR("Lib dataport test failed.");
-    }
+    test_tcp_client();
+    test_udp_recvfrom();
+    test_udp_sendto();
+    test_dataport_size_check_client_functions();
+    test_dataport_size_check_lib_functions();
 
     return 0;
 }
