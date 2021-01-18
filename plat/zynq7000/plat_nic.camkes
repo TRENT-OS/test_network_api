@@ -52,3 +52,9 @@ NIC_ChanMux_COMPONENT_DEFINE(
         _nic1_.chanMux_Rpc, \
         _nic2_.chanMux_Rpc \
     )
+
+/* macros used to connect platform specific components to the timerserver.
+ * Intentionally left empty */
+#define NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(_nic_)
+
+#define NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(_nic_)
