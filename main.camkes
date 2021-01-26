@@ -206,6 +206,9 @@ assembly {
         TimeServer_INSTANCE_CONNECT_CLIENTS(
             timeServer,
             ticker.timeServer_rpc, ticker.timeServer_notify,
+            // connect platform specific components. The comma needs to be part
+            // of the macro expansion
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver2)
 #ifndef NETWORK_TEST_ONE_NIC
             nwStack1.timeServer_rpc, nwStack1.timeServer_notify,
 #endif
@@ -216,6 +219,9 @@ assembly {
     configuration {
         TimeServer_CLIENT_ASSIGN_BADGES(
             ticker.timeServer_rpc,
+            // connect platform specific components. The comma needs to be part
+            // of the macro expansion
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver2)
             nwStack1.timeServer_rpc,
             nwStack2.timeServer_rpc
         )
