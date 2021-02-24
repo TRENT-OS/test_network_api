@@ -36,6 +36,81 @@ static OS_NetworkStackClient_SocketDataports_t config = {
 #define HTTP_PORT 80
 
 void
+test_socket_create_neg()
+{
+    // This test will try to create sockets with invalid parameters. After this
+    // it will try to open a socket to a service which is not reachable (closed
+    // port) and check that the create() fails
+    TEST_START();
+
+    OS_NetworkSocket_Handle_t   handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
+    OS_Error_t                  err;
+    OS_Network_Socket_t         null_socket = { 0 };
+
+    // first run try with a fully invalid configuration
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        err = OS_NetworkSocket_create(NULL, &null_socket, &handle[i]);
+        ASSERT_EQ_OS_ERR(OS_ERROR_GENERIC, err);
+    }
+
+    // now with and unreachable destination
+    OS_Network_Socket_t unreachable_socket =
+    {
+        .domain = OS_AF_INET,
+        .type   = OS_SOCK_STREAM,
+        .name   = "10.0.0.1",
+        .port   = 88 // note: there is no service listening on this port, in order to fail the connect phase
+    };
+
+    err = OS_NetworkSocket_create(NULL, &unreachable_socket, handle);
+    ASSERT_EQ_OS_ERR(OS_ERROR_GENERIC, err);
+
+    TEST_FINISH();
+}
+
+void
+test_socket_create_pos()
+{
+    // This test will test successful creation of an amount of
+    // OS_NETWORK_MAXIMUM_SOCKET_NO sockets. Then it will successfully destroy
+    // them.
+    // That sequence of actions is repeated twice in order to try to detect
+    // resources allocation issues.
+    // For the purpose of trying to find resources allocation issues it is
+    // suggested to run test_socket_create_neg() prior to this
+    TEST_START();
+
+    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
+    OS_Network_Socket_t cli_socket  =
+    {
+        .domain = OS_AF_INET,
+        .type   = OS_SOCK_STREAM,
+        .name   = "10.0.0.1",
+        .port   = 80
+    };
+
+    for (int i = 0; i < 2; i++)
+    {   // let the following run twice in order to try to catch possible
+        // production of RAII garbage
+
+        for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+        {
+            OS_Error_t err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
+            ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+        }
+
+        for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+        {
+            OS_Error_t err = OS_NetworkSocket_close(handle[i]);
+            ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+        }
+    }
+
+    TEST_FINISH();
+}
+
+void
 test_tcp_client()
 {
     TEST_START();
@@ -488,6 +563,8 @@ run()
     {
         test_dataport_size_check_client_functions();
         test_dataport_size_check_lib_functions();
+        test_socket_create_neg();
+        test_socket_create_pos();
     }
 
     event_network_app_send_ready_emit();
