@@ -484,11 +484,18 @@ run()
 
     OS_NetworkAPP_RT(NULL); // Must be actually called by OS Runtime
 
+    if (!strcmp(get_instance_name(), "nwApp1"))
+    {
+        test_dataport_size_check_client_functions();
+        test_dataport_size_check_lib_functions();
+    }
+
+    event_network_app_send_ready_emit();
+    event_network_app_recv_ready_wait();
+
     test_tcp_client();
     test_udp_recvfrom();
     test_udp_sendto();
-    test_dataport_size_check_client_functions();
-    test_dataport_size_check_lib_functions();
 
     return 0;
 }

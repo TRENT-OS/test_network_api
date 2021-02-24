@@ -125,6 +125,14 @@ assembly {
 
 #endif // not defined NETWORK_TEST_ONE_NIC
 
+        // Clients sync
+        connection seL4Notification nwApp1_nwApp_1_2_ready(
+            from nwApp1.event_network_app_send_ready,
+            to nwApp1_2.event_network_app_recv_ready);
+
+        connection seL4Notification nwApp1_2_nwApp_1_ready(
+            from nwApp1_2.event_network_app_send_ready,
+            to nwApp1.event_network_app_recv_ready);
 
         //----------------------------------------------------------------------
         // Network Stack #2

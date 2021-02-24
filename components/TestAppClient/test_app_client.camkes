@@ -21,6 +21,9 @@ component NwApp1 {
     uses if_OS_Socket network_stack_rpc;
     consumes EventServiceReady event_network_stack_init_done;
 
+    emits    EventApiTestsDone event_network_app_send_ready;
+    consumes EventApiTestsDone event_network_app_recv_ready;
+
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
     GEN_ID(dataport Buf NwAppDataPort);
