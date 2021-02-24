@@ -77,8 +77,6 @@ assembly {
             to nwStack1.GEN_ID(c_conn));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-#undef LOOP_ELEMENT
-#undef LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 
 
         //----------------------------------------------------------------------
@@ -101,8 +99,6 @@ assembly {
             to nwStack1.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-#undef LOOP_ELEMENT
-#undef LOOP_COUNT
 
 
         //----------------------------------------------------------------------
@@ -125,8 +121,6 @@ assembly {
             to nwStack1.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-#undef LOOP_ELEMENT
-#undef LOOP_COUNT
 
 
 #endif // not defined NETWORK_TEST_ONE_NIC
@@ -150,8 +144,6 @@ assembly {
             to nwStack2.GEN_ID(c_conn));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-#undef LOOP_ELEMENT
-#undef LOOP_COUNT
 
 
         //----------------------------------------------------------------------
@@ -174,8 +166,6 @@ assembly {
             to nwStack2.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-#undef LOOP_ELEMENT
-#undef LOOP_COUNT
 
 
         //----------------------------------------------------------------------
