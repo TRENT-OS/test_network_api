@@ -555,7 +555,7 @@ int
 run()
 {
     init_client_api();
-    Debug_LOG_INFO("Starting test_app_client...");
+    Debug_LOG_INFO("Starting test_app_client %s...", get_instance_name());
 
     OS_NetworkAPP_RT(NULL); // Must be actually called by OS Runtime
 
