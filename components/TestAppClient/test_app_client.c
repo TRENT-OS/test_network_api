@@ -561,12 +561,14 @@ run()
 
     if (!strcmp(get_instance_name(), "nwApp1"))
     {
+        // The following API tests do not need to be executed in parallel
+        // therefore only nwApp1 will execute them.
         test_dataport_size_check_client_functions();
         test_dataport_size_check_lib_functions();
         test_socket_create_neg();
         test_socket_create_pos();
     }
-
+    // synchronise the nwApp1 and nwApp1_2
     event_network_app_send_ready_emit();
     event_network_app_recv_ready_wait();
 
