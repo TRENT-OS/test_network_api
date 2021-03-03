@@ -1,7 +1,7 @@
 /*
  *  Network API Test System
  *
- *  Copyright (C) 2020, HENSOLDT Cyber GmbH
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
 import "components/Ticker/Ticker.camkes";
@@ -115,8 +115,6 @@ assembly {
 #include "util/loop.h"
 
 
-#endif // not defined NETWORK_TEST_ONE_NIC
-
         // Clients sync
         connection seL4Notification nwApp1_nwApp_1_2_ready(
             from nwApp1.event_network_app_send_ready,
@@ -125,6 +123,10 @@ assembly {
         connection seL4Notification nwApp1_2_nwApp_1_ready(
             from nwApp1_2.event_network_app_send_ready,
             to nwApp1.event_network_app_recv_ready);
+
+
+#endif // not defined NETWORK_TEST_ONE_NIC
+
 
         //----------------------------------------------------------------------
         // Network Stack #2
