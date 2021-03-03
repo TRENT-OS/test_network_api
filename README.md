@@ -24,10 +24,7 @@ DEV_ADDR will be the address of your board, GATEWAY_ADDR will be the address of 
 Start the network test in the trentos_test container using the following command:
 
 ```
-SBC=true ETH_1_ADDR="192.168.82.231" ETH_2_ADDR="192.168.82.232" src/test.sh run test_network_api.py
+src/test.sh run test_network_api.py --tc=platform.uart_connected:false --tc=network.client_ip:192.168.82.231 --tc=network.server_ip:192.168.82.232
 ```
-
-ETH_1_ADDR is used by the Network Stack testing the client functionality.
-ETH_2_ADDR is used by the Network Stack testing the server functionality.
 
 Note that not all test will function in this setup (if they require the board and the test container to be in the same network or base their decision only on UART output).
