@@ -1,7 +1,7 @@
 #
 # Network API Test System, zynq7000 QEMU configuration
 #
-# Copyright (C) 2020, Hensoldt Cyber GmbH
+# Copyright (C) 2020, HENSOLDT Cyber GmbH
 #
 
 cmake_minimum_required(VERSION 3.7.2)
