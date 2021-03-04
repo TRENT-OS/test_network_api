@@ -35,7 +35,7 @@ NIC_RPi_COMPONENT_DEFINE(NIC_RPi, NIC_DRIVER_RINGBUFFER_SIZE)
         nic_usb \
     )
 
-/* Macro used to configure the RPi3 driver component. It sets up a DMA pool 
+/* Macro used to configure the RPi3 driver component. It sets up a DMA pool
  * of 40 pages (4 KiB each)
  */
 #define NETWORK_TEST_NIC_CONFIG(_nic1_, _nic2_) \
@@ -52,7 +52,7 @@ NIC_RPi_COMPONENT_DEFINE(NIC_RPi, NIC_DRIVER_RINGBUFFER_SIZE)
 
 /* macros used to connect platform specific components to the timerserver.
  * Due to the fact that it's used to connect platform specific components,
- * the comma needs to be part of the macro expansion 
+ * the comma needs to be part of the macro expansion
  */
 #define NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(_nic_) \
         _nic_.timeServer_rpc, _nic_.timeServer_notify,
