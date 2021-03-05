@@ -42,26 +42,87 @@ test_socket_create_neg()
 
     OS_NetworkSocket_Handle_t   handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
     OS_Error_t                  err;
-    OS_Network_Socket_t         null_socket = { 0 };
-
-    // first run try with a fully invalid configuration
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        err = OS_NetworkSocket_create(NULL, &null_socket, &handle[i]);
-        ASSERT_EQ_OS_ERR(OS_ERROR_GENERIC, err);
-    }
-
-    // now with and unreachable destination
-    OS_Network_Socket_t unreachable_socket =
+    OS_Network_Socket_t         socket =
     {
         .domain = OS_AF_INET,
         .type   = OS_SOCK_STREAM,
-        .name   = "10.0.0.1",
-        .port   = 88 // note: there is no service listening on this port, in order to fail the connect phase
+        .name   = CFG_REACHABLE_HOST,
+        .port   = CFG_REACHABLE_PORT
     };
 
-    err = OS_NetworkSocket_create(NULL, &unreachable_socket, handle);
-    ASSERT_EQ_OS_ERR(OS_ERROR_GENERIC, err);
+    // Test unsupported domain
+    socket.domain = 0;
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
+    }
+    socket.domain = OS_AF_INET;
+
+    // Test unsupported type
+    socket.type = 0;
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
+    }
+    socket.type = OS_SOCK_STREAM;
+
+    // Test invalid destination address
+    memset(socket.name, 0, sizeof(socket.name));
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+    }
+
+    // Test unreachable host
+    strncpy(socket.name, CFG_UNREACHABLE_HOST, sizeof(socket.name));
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        err = OS_NetworkSocket_create(NULL, &socket, handle);
+        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_HOST_UNREACHABLE, err);
+    }
+    /*
+    This test is momentarily suppressed as it seems that picotcp is not
+    behaving correctly. There is need of further investigations to establish
+    whether is an issue with iptables or with picotcp
+
+    // Test forbidden host (connection reset),
+    // firewall is configured to reset TCP for this host
+    strncpy(socket.name, CFG_FORBIDDEN_HOST, sizeof(socket.name));
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        err = OS_NetworkSocket_create(NULL, &socket, handle);
+        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_RESET, err);
+    }
+    */
+    // Test connection refused,
+    // now with reachable address but port closed. We do not loop this test
+    // for convenience: it would take too much time due to the connection
+    // timeouts
+    strncpy(socket.name, CFG_REACHABLE_HOST, sizeof(socket.name));
+    socket.port = CFG_UNREACHABLE_PORT;
+    err = OS_NetworkSocket_create(NULL, &socket, handle);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
+
+    // test out of resources
+    socket.port = CFG_REACHABLE_PORT;
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+    }
+    OS_NetworkSocket_Handle_t exceedingHandle;
+    err = OS_NetworkSocket_create(NULL, &socket, &exceedingHandle);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INSUFFICIENT_SPACE, err);
+
+    // cleanup
+    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
+    {
+        OS_Error_t err = OS_NetworkSocket_close(handle[i]);
+        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+    }
 
     TEST_FINISH();
 }
