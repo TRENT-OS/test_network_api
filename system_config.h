@@ -81,3 +81,10 @@
 #define NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS 16
 #define NIC_DRIVER_RINGBUFFER_SIZE                                             \
     (NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS * 4096)
+
+//-----------------------------------------------------------------------------
+// SysLog
+//-----------------------------------------------------------------------------
+
+#define SysLogger_Config_MSG_SIZE                SysLogger_MAX_MSG_SIZE
+#define SysLogger_Config_COMPONENT_NAME_COLUMNS  11

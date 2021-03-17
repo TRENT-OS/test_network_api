@@ -51,6 +51,7 @@ DeclareCAmkESComponent(
         os_configuration
         os_network_lib
         TimeServer_client
+        syslogger_client
 )
 
 DeclareCAmkESComponent(
@@ -74,6 +75,7 @@ DeclareCAmkESComponent(
         os_configuration
         os_network_lib
         TimeServer_client
+        syslogger_client
 )
 
 DeclareCAmkESComponent(
@@ -89,6 +91,7 @@ DeclareCAmkESComponent(
         lib_debug
         lib_macros
         os_network_api
+        syslogger_client
 )
 
 DeclareCAmkESComponent(
@@ -103,8 +106,13 @@ DeclareCAmkESComponent(
         os_core_api
         lib_debug
         os_network_api
+        syslogger_client
 )
 
+DeclareCAmkESComponent_SysLogger(
+    SysLogger
+    system_config
+)
 
 DeclareCAmkESComponent(
     ConfigServer

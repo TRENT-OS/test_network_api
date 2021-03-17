@@ -45,6 +45,17 @@ void init_client_api()
     OS_NetworkStackClient_init(&config);
 }
 
+//------------------------------------------------------------------------------
+void
+pre_init(void)
+{
+#if defined(Debug_Config_PRINT_TO_LOG_SERVER)
+    OS_Error_t err = SysLoggerClient_init(sysLogger_Rpc_log);
+    Debug_ASSERT(err == OS_SUCCESS);
+#endif
+}
+
+//------------------------------------------------------------------------------
 int
 run()
 {

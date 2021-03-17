@@ -15,6 +15,9 @@ import "components/ConfigServer/ConfigServer.camkes";
 #include "TimeServer/camkes/TimeServer.camkes"
 TimeServer_COMPONENT_DEFINE(TimeServer)
 
+#include "SysLogger/camkes/SysLogger.camkes"
+SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
+
 #include "plat_nic.camkes"
 
 #include "util/loop_defines.h"
@@ -78,6 +81,19 @@ assembly {
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
 
+        //----------------------------------------------------------------------
+        // SysLogger
+        //----------------------------------------------------------------------
+        component   SysLogger       sysLogger;
+
+        SysLogger_INSTANCE_CONNECT_CLIENTS(
+            sysLogger,
+            nwStack1,
+            nwStack2,
+            nwApp1,
+            nwApp1_2,
+            nwApp2
+        )
 
         //----------------------------------------------------------------------
         // Network Stack App #1

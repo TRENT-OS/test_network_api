@@ -16,6 +16,7 @@
 #include "math.h"
 
 #include "OS_NetworkStackClient.h"
+#include "SysLoggerClient.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
 
@@ -609,6 +610,17 @@ test_dataport_size_check_lib_functions()
     TEST_FINISH();
 }
 
+//------------------------------------------------------------------------------
+void
+pre_init(void)
+{
+#if defined(Debug_Config_PRINT_TO_LOG_SERVER)
+    OS_Error_t err = SysLoggerClient_init(sysLogger_Rpc_log);
+    Debug_ASSERT(err == OS_SUCCESS);
+#endif
+}
+
+//------------------------------------------------------------------------------
 int
 run()
 {

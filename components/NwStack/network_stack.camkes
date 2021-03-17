@@ -1,7 +1,7 @@
 /*
  *  OS Network Stack
  *
- *  Copyright (C) 2019, Hensoldt Cyber GmbH
+ *  Copyright (C) 2019-2021, Hensoldt Cyber GmbH
  *
  */
 
@@ -9,6 +9,8 @@ import <if_OS_Nic.camkes>;
 import <if_OS_Timer.camkes>;
 import <if_OS_Socket.camkes>;
 import <if_OS_ConfigService.camkes>;
+
+#include "SysLogger/camkes/SysLogger.camkes"
 
 #include "system_config.h"
 #include "util/loop_defines.h"
@@ -64,6 +66,7 @@ component NwStack1 {
     GEN_ID(dataport Buf nwStack_port);
 #include "util/loop.h"
 
+    SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)
 }
 
 
@@ -118,4 +121,5 @@ component NwStack2 {
     GEN_ID(dataport Buf nwStack_port);
 #include "util/loop.h"
 
+    SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)
 }
