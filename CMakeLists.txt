@@ -12,7 +12,7 @@ os_set_config_file(system_config.h CREATE_CONFIG_PROJECT)
 #-------------------------------------------------------------------------------
 project(tests_picotcp_api C)
 
-include("plat/${PLATFORM}/plat_nic.cmake" OPTIONAL)
+include("plat/${PLATFORM}/plat_nic.cmake")
 
 TimeServer_DeclareCAmkESComponent(
     TimeServer
