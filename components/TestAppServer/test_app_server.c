@@ -63,12 +63,12 @@ run()
     };
 
     /* Gets filled when accept is called */
-    OS_NetworkSocket_Handle_t  seos_socket_handle ;
+    OS_NetworkSocket_Handle_t  os_socket_handle ;
     /* Gets filled when server socket create is called */
-    OS_NetworkServer_Handle_t  seos_nw_server_handle ;
+    OS_NetworkServer_Handle_t  os_nw_server_handle ;
 
     OS_Error_t err = OS_NetworkServerSocket_create(NULL, &srv_socket,
-                                                   &seos_nw_server_handle);
+                                                   &os_nw_server_handle);
 
     if (err != OS_SUCCESS)
     {
@@ -80,7 +80,7 @@ run()
 
     for (;;)
     {
-        err = OS_NetworkServerSocket_accept(seos_nw_server_handle, &seos_socket_handle);
+        err = OS_NetworkServerSocket_accept(os_nw_server_handle, &os_socket_handle);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_accept() failed, error %d", err);
@@ -113,14 +113,14 @@ run()
             Debug_LOG_DEBUG("read...");
             size_t n = 0;
             // Try to read as much as fits into the buffer
-            err = OS_NetworkSocket_read(seos_socket_handle, buffer, sizeof(buffer), &n);
+            err = OS_NetworkSocket_read(os_socket_handle, buffer, sizeof(buffer), &n);
             if (OS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("socket_read() failed, error %d", err);
                 break;
             }
 
-            err = OS_NetworkSocket_write(seos_socket_handle, buffer, n, &n);
+            err = OS_NetworkSocket_write(os_socket_handle, buffer, n, &n);
             if (err != OS_SUCCESS)
             {
                 Debug_LOG_ERROR("socket_write() failed, error %d", err);
@@ -134,12 +134,12 @@ run()
         case OS_ERROR_CONNECTION_CLOSED:
             // the test runner checks for this string
             Debug_LOG_INFO("connection closed by server");
-            OS_NetworkSocket_close(seos_socket_handle);
+            OS_NetworkSocket_close(os_socket_handle);
             continue;
         /* Any other value is a failure in read, hence exit and close handle  */
         default :
             Debug_LOG_ERROR("server socket failure, error %d", err);
-            OS_NetworkSocket_close(seos_socket_handle);
+            OS_NetworkSocket_close(os_socket_handle);
             continue;
         } //end of switch
     }
