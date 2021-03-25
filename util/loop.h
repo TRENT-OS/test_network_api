@@ -4,7 +4,8 @@
 
 #if __INCLUDE_LEVEL__ <= LOOP_COUNT
 LOOP_ELEMENT
-// TODO: check cppcheck warning: #include nested too deeply
+// Suppression of "#include nested too deeply" justified because the inclusion
+// cylce is terminated by a check of the include level.
 // cppcheck-suppress preprocessorErrorDirective
 #include "loop.h"
 #else
