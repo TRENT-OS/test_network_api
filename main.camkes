@@ -4,12 +4,6 @@
  *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
-import "components/Ticker/Ticker.camkes";
-import "components/NwStack/network_stack.camkes";
-import "components/TestAppClient/test_app_client.camkes";
-import "components/TestAppServer/test_app_server.camkes";
-import "components/ConfigServer/ConfigServer.camkes";
-
 #include "system_config.h"
 
 #include "TimeServer/camkes/TimeServer.camkes"
@@ -17,6 +11,12 @@ TimeServer_COMPONENT_DEFINE(TimeServer)
 
 #include "SysLogger/camkes/SysLogger.camkes"
 SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
+
+import "components/Ticker/Ticker.camkes";
+import "components/NwStack/network_stack.camkes";
+import "components/TestAppClient/test_app_client.camkes";
+import "components/TestAppServer/test_app_server.camkes";
+import "components/ConfigServer/ConfigServer.camkes";
 
 #include "plat_nic.camkes"
 
@@ -29,17 +29,21 @@ SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
     \
     component _stackType_ _stack_; \
     \
+    connection seL4NotificationNative conn_##_stack_##_tick( \
+        from ticker._stack_##_event_tick, \
+        to   _stack_.event_tick_or_data); \
+    \
     NETWORK_TEST_NIC_CONNECT(_nic_, _stack_) \
     \
-    connection seL4Notification conn_ ## _stack_ ## _configServer_ready( \
+    connection seL4Notification conn_##_stack_##_configServer_ready( \
         from configServer.event_ready, \
-        to _stack_.cfgServer_event_ready); \
+        to   _stack_.cfgServer_event_ready); \
     \
-    connection seL4RPCCall conn_ ## _stack_ ## _configServer_rpc( \
+    connection seL4RPCCall conn_##_stack_##_configServer_rpc( \
         from _stack_.OS_ConfigServiceServer, \
-        to configServer.OS_ConfigServiceServer); \
+        to   configServer.OS_ConfigServiceServer); \
     \
-    connection seL4SharedData conn_ ## _stack_ ## _configServer_port( \
+    connection seL4SharedData conn_##_stack_##_configServer_port( \
         from _stack_.cfg_port, \
         to   configServer.cfg_port);
 
@@ -48,9 +52,13 @@ assembly {
     composition {
 
         //----------------------------------------------------------------------
-        // NICs
+        // Ticker
+        // It's a very pragmatic approach to create a 1 second tick for each
+        // network stack. Actually, we don't need this, because the TimeServer
+        // should provide two timers per client, one for timeouts and once for
+        // the periodic tick.
         //----------------------------------------------------------------------
-        NETWORK_TEST_NIC_INSTANCES(nwDriver1, nwDriver2)
+        component Ticker ticker;
 
         //----------------------------------------------------------------------
         // SysLogger
@@ -69,13 +77,34 @@ assembly {
         )
 
         //----------------------------------------------------------------------
+        // TimeServer
+        //----------------------------------------------------------------------
+        component TimeServer timeServer;
+
+
+        TimeServer_INSTANCE_CONNECT_CLIENTS(
+            timeServer,
+            ticker.timeServer_rpc, ticker.timeServer_notify,
+            // connect platform specific components. The comma needs to be part
+            // of the macro expansion
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver2)
+#if !defined(NETWORK_TEST_ONE_NIC)
+            nwStack1.timeServer_rpc, nwStack1.timeServer_notify,
+#endif
+            nwStack2.timeServer_rpc, nwStack2.timeServer_notify
+        )
+
+        //----------------------------------------------------------------------
         // ConfigServer
         //----------------------------------------------------------------------
         component ConfigServer configServer;
 
+        //----------------------------------------------------------------------
+        // NICs
+        //----------------------------------------------------------------------
+        NETWORK_TEST_NIC_INSTANCES(nwDriver1, nwDriver2)
 
 #if !defined(NETWORK_TEST_ONE_NIC)
-
 
         //----------------------------------------------------------------------
         // Network Stack #1
@@ -95,7 +124,6 @@ assembly {
             to nwStack1.GEN_ID(c_conn));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
-
 
         //----------------------------------------------------------------------
         // Network Stack App #1
@@ -184,42 +212,6 @@ assembly {
 #include "util/loop.h"
 
 
-        //----------------------------------------------------------------------
-        // Ticker
-        // It's a very pragmatic approach to create a 1 second tick for each
-        // network stack. Actually, we don't need this, because the TimeServer
-        // should provide two timers per client, one for timeouts and once for
-        // the periodic tick.
-        //----------------------------------------------------------------------
-        component Ticker ticker;
-
-#if !defined(NETWORK_TEST_ONE_NIC)
-        connection seL4NotificationNative nwStack1_tick(
-            from ticker.nwStack1_event_tick,
-            to nwStack1.event_tick_or_data);
-#endif
-
-        connection seL4NotificationNative nwStack2_tick(
-            from ticker.nwStack2_event_tick,
-            to nwStack2.event_tick_or_data);
-
-
-        //----------------------------------------------------------------------
-        // TimeServer
-        //----------------------------------------------------------------------
-        component TimeServer timeServer;
-
-        TimeServer_INSTANCE_CONNECT_CLIENTS(
-            timeServer,
-            ticker.timeServer_rpc, ticker.timeServer_notify,
-            // connect platform specific components. The comma needs to be part
-            // of the macro expansion
-            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver2)
-#if !defined(NETWORK_TEST_ONE_NIC)
-            nwStack1.timeServer_rpc, nwStack1.timeServer_notify,
-#endif
-            nwStack2.timeServer_rpc, nwStack2.timeServer_notify
-        )
      }
 
     configuration {
