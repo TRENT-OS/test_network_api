@@ -27,7 +27,7 @@ component NwApp1 {
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
-    GEN_ID(dataport Buf networkStack_port);
+    GEN_PORT(dataport Buf socket_);
 #include "util/loop.h"
 
     SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)

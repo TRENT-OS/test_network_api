@@ -148,13 +148,13 @@ post_init(void)
 
     #define LOOP_ELEMENT \
         { \
-            .notify_write      = GEN_EMIT(e_write), \
-            .wait_write        = GEN_WAIT(c_write), \
-            .notify_read       = GEN_EMIT(e_read), \
-            .wait_read         = GEN_WAIT(c_read), \
-            .notify_connection = GEN_EMIT(e_conn), \
-            .wait_connection   = GEN_WAIT(c_conn), \
-            .buf               = OS_DATAPORT_ASSIGN(GEN_ID(nwStack_port)), \
+            .notify_write      = GEN_EMIT(e_write_), \
+            .wait_write        = GEN_WAIT(c_write_), \
+            .notify_read       = GEN_EMIT(e_read_), \
+            .wait_read         = GEN_WAIT(c_read_), \
+            .notify_connection = GEN_EMIT(e_conn_), \
+            .wait_connection   = GEN_WAIT(c_conn_), \
+            .buf               = OS_DATAPORT_ASSIGN(GEN_PORT(socket_)), \
             .accepted_handle   = -1, \
         },
 
@@ -169,7 +169,7 @@ post_init(void)
 
         .internal =
         {
-            .notify_loop        = e_tick_or_data_emit,
+            .notify_loop        = event_internal_emit,
 
             .allocator_lock     = allocatorMutex_lock,
             .allocator_unlock   = allocatorMutex_unlock,
@@ -191,17 +191,17 @@ post_init(void)
         {
             .from =
             {
-                .io = (void**)( &(nic_port_from)),
+                .io = (void**)( &(nic_from_port)),
                 .size = NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS
             },
 
-            .to = OS_DATAPORT_ASSIGN(nic_port_to),
+            .to = OS_DATAPORT_ASSIGN(nic_to_port),
 
             .rpc =
             {
-                .dev_read       = nic_driver_rx_data,
-                .dev_write      = nic_driver_tx_data,
-                .get_mac        = nic_driver_get_mac_address,
+                .dev_read       = nic_rpc_rx_data,
+                .dev_write      = nic_rpc_tx_data,
+                .get_mac        = nic_rpc_get_mac_address,
             }
         }
     };

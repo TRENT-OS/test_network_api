@@ -16,11 +16,6 @@
 
 // #define NETWORK_TEST_ONE_NIC
 
-
-#define NETWORK_TEST_NIC_CONNECT(_nic_, _stack_) \
-    NIC_IMX6_INSTANCE_CONNECT_CLIENT(_nic_, _stack_)
-
-
 #ifdef NETWORK_TEST_ONE_NIC
 
 #define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \

@@ -18,15 +18,6 @@ NIC_RPi_COMPONENT_DEFINE(NIC_RPi, NIC_DRIVER_RINGBUFFER_SIZE)
  */
 #define NETWORK_TEST_ONE_NIC
 
-#define NETWORK_TEST_NIC_CONNECT(_nic_, _stack_) \
-    NIC_RPi_INSTANCE_CONNECT_CLIENT( \
-        _nic_, \
-        _stack_.nic_driver, \
-        _stack_.nic_port_to, \
-        _stack_.nic_port_from, \
-        _stack_.event_tick_or_data \
-    )
-
 #define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \
     component NIC_RPi           _nic2_; \
     component NIC_RPi_Mailbox   nic_mailbox; \
