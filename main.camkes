@@ -59,7 +59,7 @@ assembly {
         component ConfigServer configServer;
 
 
-#ifndef NETWORK_TEST_ONE_NIC
+#if !defined(NETWORK_TEST_ONE_NIC)
 
 
         //----------------------------------------------------------------------
@@ -141,7 +141,7 @@ assembly {
             to nwApp1.event_network_app_recv_ready);
 
 
-#endif // not defined NETWORK_TEST_ONE_NIC
+#endif // !defined(NETWORK_TEST_ONE_NIC)
 
 
         //----------------------------------------------------------------------
@@ -191,7 +191,7 @@ assembly {
         //----------------------------------------------------------------------
         component Ticker ticker;
 
-#ifndef NETWORK_TEST_ONE_NIC
+#if !defined(NETWORK_TEST_ONE_NIC)
         connection seL4NotificationNative nwStack1_tick(
             from ticker.nwStack1_event_tick,
             to nwStack1.event_tick_or_data);
@@ -213,7 +213,7 @@ assembly {
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver2)
-#ifndef NETWORK_TEST_ONE_NIC
+#if !defined(NETWORK_TEST_ONE_NIC)
             nwStack1.timeServer_rpc, nwStack1.timeServer_notify,
 #endif
             nwStack2.timeServer_rpc, nwStack2.timeServer_notify
