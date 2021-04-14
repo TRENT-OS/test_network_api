@@ -40,8 +40,8 @@ SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
         to configServer.OS_ConfigServiceServer); \
     \
     connection seL4SharedData conn_ ## _stack_ ## _configServer_port( \
-        from _stack_.cfg_dataport_buf, \
-        to configServer.cfg_dataport_buf);
+        from _stack_.cfg_port, \
+        to   configServer.cfg_port);
 
 
 assembly {
@@ -103,13 +103,13 @@ assembly {
         component  NwApp1           nwApp1;
 
         connection seL4RPCCall      nwApp1_nwStack1_rpc(
-            from nwApp1.network_stack_rpc,
-            to nwStack1.network_stack_rpc);
+            from nwApp1.networkStack_rpc,
+            to nwStack1.networkStack_rpc);
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
         connection seL4SharedData GEN_NAME(nwApp1, nwStack1)( \
-            from nwApp1.GEN_ID(NwAppDataPort), \
+            from nwApp1.GEN_ID(networkStack_port), \
             to nwStack1.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
@@ -121,13 +121,13 @@ assembly {
         component NwApp1 nwApp1_2;
 
         connection seL4RPCCall nwApp1_2_nwStack1_rpc(
-            from nwApp1_2.network_stack_rpc,
-            to nwStack1.network_stack_rpc);
+            from nwApp1_2.networkStack_rpc,
+            to nwStack1.networkStack_rpc);
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
         connection seL4SharedData GEN_NAME(nwApp1_2, nwStack1)( \
-            from nwApp1_2.GEN_ID(NwAppDataPort), \
+            from nwApp1_2.GEN_ID(networkStack_port), \
             to nwStack1.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"
@@ -172,13 +172,13 @@ assembly {
         component NwApp2 nwApp2;
 
         connection seL4RPCCall      nwApp2_nwStack2_rpc(
-            from nwApp2.network_stack_rpc,
-            to nwStack2.network_stack_rpc);
+            from nwApp2.networkStack_rpc,
+            to nwStack2.networkStack_rpc);
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
         connection seL4SharedData GEN_NAME(nwApp2, nwStack2)( \
-            from nwApp2.GEN_ID(NwAppDataPort), \
+            from nwApp2.GEN_ID(networkStack_port), \
             to nwStack2.GEN_ID(nwStack_port));
 /* insert LOOP_ELEMENT for LOOP_COUNT times */
 #include "util/loop.h"

@@ -14,7 +14,7 @@ component ConfigServer {
     // hard-coded in the config server core lib
 
     provides  if_OS_ConfigService  OS_ConfigServiceServer;
-    dataport  Buf                  cfg_dataport_buf;
+    dataport  Buf                  cfg_port;
     emits     EventServiceReady    event_ready;
 
 }

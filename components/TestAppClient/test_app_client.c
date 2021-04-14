@@ -473,7 +473,7 @@ init_client_api()
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT                                                           \
-    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_ID(NwAppDataPort));       \
+    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_ID(networkStack_port));       \
     dataports[i]            = GEN_ID(t);                                       \
     i++;
 #include "util/loop.h"
@@ -564,7 +564,7 @@ test_dataport_size_check_lib_functions()
     // fit in the dataport and will generate an error case
     size_t len = OS_Dataport_getSize(dp) + 1;
 
-    err = network_stack_rpc_socket_read(handle, &len);
+    err = networkStack_rpc_socket_read(handle, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -573,7 +573,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = network_stack_rpc_socket_recvfrom(handle, &len, &udp_socket);
+    err = networkStack_rpc_socket_recvfrom(handle, &len, &udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -582,7 +582,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = network_stack_rpc_socket_write(handle, &len);
+    err = networkStack_rpc_socket_write(handle, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -591,7 +591,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = network_stack_rpc_socket_sendto(handle, &len, udp_socket);
+    err = networkStack_rpc_socket_sendto(handle, &len, udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(

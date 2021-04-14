@@ -54,13 +54,13 @@ component NwStack1 {
     //---------------------------------------------------
     // Configuration server
     uses       if_OS_ConfigService  OS_ConfigServiceServer; // name hard-coded in config server client lib
-    dataport   Buf                  cfg_dataport_buf;       // name hard-coded in config server client lib
+    dataport   Buf                  cfg_port;       // name hard-coded in config server client lib
     consumes   EventServiceReady    cfgServer_event_ready;
 
 
     //-------------------------------------------------
     // interface Application
-    provides if_OS_Socket network_stack_rpc; // name hard-coded in network client lib
+    provides if_OS_Socket networkStack_rpc; // name hard-coded in network client lib
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
     GEN_ID(dataport Buf nwStack_port);
@@ -109,13 +109,13 @@ component NwStack2 {
     //---------------------------------------------------
     // Configuration server
     uses       if_OS_ConfigService  OS_ConfigServiceServer; // name hard-coded in config server client lib
-    dataport   Buf                  cfg_dataport_buf;       // name hard-coded in config server client lib
+    dataport   Buf                  cfg_port;       // name hard-coded in config server client lib
     consumes   EventServiceReady    cfgServer_event_ready;
 
 
     //-------------------------------------------------
     // interface Application
-    provides if_OS_Socket network_stack_rpc; // name hard-coded in network client lib
+    provides if_OS_Socket networkStack_rpc; // name hard-coded in network client lib
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
     GEN_ID(dataport Buf nwStack_port);

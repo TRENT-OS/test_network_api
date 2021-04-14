@@ -20,14 +20,14 @@ component NwApp1 {
     // network stack interface. Note that the names of the CAmkES object are
     // hard-coded in the network client lib
 
-    uses if_OS_Socket network_stack_rpc;
+    uses if_OS_Socket networkStack_rpc;
 
     emits    EventApiTestsDone event_network_app_send_ready;
     consumes EventApiTestsDone event_network_app_recv_ready;
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
-    GEN_ID(dataport Buf NwAppDataPort);
+    GEN_ID(dataport Buf networkStack_port);
 #include "util/loop.h"
 
     SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)

@@ -37,7 +37,7 @@ void init_client_api()
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT                                                     \
-    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_ID(NwAppDataPort)); \
+    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_ID(networkStack_port)); \
     dataports[i] = GEN_ID(t);                                            \
     i++;
 #include "util/loop.h"
