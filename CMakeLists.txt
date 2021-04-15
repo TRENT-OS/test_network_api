@@ -47,6 +47,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
+        lib_compiler
         lib_debug
         os_configuration
         os_network_lib
@@ -71,6 +72,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
+        lib_compiler
         lib_debug
         os_configuration
         os_network_lib
@@ -88,6 +90,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
+        lib_compiler
         lib_debug
         lib_macros
         os_network_api
@@ -104,6 +107,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
+        lib_compiler
         lib_debug
         os_network_api
         syslogger_client

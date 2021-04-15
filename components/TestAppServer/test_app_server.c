@@ -6,6 +6,7 @@
  */
 #include <string.h>
 #include "stdint.h"
+#include "lib_compiler/compiler.h"
 #include "lib_debug/Debug.h"
 #include "OS_Error.h"
 
@@ -50,7 +51,7 @@ void
 pre_init(void)
 {
 #if defined(Debug_Config_PRINT_TO_LOG_SERVER)
-    OS_Error_t err = SysLoggerClient_init(sysLogger_Rpc_log);
+    DECL_UNUSED_VAR(OS_Error_t err) = SysLoggerClient_init(sysLogger_Rpc_log);
     Debug_ASSERT(err == OS_SUCCESS);
 #endif
 }
