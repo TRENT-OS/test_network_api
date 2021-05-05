@@ -22,18 +22,8 @@ import <if_OS_ConfigService.camkes>;
 //------------------------------------------------------------------------------
 // Network Stack Components
 
-#if !defined(NETWORK_TEST_ONE_NIC)
-
 NwStack_COMPONENT_DEFINE(
     NwStack1,
-    NIC_DRIVER_RINGBUFFER_SIZE,
-    OS_NETWORK_MAXIMUM_SOCKET_NO,
-    NwStack_INTERFACES)
-
-#endif // !defined(NETWORK_TEST_ONE_NIC)
-
-NwStack_COMPONENT_DEFINE(
-    NwStack2,
     NIC_DRIVER_RINGBUFFER_SIZE,
     OS_NETWORK_MAXIMUM_SOCKET_NO,
     NwStack_INTERFACES)

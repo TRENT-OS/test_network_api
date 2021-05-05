@@ -1,25 +1,19 @@
 /*
  *  Network API Test System, i.MX6 Sabre Lite board configuration
  *
- *  Copyright (C) 2020, HENSOLDT Cyber GmbH
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
 #pragma once
 
 #include "NIC_iMX6/NIC_iMX6.camkes"
 
+// Create a i.MX6 NIC driver instance.
+#define NETWORK_TEST_NIC_INSTANCE(_nic_) \
+    NIC_IMX6_INSTANCE(_nic_)
 
-/* there is only one NIC we can use, and the network test expects it to be the
- * second NIC/Network stack instances it creates. It's a bit misleading that
- * we don't use the first instance here.
- */
-#define NETWORK_TEST_ONE_NIC
-
-#define NETWORK_TEST_NIC_INSTANCES(_nic1_, _nic2_) \
-    NIC_IMX6_INSTANCE(_nic2_)
-
-#define NETWORK_TEST_NIC_CONFIG(_nic1_, _nic2_) \
-    NIC_IMX6_MEMORY_CONFIG(_nic2_)
+#define NETWORK_TEST_NIC_CONFIG(_nic_) \
+    NIC_IMX6_MEMORY_CONFIG(_nic_)
 
 /* macros used to connect platform specific components to the timerserver.
  * Intentionally left empty */

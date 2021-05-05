@@ -1,7 +1,7 @@
 /*
  *  Ticker
  *
- *  Copyright (C) 2019, Hensoldt Cyber GmbH
+ *  Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  *
  */
 
@@ -13,6 +13,5 @@ component Ticker {
     uses        if_OS_Timer         timeServer_rpc;
     consumes    TimerReady          timeServer_notify;
 
-    emits  EventDataAvailable  nwStack1_event_tick;
-    emits  EventDataAvailable  nwStack2_event_tick;
+    emits  EventDataAvailable  NwStack_event_tick;
 }

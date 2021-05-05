@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019, Hensoldt Cyber GmbH
+ * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  *
  * OS libraries configurations
  *
@@ -34,18 +34,14 @@
 // ChanMUX
 //-----------------------------------------------------------------------------
 
-#define CHANMUX_CHANNEL_NIC_1_CTRL 4
-#define CHANMUX_CHANNEL_NIC_1_DATA 5
-
-#define CHANMUX_CHANNEL_NIC_2_CTRL 7
-#define CHANMUX_CHANNEL_NIC_2_DATA 8
+#define CHANMUX_CHANNEL_NIC_CTRL 4
+#define CHANMUX_CHANNEL_NIC_DATA 5
 
 //-----------------------------------------------------------------------------
 // ChanMUX clients
 //-----------------------------------------------------------------------------
 
-#define CHANMUX_ID_NIC_1 101
-#define CHANMUX_ID_NIC_2 102
+#define CHANMUX_ID_NIC 101
 
 //-----------------------------------------------------------------------------
 // Network Stack

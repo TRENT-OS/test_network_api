@@ -1,7 +1,7 @@
 /*
  *  Ticker
  *
- *  Copyright (C) 2019, Hensoldt Cyber GmbH
+ *  Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  *
  */
 
@@ -26,8 +26,6 @@ int run(void)
     {
         timeServer_notify_wait();
 
-        // send tick to both network stacks
-        nwStack1_event_tick_emit();
-        nwStack2_event_tick_emit();
+        NwStack_event_tick_emit();
     }
 }

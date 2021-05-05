@@ -1,7 +1,7 @@
 /*
- *  ChanMux
+ * Channel MUX
  *
- *  Copyright (C) 2019, Hensoldt Cyber GmbH
+ * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
 #include "system_config.h"
@@ -9,12 +9,11 @@
 #include "ChanMuxNic.h"
 #include <camkes.h>
 
-
 //------------------------------------------------------------------------------
 static unsigned int
 resolveChannel(
-    unsigned int  sender_id,
-    unsigned int  chanNum_local)
+    unsigned int sender_id, 
+    unsigned int chanNum_local)
 {
     // ToDo: this function is supposed to map a "local" channel number passed
     //       by a sender to a "global" channel number used by the Proxy. Goal
@@ -33,30 +32,15 @@ resolveChannel(
     switch (sender_id)
     {
     //----------------------------------
-    case CHANMUX_ID_NIC_1:
+    case CHANMUX_ID_NIC:
         switch (chanNum_local)
         {
         //----------------------------------
-        case CHANMUX_CHANNEL_NIC_1_CTRL: // ToDo: use local channel number
-            return CHANMUX_CHANNEL_NIC_1_CTRL;
+        case CHANMUX_CHANNEL_NIC_CTRL:
+            return CHANMUX_CHANNEL_NIC_CTRL;
         //----------------------------------
-        case CHANMUX_CHANNEL_NIC_1_DATA: // ToDo: use local channel number
-            return CHANMUX_CHANNEL_NIC_1_DATA;
-        //----------------------------------
-        default:
-            break;
-        }
-        break;
-    //----------------------------------
-    case CHANMUX_ID_NIC_2:
-        switch (chanNum_local)
-        {
-        //----------------------------------
-        case CHANMUX_CHANNEL_NIC_2_CTRL: // ToDo: use local channel number
-            return CHANMUX_CHANNEL_NIC_2_CTRL;
-        //----------------------------------
-        case CHANMUX_CHANNEL_NIC_2_DATA: // ToDo: use local channel number
-            return CHANMUX_CHANNEL_NIC_2_DATA;
+        case CHANMUX_CHANNEL_NIC_DATA:
+            return CHANMUX_CHANNEL_NIC_DATA;
         //----------------------------------
         default:
             break;
@@ -70,54 +54,39 @@ resolveChannel(
     return INVALID_CHANNEL;
 }
 
-
 //------------------------------------------------------------------------------
-
-static struct {
+static struct
+{
     uint8_t ctrl[128];
     // FIFO is big enough to store 1 minute of network "background" traffic.
     // Value found by manual testing, may differ in less noisy networks
     uint8_t data[1024 * PAGE_SIZE];
 } nic_fifo[2];
 
-static struct {
+static struct
+{
     ChanMux_Channel_t ctrl;
     ChanMux_Channel_t data;
-} nic_channel[2];
-
+} nic_channel[1];
 
 //------------------------------------------------------------------------------
 static const ChanMux_ChannelCtx_t channelCtx[] = {
 
     CHANNELS_CTX_NIC_CTRL_DATA(
-        CHANMUX_CHANNEL_NIC_1_CTRL,
-        CHANMUX_CHANNEL_NIC_1_DATA,
+        CHANMUX_CHANNEL_NIC_CTRL,
+        CHANMUX_CHANNEL_NIC_DATA,
         0,
-        nwDriver1_ctrl_portRead,
-        nwDriver1_ctrl_portWrite,
-        nwDriver1_data_portRead,
-        nwDriver1_data_portWrite,
-        nwDriver1_ctrl_eventHasData_emit,
-        nwDriver1_data_eventHasData_emit),
-
-    CHANNELS_CTX_NIC_CTRL_DATA(
-        CHANMUX_CHANNEL_NIC_2_CTRL,
-        CHANMUX_CHANNEL_NIC_2_DATA,
-        1,
-        nwDriver2_ctrl_portRead,
-        nwDriver2_ctrl_portWrite,
-        nwDriver2_data_portRead,
-        nwDriver2_data_portWrite,
-        nwDriver2_ctrl_eventHasData_emit,
-        nwDriver2_data_eventHasData_emit),
-
+        nwDriver_ctrl_portRead,
+        nwDriver_ctrl_portWrite,
+        nwDriver_data_portRead,
+        nwDriver_data_portWrite,
+        nwDriver_ctrl_eventHasData_emit,
+        nwDriver_data_eventHasData_emit)
 };
-
 
 //------------------------------------------------------------------------------
 // this is used by the ChanMux component
-const ChanMux_Config_t cfgChanMux =
-{
+const ChanMux_Config_t cfgChanMux = {
     .resolveChannel = &resolveChannel,
     .numChannels    = ARRAY_SIZE(channelCtx),
     .channelCtx     = channelCtx
