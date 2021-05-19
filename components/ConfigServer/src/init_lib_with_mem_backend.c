@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2019, Hensoldt Cyber GmbH
+/*
+ * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  */
 
 #include <string.h>
@@ -46,7 +46,7 @@ formatMemoryBackends(OS_ConfigServiceLib_t* configLib)
                  stringBuf,
                  sizeof(stringBuf),
                  16,
-                 OS_CONFIG_LIB_PARAMETER_MAX_STRING_LENGTH);
+                 OS_CONFIG_LIB_PARAMETER_MAX_STRING_SIZE);
     if (result != OS_SUCCESS)
     {
         Debug_LOG_ERROR("createMemBackend failed with: %d", result);
@@ -57,7 +57,7 @@ formatMemoryBackends(OS_ConfigServiceLib_t* configLib)
                  blobBuf,
                  sizeof(blobBuf),
                  144,
-                 OS_CONFIG_LIB_PARAMETER_MAX_BLOB_BLOCK_LENGTH);
+                 OS_CONFIG_LIB_PARAMETER_MAX_BLOB_BLOCK_SIZE);
     if (result != OS_SUCCESS)
     {
         Debug_LOG_ERROR("createMemBackend failed with: %d", result);

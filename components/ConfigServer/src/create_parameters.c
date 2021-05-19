@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2019, Hensoldt Cyber GmbH
+/*
+ * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  */
 
 #include "system_config.h"
@@ -27,7 +27,7 @@ initializeDomain(
     OS_ConfigServiceLibTypes_Domain_t* domain,
     char const* name)
 {
-    initializeName(domain->name.name, OS_CONFIG_LIB_DOMAIN_NAME_LEN, name);
+    initializeName(domain->name.name, OS_CONFIG_LIB_DOMAIN_NAME_SIZE, name);
     domain->enumerator.index = 0;
 }
 
@@ -61,10 +61,12 @@ initializeDomainsAndParameters(
         OS_ConfigServiceAccessRights_SetAll(&parameter.writeAccess);
 
         parameter.parameterType = OS_CONFIG_LIB_PARAMETER_TYPE_STRING;
-        initializeName(parameter.parameterName.name, OS_CONFIG_LIB_PARAMETER_NAME_LEN,
-                       CFG_ETH_ADDR_CLIENT);
+        initializeName(
+            parameter.parameterName.name,
+            OS_CONFIG_LIB_PARAMETER_NAME_SIZE,
+            CFG_ETH_ADDR_CLIENT);
 
-        char str[OS_CONFIG_LIB_PARAMETER_MAX_STRING_LENGTH];
+        char str[OS_CONFIG_LIB_PARAMETER_MAX_STRING_SIZE];
         memset(str, 0, sizeof(str));
         strncpy(str, CFG_ETH_ADDR_CLIENT_VALUE, (sizeof(str) - 1));
 
@@ -91,8 +93,10 @@ initializeDomainsAndParameters(
         }
 
         parameter.parameterType = OS_CONFIG_LIB_PARAMETER_TYPE_STRING;
-        initializeName(parameter.parameterName.name, OS_CONFIG_LIB_PARAMETER_NAME_LEN,
-                       CFG_ETH_ADDR_SERVER);
+        initializeName(
+            parameter.parameterName.name,
+            OS_CONFIG_LIB_PARAMETER_NAME_SIZE,
+            CFG_ETH_ADDR_SERVER);
 
 
         memset(str, 0, sizeof(str));
@@ -121,8 +125,10 @@ initializeDomainsAndParameters(
         }
 
         parameter.parameterType = OS_CONFIG_LIB_PARAMETER_TYPE_STRING;
-        initializeName(parameter.parameterName.name, OS_CONFIG_LIB_PARAMETER_NAME_LEN,
-                       CFG_ETH_GATEWAY_ADDR);
+        initializeName(
+            parameter.parameterName.name,
+            OS_CONFIG_LIB_PARAMETER_NAME_SIZE,
+            CFG_ETH_GATEWAY_ADDR);
 
         memset(str, 0, sizeof(str));
         strncpy(str, CFG_ETH_GATEWAY_ADDR_VALUE, (sizeof(str) - 1));
@@ -151,8 +157,10 @@ initializeDomainsAndParameters(
 
 
         parameter.parameterType = OS_CONFIG_LIB_PARAMETER_TYPE_STRING;
-        initializeName(parameter.parameterName.name, OS_CONFIG_LIB_PARAMETER_NAME_LEN,
-                       CFG_ETH_SUBNET_MASK);
+        initializeName(
+            parameter.parameterName.name,
+            OS_CONFIG_LIB_PARAMETER_NAME_SIZE,
+            CFG_ETH_SUBNET_MASK);
 
 
         memset(str, 0, sizeof(str));
