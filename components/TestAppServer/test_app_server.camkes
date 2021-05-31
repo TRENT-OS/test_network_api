@@ -11,7 +11,7 @@ import <if_OS_Socket.camkes>;
 #include "util/loop_defines.h"
 #include "system_config.h"
 
-component NwApp2 {
+component TestAppServer {
 
     control;
 

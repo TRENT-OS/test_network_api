@@ -11,6 +11,27 @@ seos\_tests) to build a binary image.
 
 * seos\_sandbox
 
+## Test configurations
+
+This test can build for multiple configurations of the test environment. The
+following single-NIC targets are currently supported:
+
+* tcp_client_single_socket
+* tcp_client_multiple_sockets
+* tcp_client_multiple_clients
+* tcp_server
+* udp_server
+
+To build test_network_api in a given configuration
+```
+BUILD_PLATFORM=zynq7000 src/build.sh test_network_api \
+-DTEST_CONFIGURATION=<test_config_name>
+```
+To run the corresponding tests:
+```
+BUILD_PLATFORM=zynq7000 src/test.sh run test_network_api.py \
+--tc=platform.test_configuration:<test_config_name>
+```
 
 ## Running tests on hardware
 

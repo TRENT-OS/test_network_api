@@ -12,7 +12,7 @@
 //------------------------------------------------------------------------------
 static unsigned int
 resolveChannel(
-    unsigned int sender_id, 
+    unsigned int sender_id,
     unsigned int chanNum_local)
 {
     // ToDo: this function is supposed to map a "local" channel number passed

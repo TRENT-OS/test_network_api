@@ -628,22 +628,32 @@ run()
     init_client_api();
     Debug_LOG_INFO("Starting test_app_client %s...", get_instance_name());
 
-    if (!strcmp(get_instance_name(), "nwApp1"))
+#ifdef TCP_CLIENT
+    if (!strcmp(get_instance_name(), "tac_1"))
     {
         // The following API tests do not need to be executed in parallel
-        // therefore only nwApp1 will execute them.
+        // therefore only tac_1 will execute them.
         test_dataport_size_check_client_functions();
         test_dataport_size_check_lib_functions();
         test_socket_create_neg();
         test_socket_create_pos();
     }
-    // synchronise the nwApp1 and nwApp1_2
+#endif
+
+#ifdef TCP_CLIENT_MULTIPLE_CLIENTS
+    // synchronise the tac_1 and tac_1_2
     event_network_app_send_ready_emit();
     event_network_app_recv_ready_wait();
+#endif
 
+#if defined(TCP_CLIENT) || defined(TCP_CLIENT_MULTIPLE_CLIENTS)
     test_tcp_client();
+#endif
+
+#ifdef UDP_SERVER
     test_udp_recvfrom();
     test_udp_sendto();
+#endif
 
     return 0;
 }

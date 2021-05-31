@@ -23,7 +23,7 @@ import <if_OS_ConfigService.camkes>;
 // Network Stack Components
 
 NwStack_COMPONENT_DEFINE(
-    NwStack1,
+    NwStack,
     NIC_DRIVER_RINGBUFFER_SIZE,
     OS_NETWORK_MAXIMUM_SOCKET_NO,
     NwStack_INTERFACES)

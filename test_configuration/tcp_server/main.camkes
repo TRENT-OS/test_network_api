@@ -1,0 +1,110 @@
+/*
+ *  Network API Test System
+ *
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ */
+
+#include "system_config.h"
+
+#include "TimeServer/camkes/TimeServer.camkes"
+TimeServer_COMPONENT_DEFINE(TimeServer)
+
+#include "SysLogger/camkes/SysLogger.camkes"
+SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
+
+import "../../components/Ticker/Ticker.camkes";
+import "../../components/TestAppServer/test_app_server.camkes";
+import "../../components/ConfigServer/ConfigServer.camkes";
+#include "../../components/NwStack/NwStack.camkes"
+
+#include "plat_nic.camkes"
+#include "lib_macros/List.h"
+
+assembly {
+    composition {
+
+        //----------------------------------------------------------------------
+        // Ticker
+        // It's a very pragmatic approach to create a 1 second tick for each
+        // network stack. Actually, we don't need this, because the TimeServer
+        // should provide two timers per client, one for timeouts and once for
+        // the periodic tick.
+        //----------------------------------------------------------------------
+        component Ticker ticker;
+
+        //----------------------------------------------------------------------
+        // SysLogger
+        //----------------------------------------------------------------------
+        component   SysLogger       sysLogger;
+
+        SysLogger_INSTANCE_CONNECT_CLIENTS(
+            sysLogger,
+            NwStack,
+            tas_1
+        )
+
+        //----------------------------------------------------------------------
+        // TimeServer
+        //----------------------------------------------------------------------
+        component TimeServer timeServer;
+
+
+        TimeServer_INSTANCE_CONNECT_CLIENTS(
+            timeServer,
+            ticker.timeServer_rpc, ticker.timeServer_notify,
+            // connect platform specific components. The comma needs to be part
+            // of the macro expansion
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver)
+            NwStack.timeServer_rpc, NwStack.timeServer_notify
+        )
+
+        //----------------------------------------------------------------------
+        // ConfigServer
+        //----------------------------------------------------------------------
+        component ConfigServer configServer;
+
+        //----------------------------------------------------------------------
+        // NICs
+        //----------------------------------------------------------------------
+        NETWORK_TEST_NIC_INSTANCE(nwDriver)
+
+        //----------------------------------------------------------------------
+        // Network Stack #1
+        //----------------------------------------------------------------------
+        component NwStack NwStack;
+
+        NwStack_INSTANCE_CONNECT(
+            NwStack,
+            ticker.NwStack_event_tick,
+            nwDriver
+        )
+
+        NETWORK_STACK_CONNECT_CONFIGSERVER(NwStack, configServer)
+
+
+        //----------------------------------------------------------------------
+        // Network Stack App #1
+        //----------------------------------------------------------------------
+        component TestAppServer tas_1;
+
+        NwStack_INSTANCE_CONNECT_CLIENT(
+            NwStack,
+            tas_1,
+            networkStack_rpc,
+            LIST(NwStack_SOCKET_PORT_NAME,
+                 OS_NETWORK_MAXIMUM_SOCKET_NO))
+
+     }
+
+    configuration {
+        TimeServer_CLIENT_ASSIGN_BADGES(
+            ticker.timeServer_rpc,
+            // connect platform specific components. The comma needs to be part
+            // of the macro expansion
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver)
+            NwStack.timeServer_rpc
+        )
+
+        NETWORK_TEST_NIC_CONFIG(nwDriver)
+    }
+}

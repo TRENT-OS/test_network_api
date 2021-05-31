@@ -12,15 +12,12 @@ TimeServer_COMPONENT_DEFINE(TimeServer)
 #include "SysLogger/camkes/SysLogger.camkes"
 SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
-import "components/Ticker/Ticker.camkes";
-import "components/TestAppClient/test_app_client.camkes";
-import "components/TestAppServer/test_app_server.camkes";
-import "components/ConfigServer/ConfigServer.camkes";
-#include "components/NwStack/network_stack.camkes"
+import "../../components/Ticker/Ticker.camkes";
+import "../../components/TestAppClient/test_app_client.camkes";
+import "../../components/ConfigServer/ConfigServer.camkes";
+#include "../../components/NwStack/NwStack.camkes"
 
 #include "plat_nic.camkes"
-
-#include "util/loop_defines.h"
 #include "lib_macros/List.h"
 
 assembly {
@@ -42,13 +39,9 @@ assembly {
 
         SysLogger_INSTANCE_CONNECT_CLIENTS(
             sysLogger,
-#if !defined(NETWORK_TEST_ONE_NIC)
-            nwStack1,
-            nwApp1,
-            nwApp1_2,
-#endif
-            nwStack2,
-            nwApp2
+            NwStack,
+            tac_1,
+            tac_2
         )
 
         //----------------------------------------------------------------------
@@ -62,11 +55,8 @@ assembly {
             ticker.timeServer_rpc, ticker.timeServer_notify,
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
-            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver2)
-#if !defined(NETWORK_TEST_ONE_NIC)
-            nwStack1.timeServer_rpc, nwStack1.timeServer_notify,
-#endif
-            nwStack2.timeServer_rpc, nwStack2.timeServer_notify
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver)
+            NwStack.timeServer_rpc, NwStack.timeServer_notify
         )
 
         //----------------------------------------------------------------------
@@ -77,85 +67,57 @@ assembly {
         //----------------------------------------------------------------------
         // NICs
         //----------------------------------------------------------------------
-        NETWORK_TEST_NIC_INSTANCES(nwDriver1, nwDriver2)
-
-#if !defined(NETWORK_TEST_ONE_NIC)
+        NETWORK_TEST_NIC_INSTANCE(nwDriver)
 
         //----------------------------------------------------------------------
         // Network Stack #1
         //----------------------------------------------------------------------
-        component NwStack1 nwStack1;
+        component NwStack NwStack;
 
         NwStack_INSTANCE_CONNECT(
-            nwStack1,
-            ticker.nwStack1_event_tick,
-            nwDriver1
+            NwStack,
+            ticker.NwStack_event_tick,
+            nwDriver
         )
 
-        NETWORK_STACK_CONNECT_CONFIGSERVER(nwStack1, configServer)
+        NETWORK_STACK_CONNECT_CONFIGSERVER(NwStack, configServer)
 
         //----------------------------------------------------------------------
         // Network Stack App #1
         //----------------------------------------------------------------------
-        component  NwApp1           nwApp1;
+        component TestAppClient tac_1;
 
         NwStack_INSTANCE_CONNECT_CLIENT(
-            nwStack1,
-            nwApp1,
+            NwStack,
+            tac_1,
             networkStack_rpc,
             LIST(NwStack_SOCKET_PORT_NAME,
                  OS_NETWORK_MAXIMUM_SOCKET_NO))
+
 
         //----------------------------------------------------------------------
         // Network Stack App #1.2
         //----------------------------------------------------------------------
-        component NwApp1 nwApp1_2;
+        component TestAppClient tac_2;
 
         NwStack_INSTANCE_CONNECT_CLIENT(
-            nwStack1,
-            nwApp1_2,
+            NwStack,
+            tac_2,
             networkStack_rpc,
             LIST(NwStack_SOCKET_PORT_NAME,
                  OS_NETWORK_MAXIMUM_SOCKET_NO))
+
 
         // Clients sync
-        connection seL4Notification nwApp1_nwApp_1_2_ready(
-            from nwApp1.event_network_app_send_ready,
-            to nwApp1_2.event_network_app_recv_ready);
+        connection seL4Notification tac_1_tac_2_ready(
+            from tac_1.event_network_app_send_ready,
+            to tac_2.event_network_app_recv_ready);
 
-        connection seL4Notification nwApp1_2_nwApp_1_ready(
-            from nwApp1_2.event_network_app_send_ready,
-            to nwApp1.event_network_app_recv_ready);
-
-
-#endif // !defined(NETWORK_TEST_ONE_NIC)
+        connection seL4Notification tac_2_tac_1_ready(
+            from tac_2.event_network_app_send_ready,
+            to tac_1.event_network_app_recv_ready);
 
 
-        //----------------------------------------------------------------------
-        // Network Stack #2
-        //----------------------------------------------------------------------
-        component NwStack2 nwStack2;
-
-        NwStack_INSTANCE_CONNECT(
-            nwStack2,
-            ticker.nwStack2_event_tick,
-            nwDriver2
-        )
-
-        NETWORK_STACK_CONNECT_CONFIGSERVER(nwStack2, configServer)
-
-
-        //----------------------------------------------------------------------
-        // Network Stack App #2
-        //----------------------------------------------------------------------
-        component NwApp2 nwApp2;
-
-        NwStack_INSTANCE_CONNECT_CLIENT(
-            nwStack2,
-            nwApp2,
-            networkStack_rpc,
-            LIST(NwStack_SOCKET_PORT_NAME,
-                 OS_NETWORK_MAXIMUM_SOCKET_NO))
      }
 
     configuration {
@@ -163,11 +125,10 @@ assembly {
             ticker.timeServer_rpc,
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
-            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver2)
-            nwStack1.timeServer_rpc,
-            nwStack2.timeServer_rpc
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver)
+            NwStack.timeServer_rpc
         )
 
-        NETWORK_TEST_NIC_CONFIG(nwDriver1, nwDriver2)
+        NETWORK_TEST_NIC_CONFIG(nwDriver)
     }
 }
