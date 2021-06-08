@@ -14,7 +14,6 @@ import <if_OS_ConfigService.camkes>;
     /* config server */ \
     uses      if_OS_ConfigService  OS_ConfigServiceServer; \
     dataport  Buf                  cfg_port; \
-    consumes  EventServiceReady    configServer_event_ready; \
     /* logger */ \
     SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)
 
@@ -32,10 +31,6 @@ NwStack_COMPONENT_DEFINE(
 //------------------------------------------------------------------------------
 // Connect a Network Stack to a ConfigServer
 #define NETWORK_STACK_CONNECT_CONFIGSERVER(_inst_, _inst_cfg_server_) \
-    \
-    connection seL4Notification conn_##_inst_##_inst_cfg_server_##_ready( \
-        from _inst_cfg_server_.event_ready, \
-        to   _inst_.configServer_event_ready); \
     \
     connection seL4RPCCall conn_##_inst_##_##_inst_cfg_server_##_rpc( \
         from _inst_.OS_ConfigServiceServer, \

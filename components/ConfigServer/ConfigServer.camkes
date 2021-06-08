@@ -15,6 +15,5 @@ component ConfigServer {
 
     provides  if_OS_ConfigService  OS_ConfigServiceServer;
     dataport  Buf                  cfg_port;
-    emits     EventServiceReady    event_ready;
 
 }
