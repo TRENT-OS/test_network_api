@@ -24,13 +24,11 @@ compareDomainName(
     OS_ConfigServiceLibTypes_DomainName_t const* a,
     OS_ConfigServiceLibTypes_DomainName_t const* b)
 {
-    for (unsigned int k = 0; k < OS_CONFIG_LIB_DOMAIN_NAME_SIZE; ++k)
+    if (strncmp(a->name, b->name, OS_CONFIG_LIB_DOMAIN_NAME_SIZE))
     {
-        if (a->name[k] != b->name[k])
-        {
-            Debug_LOG_DEBUG("Error: function: %s - line: %d\n", __FUNCTION__, __LINE__);
-            return OS_ERROR_GENERIC;
-        }
+        Debug_LOG_DEBUG("Error: function: %s - line: %d\n",
+                        __FUNCTION__, __LINE__);
+        return OS_ERROR_GENERIC;
     }
 
     return OS_SUCCESS;
