@@ -13,7 +13,7 @@ TimeServer_COMPONENT_DEFINE(TimeServer)
 SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
 import "../../components/Ticker/Ticker.camkes";
-import "../../components/TestAppServer/test_app_server.camkes";
+import "../../components/TestAppTCPServer/TestAppTCPServer.camkes";
 import "../../components/ConfigServer/ConfigServer.camkes";
 #include "../../components/NwStack/NwStack.camkes"
 
@@ -39,8 +39,8 @@ assembly {
 
         SysLogger_INSTANCE_CONNECT_CLIENTS(
             sysLogger,
-            NwStack,
-            tas_1
+            nwStack,
+            testAppTCPServer
         )
 
         //----------------------------------------------------------------------
@@ -55,7 +55,7 @@ assembly {
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver)
-            NwStack.timeServer_rpc, NwStack.timeServer_notify
+            nwStack.timeServer_rpc, nwStack.timeServer_notify
         )
 
         //----------------------------------------------------------------------
@@ -69,27 +69,27 @@ assembly {
         NETWORK_TEST_NIC_INSTANCE(nwDriver)
 
         //----------------------------------------------------------------------
-        // Network Stack #1
+        // Network Stack
         //----------------------------------------------------------------------
-        component NwStack NwStack;
+        component NwStack nwStack;
 
         NwStack_INSTANCE_CONNECT(
-            NwStack,
+            nwStack,
             ticker.NwStack_event_tick,
             nwDriver
         )
 
-        NETWORK_STACK_CONNECT_CONFIGSERVER(NwStack, configServer)
+        NETWORK_STACK_CONNECT_CONFIGSERVER(nwStack, configServer)
 
 
         //----------------------------------------------------------------------
-        // Network Stack App #1
+        // TCP Echo server
         //----------------------------------------------------------------------
-        component TestAppServer tas_1;
+        component TestAppTCPServer testAppTCPServer;
 
         NwStack_INSTANCE_CONNECT_CLIENT(
-            NwStack,
-            tas_1,
+            nwStack,
+            testAppTCPServer,
             networkStack_rpc,
             LIST(NwStack_SOCKET_PORT_NAME,
                  OS_NETWORK_MAXIMUM_SOCKET_NO))
@@ -102,7 +102,7 @@ assembly {
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver)
-            NwStack.timeServer_rpc
+            nwStack.timeServer_rpc
         )
 
         NETWORK_TEST_NIC_CONFIG(nwDriver)

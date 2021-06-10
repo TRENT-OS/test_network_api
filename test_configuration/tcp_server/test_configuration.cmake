@@ -24,10 +24,10 @@ DeclareCAmkESComponent(
         -Werror
         -DOS_NWSTACK_AS_SERVER
         -DOS_CONFIG_SERVICE_CAMKES_CLIENT
-        #-DDEV_ADDR="192.168.82.232"
-        #-DGATEWAY_ADDR="192.168.82.1"
-        #-DSUBNET_MASK="255.255.255.0"
-        -DOS_NETWORK_STACK_USE_CONFIGSERVER
+        -DDEV_ADDR="10.0.0.11"
+        -DGATEWAY_ADDR="10.0.0.1"
+        -DSUBNET_MASK="255.255.255.0"
+        #-DOS_NETWORK_STACK_USE_CONFIGSERVER
     LIBS
         system_config
         os_core_api
@@ -40,9 +40,9 @@ DeclareCAmkESComponent(
 )
 
 DeclareCAmkESComponent(
-    TestAppServer
+    TestAppTCPServer
     SOURCES
-        components/TestAppServer/test_app_server.c
+        components/TestAppTCPServer/TestAppTCPServer.c
     C_FLAGS
         -Wall
         -Werror
