@@ -6,14 +6,10 @@
 
 #pragma once
 
-import <if_OS_ConfigService.camkes>;
 #include "SysLogger/camkes/SysLogger.camkes"
 #include "os_network_stack/network_stack.camkes"
 
 #define NwStack_INTERFACES \
-    /* config server */ \
-    uses      if_OS_ConfigService  OS_ConfigServiceServer; \
-    dataport  Buf                  cfg_port; \
     /* logger */ \
     SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)
 
@@ -26,16 +22,3 @@ NwStack_COMPONENT_DEFINE(
     NIC_DRIVER_RINGBUFFER_SIZE,
     OS_NETWORK_MAXIMUM_SOCKET_NO,
     NwStack_INTERFACES)
-
-
-//------------------------------------------------------------------------------
-// Connect a Network Stack to a ConfigServer
-#define NETWORK_STACK_CONNECT_CONFIGSERVER(_inst_, _inst_cfg_server_) \
-    \
-    connection seL4RPCCall conn_##_inst_##_##_inst_cfg_server_##_rpc( \
-        from _inst_.OS_ConfigServiceServer, \
-        to   _inst_cfg_server_.OS_ConfigServiceServer); \
-    \
-    connection seL4SharedData conn_##_inst_##_##_inst_cfg_server_##_port( \
-        from _inst_.cfg_port, \
-        to   _inst_cfg_server_.cfg_port);

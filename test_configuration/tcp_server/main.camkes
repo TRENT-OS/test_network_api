@@ -14,7 +14,6 @@ SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
 import "../../components/Ticker/Ticker.camkes";
 import "../../components/TestAppTCPServer/TestAppTCPServer.camkes";
-import "../../components/ConfigServer/ConfigServer.camkes";
 #include "../../components/NwStack/NwStack.camkes"
 
 #include "plat_nic.camkes"
@@ -59,11 +58,6 @@ assembly {
         )
 
         //----------------------------------------------------------------------
-        // ConfigServer
-        //----------------------------------------------------------------------
-        component ConfigServer configServer;
-
-        //----------------------------------------------------------------------
         // NICs
         //----------------------------------------------------------------------
         NETWORK_TEST_NIC_INSTANCE(nwDriver)
@@ -78,9 +72,6 @@ assembly {
             ticker.NwStack_event_tick,
             nwDriver
         )
-
-        NETWORK_STACK_CONNECT_CONFIGSERVER(nwStack, configServer)
-
 
         //----------------------------------------------------------------------
         // TCP Echo server

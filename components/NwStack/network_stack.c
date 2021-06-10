@@ -12,17 +12,10 @@
 #include "OS_Error.h"
 #include "OS_NetworkStack.h"
 #include "TimeServer.h"
-#include "util/helper_func.h"
 #include <camkes.h>
 #include "OS_Dataport.h"
 #include "OS_Network.h"
 #include "util/loop_defines.h"
-
-#ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
-char DEV_ADDR[20];
-char GATEWAY_ADDR[20];
-char SUBNET_MASK[20];
-#endif
 
 static const OS_NetworkStack_AddressConfig_t config =
 {
@@ -37,80 +30,6 @@ static const if_OS_Timer_t timer =
         timeServer_notify);
 
 static bool initSuccessfullyCompleted = false;
-
-#ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
-OS_Error_t
-read_ip_from_config_server(void)
-{
-    OS_Error_t ret;
-    // Create a handle to the remote library instance.
-    OS_ConfigServiceHandle_t serverLibWithMemBackend;
-
-    static OS_ConfigService_ClientCtx_t ctx =
-    {
-        .dataport = OS_DATAPORT_ASSIGN(cfg_port)
-    };
-    ret = OS_ConfigService_createHandleRemote(
-                                        &ctx,
-                                        &serverLibWithMemBackend);
-    if (ret != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("OS_ConfigService_createHandleRemote failed with :%d", ret);
-        return ret;
-    }
-
-    // Get the needed param values one by one from config server, using below API
-    ret = helper_func_getConfigParameter(&serverLibWithMemBackend,
-                                         DOMAIN_NWSTACK,
-#ifdef OS_NWSTACK_AS_CLIENT
-                                         CFG_ETH_ADDR_CLIENT,
-#endif
-#ifdef OS_NWSTACK_AS_SERVER
-                                         CFG_ETH_ADDR_SERVER,
-#endif
-                                         DEV_ADDR,
-                                         sizeof(DEV_ADDR));
-    if (ret != OS_SUCCESS)
-    {
-#ifdef OS_NWSTACK_AS_CLIENT
-        Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
-                        CFG_ETH_ADDR_CLIENT, ret);
-#endif
-#ifdef OS_NWSTACK_AS_SERVER
-        Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
-                        CFG_ETH_ADDR_SERVER, ret);
-#endif
-        return ret;
-    }
-
-    ret = helper_func_getConfigParameter(&serverLibWithMemBackend,
-                                         DOMAIN_NWSTACK,
-                                         CFG_ETH_GATEWAY_ADDR,
-                                         GATEWAY_ADDR,
-                                         sizeof(GATEWAY_ADDR));
-    if (ret != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
-                        CFG_ETH_GATEWAY_ADDR, ret);
-        return ret;
-    }
-
-    ret = helper_func_getConfigParameter(&serverLibWithMemBackend,
-                                         DOMAIN_NWSTACK,
-                                         CFG_ETH_SUBNET_MASK,
-                                         SUBNET_MASK,
-                                         sizeof(SUBNET_MASK));
-    if (ret != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("helper_func_getConfigParameter for param %s failed with :%d",
-                        CFG_ETH_SUBNET_MASK, ret);
-        return ret;
-    }
-
-    return OS_SUCCESS;
-}
-#endif
-
 
 //------------------------------------------------------------------------------
 // network stack's PicTCP OS adaption layer calls this.
@@ -207,16 +126,6 @@ post_init(void)
     };
 
     OS_Error_t ret;
-
-#ifdef OS_NETWORK_STACK_USE_CONFIGSERVER
-    ret = read_ip_from_config_server();
-    if (ret != OS_SUCCESS)
-    {
-        Debug_LOG_FATAL("[NwStack '%s'] Read from config failed, error %d",
-                        get_instance_name(), ret);
-        return;
-    }
-#endif
 
     Debug_LOG_INFO("[NwStack '%s'] IP ADDR: %s", get_instance_name(), DEV_ADDR);
     Debug_LOG_INFO("[NwStack '%s'] GATEWAY ADDR: %s", get_instance_name(), GATEWAY_ADDR);
