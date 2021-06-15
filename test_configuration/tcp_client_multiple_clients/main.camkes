@@ -13,7 +13,7 @@ TimeServer_COMPONENT_DEFINE(TimeServer)
 SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
 import "../../components/Ticker/Ticker.camkes";
-import "../../components/TestAppClient/test_app_client.camkes";
+import "../../components/TestAppTCPClient/TestAppTCPClient.camkes";
 import "../../components/ConfigServer/ConfigServer.camkes";
 #include "../../components/NwStack/NwStack.camkes"
 
@@ -39,9 +39,9 @@ assembly {
 
         SysLogger_INSTANCE_CONNECT_CLIENTS(
             sysLogger,
-            NwStack,
-            tac_1,
-            tac_2
+            nwStack,
+            testAppTCPClient_client1,
+            testAppTCPClient_client2
         )
 
         //----------------------------------------------------------------------
@@ -56,7 +56,7 @@ assembly {
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver)
-            NwStack.timeServer_rpc, NwStack.timeServer_notify
+            nwStack.timeServer_rpc, nwStack.timeServer_notify
         )
 
         //----------------------------------------------------------------------
@@ -70,52 +70,52 @@ assembly {
         NETWORK_TEST_NIC_INSTANCE(nwDriver)
 
         //----------------------------------------------------------------------
-        // Network Stack #1
+        // Network Stack
         //----------------------------------------------------------------------
-        component NwStack NwStack;
+        component NwStack nwStack;
 
         NwStack_INSTANCE_CONNECT(
-            NwStack,
+            nwStack,
             ticker.NwStack_event_tick,
             nwDriver
         )
 
-        NETWORK_STACK_CONNECT_CONFIGSERVER(NwStack, configServer)
+        NETWORK_STACK_CONNECT_CONFIGSERVER(nwStack, configServer)
 
         //----------------------------------------------------------------------
-        // Network Stack App #1
+        // TCP Client multiple clients - client 1
         //----------------------------------------------------------------------
-        component TestAppClient tac_1;
+        component TestAppTCPClient testAppTCPClient_client1;
 
         NwStack_INSTANCE_CONNECT_CLIENT(
-            NwStack,
-            tac_1,
+            nwStack,
+            testAppTCPClient_client1,
             networkStack_rpc,
             LIST(NwStack_SOCKET_PORT_NAME,
                  OS_NETWORK_MAXIMUM_SOCKET_NO))
 
 
         //----------------------------------------------------------------------
-        // Network Stack App #1.2
+        // TCP Client multiple clients - client 2
         //----------------------------------------------------------------------
-        component TestAppClient tac_2;
+        component TestAppTCPClient testAppTCPClient_client2;
 
         NwStack_INSTANCE_CONNECT_CLIENT(
-            NwStack,
-            tac_2,
+            nwStack,
+            testAppTCPClient_client2,
             networkStack_rpc,
             LIST(NwStack_SOCKET_PORT_NAME,
                  OS_NETWORK_MAXIMUM_SOCKET_NO))
 
 
         // Clients sync
-        connection seL4Notification tac_1_tac_2_ready(
-            from tac_1.event_network_app_send_ready,
-            to tac_2.event_network_app_recv_ready);
+        connection seL4Notification testAppTCPClient_1_2_ready(
+            from testAppTCPClient_client1.multiple_client_sync_send_ready,
+            to   testAppTCPClient_client2.multiple_client_sync_recv_ready);
 
-        connection seL4Notification tac_2_tac_1_ready(
-            from tac_2.event_network_app_send_ready,
-            to tac_1.event_network_app_recv_ready);
+        connection seL4Notification testAppTCPClient_2_1_ready(
+            from testAppTCPClient_client2.multiple_client_sync_send_ready,
+            to   testAppTCPClient_client1.multiple_client_sync_recv_ready);
 
 
      }
@@ -126,7 +126,7 @@ assembly {
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver)
-            NwStack.timeServer_rpc
+            nwStack.timeServer_rpc
         )
 
         NETWORK_TEST_NIC_CONFIG(nwDriver)

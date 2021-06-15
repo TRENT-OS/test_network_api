@@ -842,10 +842,11 @@ run()
     Debug_LOG_INFO("Starting TestAppTCPClient %s...", get_instance_name());
 
 #ifdef TCP_CLIENT
-    if (!strcmp(get_instance_name(), "tac_1"))
+    if ((0 == strcmp(get_instance_name(), "testAppTCPClient_singleSocket")) ||
+        (0 == strcmp(get_instance_name(), "testAppTCPClient_client1")))
     {
         // The following API tests do not need to be executed in parallel
-        // therefore only tac_1 will execute them.
+        // therefore only testAppTCPClient_client1 will execute them.
         test_dataport_size_check_client_functions();
         test_dataport_size_check_lib_functions();
         test_socket_create_neg();
@@ -864,9 +865,9 @@ run()
 #endif
 
 #ifdef TCP_CLIENT_MULTIPLE_CLIENTS
-    // synchronise the tac_1 and tac_1_2
-    event_network_app_send_ready_emit();
-    event_network_app_recv_ready_wait();
+    // synchronise the two clients
+    multiple_client_sync_send_ready_emit();
+    multiple_client_sync_recv_ready_wait();
 #endif
 
     test_tcp_client();

@@ -22,8 +22,8 @@ component TestAppTCPClient {
 
     uses if_OS_Socket networkStack_rpc;
 
-    emits    EventApiTestsDone event_network_app_send_ready;
-    maybe    consumes EventApiTestsDone event_network_app_recv_ready;
+             emits    EventApiTestsDone multiple_client_sync_send_ready;
+    maybe    consumes EventApiTestsDone multiple_client_sync_recv_ready;
 
 #define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
 #define LOOP_ELEMENT \
