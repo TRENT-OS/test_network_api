@@ -10,7 +10,7 @@
 
 
 // Create a i.MX6 NIC driver instance.
-#define NETWORK_TEST_NIC_INSTANCES(_nic_) \
+#define NETWORK_TEST_NIC_INSTANCE(_nic_) \
     NIC_IMX6_INSTANCE(_nic_)
 
 #define NETWORK_TEST_NIC_CONFIG(_nic_) \
