@@ -12,8 +12,12 @@
 
 #include "OS_Network.h"
 #include "OS_NetworkStackClient.h"
+#include "interfaces/if_OS_NetworkStack.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
+
+static const if_OS_NetworkStack_t network_stack =
+    IF_OS_NETWORKSTACK_ASSIGN(networkStack_rpc, socket_1_port);
 
 /*
  * This example demonstrates a server with an incoming connection. Reads
@@ -77,8 +81,10 @@ run()
     /* Gets filled when server socket create is called */
     OS_NetworkServer_Handle_t os_nw_server_handle;
 
-    OS_Error_t err =
-        OS_NetworkServerSocket_create(NULL, &srv_socket, &os_nw_server_handle);
+    OS_Error_t err = OS_NetworkServerSocket_create(
+        &network_stack,
+        &srv_socket,
+        &os_nw_server_handle);
 
     if (err != OS_SUCCESS)
     {

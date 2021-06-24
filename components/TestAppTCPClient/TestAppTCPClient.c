@@ -18,8 +18,12 @@
 
 #include "OS_NetworkStackClient.h"
 #include "SysLoggerClient.h"
+#include "interfaces/if_OS_NetworkStack.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
+
+static const if_OS_NetworkStack_t network_stack =
+    IF_OS_NETWORKSTACK_ASSIGN(networkStack_rpc, socket_1_port);
 
 static OS_NetworkStackClient_SocketDataports_t config = {
     .number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO
@@ -80,7 +84,7 @@ test_socket_create_neg()
     socket.domain = 0;
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
     }
     socket.domain = OS_AF_INET;
@@ -89,7 +93,7 @@ test_socket_create_neg()
     socket.type = 0;
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
     }
     socket.type = OS_SOCK_STREAM;
@@ -98,7 +102,7 @@ test_socket_create_neg()
     memset(socket.name, 0, sizeof(socket.name));
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
         ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
     }
 
@@ -106,7 +110,7 @@ test_socket_create_neg()
     strncpy(socket.name, CFG_UNREACHABLE_HOST, sizeof(socket.name));
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(NULL, &socket, handle);
+        err = OS_NetworkSocket_create(&network_stack, &socket, handle);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_HOST_UNREACHABLE, err);
     }
     /*
@@ -119,7 +123,7 @@ test_socket_create_neg()
     strncpy(socket.name, CFG_FORBIDDEN_HOST, sizeof(socket.name));
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(NULL, &socket, handle);
+        err = OS_NetworkSocket_create(&network_stack, &socket, handle);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_RESET, err);
     }
     */
@@ -129,18 +133,18 @@ test_socket_create_neg()
     // timeouts
     strncpy(socket.name, CFG_REACHABLE_HOST, sizeof(socket.name));
     socket.port = CFG_UNREACHABLE_PORT;
-    err         = OS_NetworkSocket_create(NULL, &socket, handle);
+    err         = OS_NetworkSocket_create(&network_stack, &socket, handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
 
     // test out of resources
     socket.port = CFG_REACHABLE_PORT;
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(NULL, &socket, &handle[i]);
+        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
     }
     OS_NetworkSocket_Handle_t exceedingHandle;
-    err = OS_NetworkSocket_create(NULL, &socket, &exceedingHandle);
+    err = OS_NetworkSocket_create(&network_stack, &socket, &exceedingHandle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INSUFFICIENT_SPACE, err);
 
     // cleanup
@@ -179,7 +183,7 @@ test_socket_create_pos()
         for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
         {
             OS_Error_t err =
-                OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
+                OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
             ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
         }
 
@@ -220,7 +224,7 @@ test_server_socket_create_pos()
         {
             socket.listen_port += i;
             OS_Error_t err =
-                OS_NetworkServerSocket_create(NULL, &socket, &handle[i]);
+                OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
             ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
         }
 
@@ -251,7 +255,7 @@ test_server_socket_create_neg()
     socket.domain = 0;
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkServerSocket_create(NULL, &socket, &handle[i]);
+        err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
     }
     socket.domain = OS_AF_INET;
@@ -260,18 +264,18 @@ test_server_socket_create_neg()
     socket.type = 0;
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkServerSocket_create(NULL, &socket, &handle[i]);
+        err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
     }
     socket.type = OS_SOCK_STREAM;
 
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkServerSocket_create(NULL, &socket, &handle[i]);
+        err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
     }
     OS_NetworkSocket_Handle_t exceedingHandle;
-    err = OS_NetworkServerSocket_create(NULL, &socket, &exceedingHandle);
+    err = OS_NetworkServerSocket_create(&network_stack, &socket, &exceedingHandle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INSUFFICIENT_SPACE, err);
 
     // cleanup
@@ -297,7 +301,7 @@ test_server_socket_close_pos()
 
     OS_Error_t err;
 
-    err = OS_NetworkServerSocket_create(NULL, &socket, &handle[0]);
+    err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[0]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = OS_NetworkServerSocket_close(handle[0]);
@@ -319,10 +323,13 @@ test_server_socket_close_neg()
 
     OS_Error_t err;
 
-    err = OS_NetworkServerSocket_create(NULL, &socket, &handle[0]);
+    err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[0]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkServerSocket_close(-1);
+    OS_NetworkServer_Handle_t invalid_handle = { .ctx    = handle[0].ctx,
+                                                 .handleID = -1 };
+
+    err = OS_NetworkServerSocket_close(invalid_handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
     err = OS_NetworkServerSocket_close(handle[0]);
@@ -344,7 +351,7 @@ test_socket_close_pos()
 
     OS_Error_t err;
 
-    err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[0]);
+    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[0]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = OS_NetworkSocket_close(handle[0]);
@@ -366,10 +373,13 @@ test_socket_close_neg()
 
     OS_Error_t err;
 
-    err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[0]);
+    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[0]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_close(-1);
+    OS_NetworkSocket_Handle_t invalid_handle = { .ctx    = handle[0].ctx,
+                                                 .handleID = -1 };
+
+    err = OS_NetworkSocket_close(invalid_handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
     err = OS_NetworkSocket_close(handle[0]);
@@ -395,7 +405,7 @@ test_tcp_read_pos()
     OS_Error_t                err;
     int                       i = 0;
 
-    err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
+    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -438,7 +448,7 @@ test_tcp_read_neg()
     OS_Error_t                err;
     int                       i = 0;
 
-    err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
+    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -489,7 +499,7 @@ test_tcp_write_neg()
     OS_Error_t                err;
     int                       i = 0;
 
-    err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
+    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -534,7 +544,7 @@ test_tcp_write_pos()
     OS_Error_t                err;
     int                       i = 0;
 
-    err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
+    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -579,7 +589,7 @@ test_tcp_client()
     int                       i;
     for (i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(NULL, &cli_socket, &handle[i]);
+        err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
 
         if (err != OS_SUCCESS)
         {
@@ -713,10 +723,10 @@ test_dataport_size_check_client_functions()
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char               buffer[4096];
     OS_Network_Socket_t       udp_socket;
-    OS_NetworkSocket_Handle_t handle = 0;
+    OS_NetworkSocket_Handle_t handle = { .ctx = &network_stack, .handleID = 0};
     OS_Error_t                err;
 
-    const OS_Dataport_t dp = config.dataport[handle];
+    const OS_Dataport_t dp = config.dataport[handle.handleID];
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
     size_t len = OS_Dataport_getSize(dp) + 1;
@@ -775,19 +785,20 @@ test_dataport_size_check_lib_functions()
                                        .name   = DEV_ADDR,
                                        .port   = CFG_TCP_TEST_PORT };
 
-    OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Dataport_t dp = config.dataport[handle];
+    const OS_Dataport_t dp = config.dataport[handle.handleID];
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
     size_t len = OS_Dataport_getSize(dp) + 1;
 
-    err = networkStack_rpc_socket_read(handle, &len);
+    if_OS_NetworkStack_t* vtable = (if_OS_NetworkStack_t*)handle.ctx;
+    err = vtable->socket_read(handle.handleID, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -796,7 +807,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = networkStack_rpc_socket_recvfrom(handle, &len, &udp_socket);
+    err = vtable->socket_recvfrom(handle.handleID, &len, &udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -805,7 +816,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = networkStack_rpc_socket_write(handle, &len);
+    err = vtable->socket_write(handle.handleID, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -814,7 +825,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = networkStack_rpc_socket_sendto(handle, &len, udp_socket);
+    err = vtable->socket_sendto(handle.handleID, &len, udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(

@@ -18,8 +18,12 @@
 
 #include "OS_NetworkStackClient.h"
 #include "SysLoggerClient.h"
+#include "interfaces/if_OS_NetworkStack.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
+
+static const if_OS_NetworkStack_t network_stack =
+    IF_OS_NETWORKSTACK_ASSIGN(networkStack_rpc, socket_1_port);
 
 static OS_NetworkStackClient_SocketDataports_t config = {
     .number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO
@@ -70,7 +74,8 @@ test_udp_recvfrom_pos()
 
     OS_Network_Socket_t receive_udp_socket = udp_socket;
 
-    OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
+    OS_Error_t err =
+        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
@@ -136,7 +141,8 @@ test_udp_sendto_pos()
 
     OS_Network_Socket_t receive_udp_socket = udp_socket;
 
-    OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
+    OS_Error_t err =
+        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
@@ -204,23 +210,26 @@ test_udp_recvfrom_neg()
     TEST_START();
 
     OS_NetworkSocket_Handle_t handle;
-    OS_NetworkSocket_Handle_t invalid_handle = -1;
+    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkServer_Handle_INVALID;
     OS_Network_Socket_t       udp_socket     = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_DGRAM,
                                        .name   = DEV_ADDR,
                                        .port   = CFG_UNREACHABLE_PORT };
 
-    OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
+    OS_Error_t err =
+        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Dataport_t dp  = config.dataport[handle];
+    const OS_Dataport_t dp  = config.dataport[handle.handleID];
     size_t              len = OS_Dataport_getSize(dp);
 
-    err = networkStack_rpc_socket_recvfrom(invalid_handle, &len, &udp_socket);
+    if_OS_NetworkStack_t* vtable = (if_OS_NetworkStack_t*)handle.ctx;
+
+    err = vtable->socket_recvfrom(invalid_handle.handleID, &len, &udp_socket);
     if (err != OS_ERROR_INVALID_HANDLE)
     {
         Debug_LOG_ERROR(
@@ -233,7 +242,7 @@ test_udp_recvfrom_neg()
     // fit in the dataport and will generate an error case
     len = OS_Dataport_getSize(dp) + 1;
 
-    err = networkStack_rpc_socket_recvfrom(handle, &len, &udp_socket);
+    err = vtable->socket_recvfrom(handle.handleID, &len, &udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -261,23 +270,26 @@ test_udp_sendto_neg()
     TEST_START();
 
     OS_NetworkSocket_Handle_t handle;
-    OS_NetworkSocket_Handle_t invalid_handle = -1;
+    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkServer_Handle_INVALID;
     OS_Network_Socket_t       udp_socket     = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_DGRAM,
                                        .name   = DEV_ADDR,
                                        .port   = 24242 };
 
-    OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
+    OS_Error_t err =
+        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Dataport_t dp  = config.dataport[handle];
+    const OS_Dataport_t dp  = config.dataport[handle.handleID];
     size_t              len = OS_Dataport_getSize(dp);
 
-    err = networkStack_rpc_socket_sendto(invalid_handle, &len, udp_socket);
+    if_OS_NetworkStack_t* vtable = (if_OS_NetworkStack_t*)handle.ctx;
+
+    err = vtable->socket_sendto(invalid_handle.handleID, &len, udp_socket);
     if (err != OS_ERROR_INVALID_HANDLE)
     {
         Debug_LOG_ERROR(
@@ -290,7 +302,7 @@ test_udp_sendto_neg()
     // fit in the dataport and will generate an error case
     len = OS_Dataport_getSize(dp) + 1;
 
-    err = networkStack_rpc_socket_sendto(handle, &len, udp_socket);
+    err = vtable->socket_sendto(handle.handleID, &len, udp_socket);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -327,7 +339,8 @@ test_udp_echo()
 
     OS_Network_Socket_t receive_udp_socket = udp_socket;
 
-    OS_Error_t err = OS_NetworkSocket_create(NULL, &udp_socket, &handle);
+    OS_Error_t err =
+        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
