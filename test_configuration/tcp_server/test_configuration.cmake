@@ -48,6 +48,7 @@ DeclareCAmkESComponent(
         os_core_api
         lib_compiler
         lib_debug
+        lib_macros
         os_network_api
         syslogger_client
 )

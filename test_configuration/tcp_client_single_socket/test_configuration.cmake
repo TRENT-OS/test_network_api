@@ -32,6 +32,7 @@ DeclareCAmkESComponent(
         os_core_api
         lib_compiler
         lib_debug
+        lib_macros
         os_network_lib
         TimeServer_client
         syslogger_client
