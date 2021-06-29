@@ -25,7 +25,8 @@
 static const if_OS_NetworkStack_t network_stack =
     IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
 
-static OS_NetworkStackClient_SocketDataports_t config = {
+static OS_NetworkStackClient_SocketDataports_t config =
+{
     .number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO
 };
 
@@ -76,9 +77,10 @@ test_socket_create_neg()
     OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
     OS_Error_t                err;
     OS_Network_Socket_t       socket = { .domain = OS_AF_INET,
-                                   .type   = OS_SOCK_STREAM,
-                                   .name   = CFG_REACHABLE_HOST,
-                                   .port   = CFG_REACHABLE_PORT };
+                                         .type   = OS_SOCK_STREAM,
+                                         .name   = CFG_REACHABLE_HOST,
+                                         .port   = CFG_REACHABLE_PORT
+                                       };
 
     // Test unsupported domain
     socket.domain = 0;
@@ -171,9 +173,10 @@ test_socket_create_pos()
 
     OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
     OS_Network_Socket_t       cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                             .type   = OS_SOCK_STREAM,
+                                             .name   = GATEWAY_ADDR,
+                                             .port   = CFG_REACHABLE_PORT
+                                           };
 
     for (int i = 0; i < 2; i++)
     {
@@ -213,7 +216,8 @@ test_server_socket_create_pos()
     OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
                                          .type        = OS_SOCK_STREAM,
                                          .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1 };
+                                         .backlog     = 1
+                                       };
 
     for (int i = 0; i < 2; i++)
     {
@@ -249,7 +253,8 @@ test_server_socket_create_neg()
     OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
                                          .type        = OS_SOCK_STREAM,
                                          .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1 };
+                                         .backlog     = 1
+                                       };
 
     // Test unsupported domain
     socket.domain = 0;
@@ -297,7 +302,8 @@ test_server_socket_close_pos()
     OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
                                          .type        = OS_SOCK_STREAM,
                                          .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1 };
+                                         .backlog     = 1
+                                       };
 
     OS_Error_t err;
 
@@ -319,7 +325,8 @@ test_server_socket_close_neg()
     OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
                                          .type        = OS_SOCK_STREAM,
                                          .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1 };
+                                         .backlog     = 1
+                                       };
 
     OS_Error_t err;
 
@@ -327,7 +334,8 @@ test_server_socket_close_neg()
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     OS_NetworkServer_Handle_t invalid_handle = { .ctx    = handle[0].ctx,
-                                                 .handleID = -1 };
+                                                 .handleID = -1
+                                               };
 
     err = OS_NetworkServerSocket_close(invalid_handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
@@ -345,9 +353,10 @@ test_socket_close_pos()
 
     OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
     OS_Network_Socket_t       cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                             .type   = OS_SOCK_STREAM,
+                                             .name   = GATEWAY_ADDR,
+                                             .port   = CFG_REACHABLE_PORT
+                                           };
 
     OS_Error_t err;
 
@@ -367,9 +376,10 @@ test_socket_close_neg()
 
     OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
     OS_Network_Socket_t       cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                             .type   = OS_SOCK_STREAM,
+                                             .name   = GATEWAY_ADDR,
+                                             .port   = CFG_REACHABLE_PORT
+                                           };
 
     OS_Error_t err;
 
@@ -377,7 +387,8 @@ test_socket_close_neg()
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     OS_NetworkSocket_Handle_t invalid_handle = { .ctx    = handle[0].ctx,
-                                                 .handleID = -1 };
+                                                 .handleID = -1
+                                               };
 
     err = OS_NetworkSocket_close(invalid_handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
@@ -397,7 +408,8 @@ test_tcp_read_pos()
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,
                                        .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                       .port   = CFG_REACHABLE_PORT
+                                     };
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
@@ -440,7 +452,8 @@ test_tcp_read_neg()
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,
                                        .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                       .port   = CFG_REACHABLE_PORT
+                                     };
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
@@ -491,7 +504,8 @@ test_tcp_write_neg()
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,
                                        .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                       .port   = CFG_REACHABLE_PORT
+                                     };
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
@@ -536,7 +550,8 @@ test_tcp_write_pos()
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,
                                        .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                       .port   = CFG_REACHABLE_PORT
+                                     };
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
@@ -579,7 +594,8 @@ test_tcp_client()
     OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_STREAM,
                                        .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT };
+                                       .port   = CFG_REACHABLE_PORT
+                                     };
 
     /* This creates a socket API and gives an handle which can be used
        for further communication. */
@@ -622,10 +638,10 @@ test_tcp_client()
             size_t       len_io       = lenRemaining;
 
             err = OS_NetworkSocket_write(
-                handle[i],
-                &request[offs],
-                len_io,
-                &len_io);
+                      handle[i],
+                      &request[offs],
+                      len_io,
+                      &len_io);
 
             if (err != OS_SUCCESS)
             {
@@ -638,7 +654,8 @@ test_tcp_client()
             ASSERT_LE_SZ(len_io, lenRemaining);
 
             offs += len_io;
-        } while (offs < len_request);
+        }
+        while (offs < len_request);
     }
     Debug_LOG_INFO("read response...");
 
@@ -670,7 +687,9 @@ test_tcp_client()
             memset(buffer, 0, sizeof(buffer));
             OS_Error_t err = OS_ERROR_CONNECTION_CLOSED;
             if (!(flag & (1 << i)))
+            {
                 err = OS_NetworkSocket_read(handle[i], buffer, len, &len);
+            }
             switch (err)
             {
 
@@ -698,7 +717,8 @@ test_tcp_client()
                 break;
             } // end of switch
         }
-    } while (flag != pow(2, socket_max) - 1);
+    }
+    while (flag != pow(2, socket_max) - 1);
     Debug_LOG_INFO("Test ended");
 
     for (int i = 0; i < socket_max; i++)
@@ -781,9 +801,10 @@ test_dataport_size_check_lib_functions()
 
     OS_NetworkSocket_Handle_t handle;
     OS_Network_Socket_t       udp_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_DGRAM,
-                                       .name   = DEV_ADDR,
-                                       .port   = CFG_TCP_TEST_PORT };
+                                             .type   = OS_SOCK_DGRAM,
+                                             .name   = DEV_ADDR,
+                                             .port   = CFG_TCP_TEST_PORT
+                                           };
 
     OS_Error_t err = OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
     if (err != OS_SUCCESS)
