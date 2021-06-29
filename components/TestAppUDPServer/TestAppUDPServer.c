@@ -18,11 +18,11 @@
 
 #include "OS_NetworkStackClient.h"
 #include "SysLoggerClient.h"
-#include "interfaces/if_OS_NetworkStack.h"
+#include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
 
-static const if_OS_NetworkStack_t network_stack =
+static const if_OS_Socket_t network_stack =
     IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
 
 static OS_NetworkStackClient_SocketDataports_t config =
@@ -231,7 +231,7 @@ test_udp_recvfrom_neg()
     const OS_Dataport_t dp  = config.dataport[handle.handleID];
     size_t              len = OS_Dataport_getSize(dp);
 
-    if_OS_NetworkStack_t* vtable = (if_OS_NetworkStack_t*)handle.ctx;
+    if_OS_Socket_t* vtable = (if_OS_Socket_t*)handle.ctx;
 
     err = vtable->socket_recvfrom(invalid_handle.handleID, &len, &udp_socket);
     if (err != OS_ERROR_INVALID_HANDLE)
@@ -292,7 +292,7 @@ test_udp_sendto_neg()
     const OS_Dataport_t dp  = config.dataport[handle.handleID];
     size_t              len = OS_Dataport_getSize(dp);
 
-    if_OS_NetworkStack_t* vtable = (if_OS_NetworkStack_t*)handle.ctx;
+    if_OS_Socket_t* vtable = (if_OS_Socket_t*)handle.ctx;
 
     err = vtable->socket_sendto(invalid_handle.handleID, &len, udp_socket);
     if (err != OS_ERROR_INVALID_HANDLE)
