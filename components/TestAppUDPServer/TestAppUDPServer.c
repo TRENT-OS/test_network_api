@@ -25,7 +25,8 @@
 static const if_OS_NetworkStack_t network_stack =
     IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
 
-static OS_NetworkStackClient_SocketDataports_t config = {
+static OS_NetworkStackClient_SocketDataports_t config =
+{
     .number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO
 };
 
@@ -70,7 +71,8 @@ test_udp_recvfrom_pos()
     OS_Network_Socket_t udp_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_DGRAM,
                                        .name   = DEV_ADDR,
-                                       .port   = CFG_UDP_TEST_PORT };
+                                       .port   = CFG_UDP_TEST_PORT
+                                     };
 
     OS_Network_Socket_t receive_udp_socket = udp_socket;
 
@@ -93,11 +95,11 @@ test_udp_recvfrom_pos()
     Debug_LOG_INFO("UDP Receive test handle: %d", handle);
 
     err = OS_NetworkSocket_recvfrom(
-        handle,
-        buffer,
-        len,
-        &len,
-        &receive_udp_socket);
+              handle,
+              buffer,
+              len,
+              &len,
+              &receive_udp_socket);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("recvfrom() failed, code %d", err);
@@ -137,7 +139,8 @@ test_udp_sendto_pos()
     OS_Network_Socket_t udp_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_DGRAM,
                                        .name   = DEV_ADDR,
-                                       .port   = CFG_UDP_TEST_PORT };
+                                       .port   = CFG_UDP_TEST_PORT
+                                     };
 
     OS_Network_Socket_t receive_udp_socket = udp_socket;
 
@@ -159,11 +162,11 @@ test_udp_sendto_pos()
     len = sizeof(buffer);
     Debug_LOG_INFO("UDP Send test");
     err = OS_NetworkSocket_recvfrom(
-        handle,
-        buffer,
-        len,
-        &len,
-        &receive_udp_socket);
+              handle,
+              buffer,
+              len,
+              &len,
+              &receive_udp_socket);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("recvfrom() failed, code %d", err);
@@ -180,11 +183,11 @@ test_udp_sendto_pos()
 
     len = sizeof(test_message);
     err = OS_NetworkSocket_sendto(
-        handle,
-        test_message,
-        len,
-        &len,
-        receive_udp_socket);
+              handle,
+              test_message,
+              len,
+              &len,
+              receive_udp_socket);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
@@ -212,9 +215,10 @@ test_udp_recvfrom_neg()
     OS_NetworkSocket_Handle_t handle;
     OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkServer_Handle_INVALID;
     OS_Network_Socket_t       udp_socket     = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_DGRAM,
-                                       .name   = DEV_ADDR,
-                                       .port   = CFG_UNREACHABLE_PORT };
+                                                 .type   = OS_SOCK_DGRAM,
+                                                 .name   = DEV_ADDR,
+                                                 .port   = CFG_UNREACHABLE_PORT
+                                               };
 
     OS_Error_t err =
         OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
@@ -272,9 +276,10 @@ test_udp_sendto_neg()
     OS_NetworkSocket_Handle_t handle;
     OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkServer_Handle_INVALID;
     OS_Network_Socket_t       udp_socket     = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_DGRAM,
-                                       .name   = DEV_ADDR,
-                                       .port   = 24242 };
+                                                 .type   = OS_SOCK_DGRAM,
+                                                 .name   = DEV_ADDR,
+                                                 .port   = 24242
+                                               };
 
     OS_Error_t err =
         OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
@@ -335,7 +340,8 @@ test_udp_echo()
     OS_Network_Socket_t udp_socket = { .domain = OS_AF_INET,
                                        .type   = OS_SOCK_DGRAM,
                                        .name   = DEV_ADDR,
-                                       .port   = CFG_UDP_TEST_PORT };
+                                       .port   = CFG_UDP_TEST_PORT
+                                     };
 
     OS_Network_Socket_t receive_udp_socket = udp_socket;
 
@@ -361,11 +367,11 @@ test_udp_echo()
         len = sizeof(buffer);
 
         err = OS_NetworkSocket_recvfrom(
-            handle,
-            buffer,
-            len,
-            &len,
-            &receive_udp_socket);
+                  handle,
+                  buffer,
+                  len,
+                  &len,
+                  &receive_udp_socket);
 
         if (err != OS_SUCCESS)
         {
@@ -375,11 +381,11 @@ test_udp_echo()
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
         err = OS_NetworkSocket_sendto(
-            handle,
-            buffer,
-            len,
-            &len,
-            receive_udp_socket);
+                  handle,
+                  buffer,
+                  len,
+                  &len,
+                  receive_udp_socket);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("client_socket_create() failed, code %d", err);

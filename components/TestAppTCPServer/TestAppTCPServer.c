@@ -69,7 +69,8 @@ run()
 
     char buffer[4096];
 
-    OS_NetworkServer_Socket_t srv_socket = {
+    OS_NetworkServer_Socket_t srv_socket =
+    {
         .domain      = OS_AF_INET,
         .type        = OS_SOCK_STREAM,
         .listen_port = CFG_TCP_SERVER_PORT,
@@ -82,9 +83,9 @@ run()
     OS_NetworkServer_Handle_t os_nw_server_handle;
 
     OS_Error_t err = OS_NetworkServerSocket_create(
-        &network_stack,
-        &srv_socket,
-        &os_nw_server_handle);
+                         &network_stack,
+                         &srv_socket,
+                         &os_nw_server_handle);
 
     if (err != OS_SUCCESS)
     {
@@ -97,8 +98,8 @@ run()
     for (;;)
     {
         err = OS_NetworkServerSocket_accept(
-            os_nw_server_handle,
-            &os_socket_handle);
+                  os_nw_server_handle,
+                  &os_socket_handle);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_accept() failed, error %d", err);
@@ -132,10 +133,10 @@ run()
             size_t n = 0;
             // Try to read as much as fits into the buffer
             err = OS_NetworkSocket_read(
-                os_socket_handle,
-                buffer,
-                sizeof(buffer),
-                &n);
+                      os_socket_handle,
+                      buffer,
+                      sizeof(buffer),
+                      &n);
             if (OS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("socket_read() failed, error %d", err);
@@ -148,10 +149,10 @@ run()
             while (totalBytesWritten < n)
             {
                 err = OS_NetworkSocket_write(
-                    os_socket_handle,
-                    &buffer[totalBytesWritten],
-                    n - totalBytesWritten,
-                    &bytesWritten);
+                          os_socket_handle,
+                          &buffer[totalBytesWritten],
+                          n - totalBytesWritten,
+                          &bytesWritten);
                 if (err != OS_SUCCESS)
                 {
                     Debug_LOG_ERROR("socket_write() failed, error %d", err);
