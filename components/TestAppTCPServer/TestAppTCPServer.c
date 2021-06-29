@@ -12,11 +12,11 @@
 
 #include "OS_Network.h"
 #include "OS_NetworkStackClient.h"
-#include "interfaces/if_OS_NetworkStack.h"
+#include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
 
-static const if_OS_NetworkStack_t network_stack =
+static const if_OS_Socket_t network_stack =
     IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
 
 /*

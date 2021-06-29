@@ -18,11 +18,11 @@
 
 #include "OS_NetworkStackClient.h"
 #include "SysLoggerClient.h"
-#include "interfaces/if_OS_NetworkStack.h"
+#include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
 
-static const if_OS_NetworkStack_t network_stack =
+static const if_OS_Socket_t network_stack =
     IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
 
 static OS_NetworkStackClient_SocketDataports_t config =
@@ -818,7 +818,7 @@ test_dataport_size_check_lib_functions()
     // fit in the dataport and will generate an error case
     size_t len = OS_Dataport_getSize(dp) + 1;
 
-    if_OS_NetworkStack_t* vtable = (if_OS_NetworkStack_t*)handle.ctx;
+    if_OS_Socket_t* vtable = (if_OS_Socket_t*)handle.ctx;
     err = vtable->socket_read(handle.handleID, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
