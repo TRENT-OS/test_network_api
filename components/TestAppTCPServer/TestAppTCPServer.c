@@ -17,7 +17,7 @@
 #include <camkes.h>
 
 static const if_OS_NetworkStack_t network_stack =
-    IF_OS_NETWORKSTACK_ASSIGN(networkStack_rpc, socket_1_port);
+    IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
 
 /*
  * This example demonstrates a server with an incoming connection. Reads
