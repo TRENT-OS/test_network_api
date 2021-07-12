@@ -20,6 +20,5 @@ endif()
 include("plat/${PLATFORM}/plat_nic.cmake")
 include("test_configuration/${TEST_CONFIGURATION}/test_configuration.cmake")
 
-
 DeclareAndCreateCamkESSystem(test_configuration/${TEST_CONFIGURATION}/main.camkes)
 GenerateSimulateScript()
