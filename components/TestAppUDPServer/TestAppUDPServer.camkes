@@ -15,11 +15,6 @@ component TestAppUDPServer {
 
     control;
 
-
-    //------------------------
-    // network stack interface. Note that the names of the CAmkES object are
-    // hard-coded in the network client lib
-
     uses if_OS_Socket networkStack_rpc;
 
     emits    EventApiTestsDone event_network_app_send_ready;
