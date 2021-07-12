@@ -57,15 +57,6 @@ init_client_api()
     OS_NetworkStackClient_init(&config);
 }
 
-/*
-    This example demonstrates reading of a web page example.com using Nw Stack
-   API. Currently only a single socket is supported per stack instance. i.e. no
-   multitasking is supported as of now.
-
-*/
-
-#define HTTP_PORT 80
-
 void
 test_socket_create_neg()
 {
