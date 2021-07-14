@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include "OS_Network.h"
-#include "OS_NetworkStackClient.h"
 #include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
 #include <camkes.h>
