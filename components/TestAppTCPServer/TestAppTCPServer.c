@@ -67,39 +67,56 @@ run()
 
     Debug_LOG_INFO("Starting TestAppTCPServer ...");
 
-    char buffer[4096];
+    OS_NetworkSocket_Handle_t srvHandle;
 
-    OS_NetworkServer_Socket_t srv_socket =
-    {
-        .domain      = OS_AF_INET,
-        .type        = OS_SOCK_STREAM,
-        .listen_port = CFG_TCP_SERVER_PORT,
-        .backlog     = 1,
-    };
-
-    /* Gets filled when accept is called */
-    OS_NetworkSocket_Handle_t os_socket_handle;
-    /* Gets filled when server socket create is called */
-    OS_NetworkServer_Handle_t os_nw_server_handle;
-
-    OS_Error_t err = OS_NetworkServerSocket_create(
+    OS_Error_t err = OS_NetworkSocket_create(
                          &network_stack,
-                         &srv_socket,
-                         &os_nw_server_handle);
-
+                         &srvHandle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("server_socket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        return -1;
+    }
+
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .port = CFG_TCP_SERVER_PORT
+    };
+
+    err = OS_NetworkSocket_bind(
+              srvHandle,
+              &dstAddr);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
+        return -1;
+    }
+
+    err = OS_NetworkSocket_listen(
+              srvHandle,
+              1);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("OS_NetworkSocket_listen() failed, code %d", err);
         return -1;
     }
 
     Debug_LOG_INFO("launching echo server");
 
+    /* Gets filled when accept is called */
+    OS_NetworkSocket_Handle_t clientHandle;
+    OS_NetworkSocket_Addr_t srcAddr = {0};
+
+    static char buffer[4096];
+
     for (;;)
     {
-        err = OS_NetworkServerSocket_accept(
-                  os_nw_server_handle,
-                  &os_socket_handle);
+        err = OS_NetworkSocket_accept(
+                  srvHandle,
+                  &clientHandle,
+                  &srcAddr);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_accept() failed, error %d", err);
@@ -133,7 +150,7 @@ run()
             size_t n = 0;
             // Try to read as much as fits into the buffer
             err = OS_NetworkSocket_read(
-                      os_socket_handle,
+                      clientHandle,
                       buffer,
                       sizeof(buffer),
                       &n);
@@ -149,7 +166,7 @@ run()
             while (totalBytesWritten < n)
             {
                 err = OS_NetworkSocket_write(
-                          os_socket_handle,
+                          clientHandle,
                           &buffer[totalBytesWritten],
                           n - totalBytesWritten,
                           &bytesWritten);
@@ -169,12 +186,12 @@ run()
         case OS_ERROR_CONNECTION_CLOSED:
             // the test runner checks for this string
             Debug_LOG_INFO("connection closed by server");
-            OS_NetworkSocket_close(os_socket_handle);
+            OS_NetworkSocket_close(clientHandle);
             continue;
         /* Any other value is a failure in read, hence exit and close handle  */
         default:
             Debug_LOG_ERROR("server socket failure, error %d", err);
-            OS_NetworkSocket_close(os_socket_handle);
+            OS_NetworkSocket_close(clientHandle);
             continue;
         } // end of switch
     }

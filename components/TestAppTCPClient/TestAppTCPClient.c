@@ -61,86 +61,54 @@ void
 test_socket_create_neg()
 {
     // This test will try to create sockets with invalid parameters. After this
-    // it will try to open a socket to a service which is not reachable (closed
-    // port) and check that the create() fails
+    // it will try to open more sockets than the ressources will allow for to
+    // verify that this exceeding creation will fail.
     TEST_START();
 
     OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Error_t                err;
-    OS_Network_Socket_t       socket = { .domain = OS_AF_INET,
-                                         .type   = OS_SOCK_STREAM,
-                                         .name   = CFG_REACHABLE_HOST,
-                                         .port   = CFG_REACHABLE_PORT
-                                       };
+    OS_Error_t err;
 
     // Test unsupported domain
-    socket.domain = 0;
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
+        err = OS_NetworkSocket_create(
+                  &network_stack,
+                  &handle[i],
+                  0,
+                  OS_SOCK_STREAM);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
     }
-    socket.domain = OS_AF_INET;
 
     // Test unsupported type
-    socket.type = 0;
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
+        err = OS_NetworkSocket_create(
+                  &network_stack,
+                  &handle[i],
+                  OS_AF_INET,
+                  0);
         ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
     }
-    socket.type = OS_SOCK_STREAM;
 
-    // Test invalid destination address
-    memset(socket.name, 0, sizeof(socket.name));
+    // Test out of resources
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
-        ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-    }
-
-    // Test unreachable host
-    strncpy(socket.name, CFG_UNREACHABLE_HOST, sizeof(socket.name));
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        err = OS_NetworkSocket_create(&network_stack, &socket, handle);
-        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_HOST_UNREACHABLE, err);
-    }
-    /*
-    This test is momentarily suppressed as it seems that picotcp is not
-    behaving correctly. There is need of further investigations to establish
-    whether is an issue with iptables or with picotcp
-
-    // Test forbidden host (connection reset),
-    // firewall is configured to reset TCP for this host
-    strncpy(socket.name, CFG_FORBIDDEN_HOST, sizeof(socket.name));
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        err = OS_NetworkSocket_create(&network_stack, &socket, handle);
-        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_RESET, err);
-    }
-    */
-    // Test connection refused,
-    // now with reachable address but port closed. We do not loop this test
-    // for convenience: it would take too much time due to the connection
-    // timeouts
-    strncpy(socket.name, CFG_REACHABLE_HOST, sizeof(socket.name));
-    socket.port = CFG_UNREACHABLE_PORT;
-    err         = OS_NetworkSocket_create(&network_stack, &socket, handle);
-    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
-
-    // test out of resources
-    socket.port = CFG_REACHABLE_PORT;
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        err = OS_NetworkSocket_create(&network_stack, &socket, &handle[i]);
+        err = OS_NetworkSocket_create(
+                  &network_stack,
+                  &handle[i],
+                  OS_AF_INET,
+                  OS_SOCK_STREAM);
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
     }
     OS_NetworkSocket_Handle_t exceedingHandle;
-    err = OS_NetworkSocket_create(&network_stack, &socket, &exceedingHandle);
+    err = OS_NetworkSocket_create(
+              &network_stack,
+              &exceedingHandle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_ERROR_INSUFFICIENT_SPACE, err);
 
-    // cleanup
+    // Cleanup
     for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
         OS_Error_t err = OS_NetworkSocket_close(handle[i]);
@@ -163,21 +131,19 @@ test_socket_create_pos()
     TEST_START();
 
     OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Network_Socket_t       cli_socket = { .domain = OS_AF_INET,
-                                             .type   = OS_SOCK_STREAM,
-                                             .name   = GATEWAY_ADDR,
-                                             .port   = CFG_REACHABLE_PORT
-                                           };
 
+    // Let the following run twice in order to try to catch possible
+    // production of RAII garbage
     for (int i = 0; i < 2; i++)
     {
-        // Let the following run twice in order to try to catch possible
-        // production of RAII garbage
-
         for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
         {
             OS_Error_t err =
-                OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
+                OS_NetworkSocket_create(
+                    &network_stack,
+                    &handle[i],
+                    OS_AF_INET,
+                    OS_SOCK_STREAM);
             ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
         }
 
@@ -192,169 +158,20 @@ test_socket_create_pos()
 }
 
 void
-test_server_socket_create_pos()
-{
-    // This test will test the successful creation of an amount of
-    // OS_NETWORK_MAXIMUM_SOCKET_NO sockets. Then it will successfully destroy
-    // them.
-    // That sequence of actions is repeated twice in order to try to detect
-    // resources allocation issues.
-    // For the purpose of trying to find resources allocation issues it is
-    // suggested to run test_socket_create_neg() prior to this.
-    TEST_START();
-
-    OS_NetworkServer_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
-                                         .type        = OS_SOCK_STREAM,
-                                         .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1
-                                       };
-
-    for (int i = 0; i < 2; i++)
-    {
-        // Let the following run twice in order to try to catch possible
-        // production of RAII garbage
-
-        for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-        {
-            socket.listen_port += i;
-            OS_Error_t err =
-                OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
-            ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-        }
-
-        for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-        {
-            OS_Error_t err = OS_NetworkServerSocket_close(handle[i]);
-            ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-        }
-    }
-
-    TEST_FINISH();
-}
-
-void
-test_server_socket_create_neg()
-{
-    // This test will try to create server sockets with invalid parameters.
-    TEST_START();
-
-    OS_NetworkServer_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Error_t                err;
-    OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
-                                         .type        = OS_SOCK_STREAM,
-                                         .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1
-                                       };
-
-    // Test unsupported domain
-    socket.domain = 0;
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
-        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
-    }
-    socket.domain = OS_AF_INET;
-
-    // Test unsupported type
-    socket.type = 0;
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
-        ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO_NO_SUPPORT, err);
-    }
-    socket.type = OS_SOCK_STREAM;
-
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[i]);
-        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-    }
-    OS_NetworkSocket_Handle_t exceedingHandle;
-    err = OS_NetworkServerSocket_create(&network_stack, &socket, &exceedingHandle);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INSUFFICIENT_SPACE, err);
-
-    // cleanup
-    for (int i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
-    {
-        OS_Error_t err = OS_NetworkServerSocket_close(handle[i]);
-        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-    }
-
-    TEST_FINISH();
-}
-
-void
-test_server_socket_close_pos()
-{
-    TEST_START();
-
-    OS_NetworkServer_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
-                                         .type        = OS_SOCK_STREAM,
-                                         .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1
-                                       };
-
-    OS_Error_t err;
-
-    err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[0]);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = OS_NetworkServerSocket_close(handle[0]);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
-void
-test_server_socket_close_neg()
-{
-    TEST_START();
-
-    OS_NetworkServer_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_NetworkServer_Socket_t socket = { .domain      = OS_AF_INET,
-                                         .type        = OS_SOCK_STREAM,
-                                         .listen_port = CFG_TCP_TEST_PORT,
-                                         .backlog     = 1
-                                       };
-
-    OS_Error_t err;
-
-    err = OS_NetworkServerSocket_create(&network_stack, &socket, &handle[0]);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    OS_NetworkServer_Handle_t invalid_handle = { .ctx    = handle[0].ctx,
-                                                 .handleID = -1
-                                               };
-
-    err = OS_NetworkServerSocket_close(invalid_handle);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
-
-    err = OS_NetworkServerSocket_close(handle[0]);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
-void
 test_socket_close_pos()
 {
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Network_Socket_t       cli_socket = { .domain = OS_AF_INET,
-                                             .type   = OS_SOCK_STREAM,
-                                             .name   = GATEWAY_ADDR,
-                                             .port   = CFG_REACHABLE_PORT
-                                           };
+    OS_NetworkSocket_Handle_t handle;
 
-    OS_Error_t err;
-
-    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[0]);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_close(handle[0]);
+    err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -365,27 +182,109 @@ test_socket_close_neg()
 {
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Network_Socket_t       cli_socket = { .domain = OS_AF_INET,
-                                             .type   = OS_SOCK_STREAM,
-                                             .name   = GATEWAY_ADDR,
-                                             .port   = CFG_REACHABLE_PORT
-                                           };
+    OS_NetworkSocket_Handle_t handle;
 
-    OS_Error_t err;
-
-    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[0]);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    OS_NetworkSocket_Handle_t invalid_handle = { .ctx    = handle[0].ctx,
-                                                 .handleID = -1
-                                               };
+    OS_NetworkSocket_Handle_t invalid_handle =
+    {
+        .ctx    = handle.ctx,
+        .handleID = -1
+    };
 
     err = OS_NetworkSocket_close(invalid_handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
-    err = OS_NetworkSocket_close(handle[0]);
+    err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    TEST_FINISH();
+}
+
+void
+test_socket_connect_pos()
+{
+    TEST_START();
+
+    OS_NetworkSocket_Handle_t handle;
+
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = CFG_REACHABLE_HOST,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    TEST_FINISH();
+}
+
+void
+test_socket_connect_neg()
+{
+    TEST_START();
+
+    OS_NetworkSocket_Handle_t handle;
+
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = CFG_REACHABLE_HOST,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    // Test invalid empty destination address.
+    memset(dstAddr.addr, 0, sizeof(dstAddr.addr));
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+
+    // Test connecting to an unreachable host.
+    strncpy((char*)dstAddr.addr, CFG_UNREACHABLE_HOST, sizeof(dstAddr.addr));
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_HOST_UNREACHABLE, err);
+
+    // Test connection refused, now with reachable address but port closed.
+    strncpy((char*)dstAddr.addr, CFG_REACHABLE_HOST, sizeof(dstAddr.addr));
+    dstAddr.port = CFG_UNREACHABLE_PORT;
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
+
+    // Test forbidden host (connection reset), firewall is configured to reset
+    // TCP for this host.
+    // This test is momentarily suppressed as it seems that picotcp is not
+    // behaving correctly. There is need of further investigations to establish
+    // whether is an issue with iptables or with picotcp
+    // strncpy((char*)dstAddr.addr, CFG_FORBIDDEN_HOST, sizeof(dstAddr.addr));
+    // err = OS_NetworkSocket_connect(handle, &dstAddr);
+    // ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_RESET, err);
+
+    // It seems after the previous failed connection tests the underlying call
+    // to close() will fail.
+    // TODO: Clarify if this behaviour is expected at this point.
+    err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     TEST_FINISH();
 }
@@ -395,20 +294,22 @@ test_tcp_read_pos()
 {
     TEST_START();
 
-    char                buffer[2048];
-    OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT
-                                     };
+    OS_NetworkSocket_Handle_t handle;
 
-    /* This creates a socket API and gives an handle which can be used
-       for further communication. */
-    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Error_t                err;
-    int                       i = 0;
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = GATEWAY_ADDR,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -418,17 +319,16 @@ test_tcp_read_pos()
     const size_t len_request = strlen(request);
     size_t       len         = len_request;
 
-    err = OS_NetworkSocket_write(handle[i], request, len, &len);
+    err = OS_NetworkSocket_write(handle, request, len, &len);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    char buffer[2048] = {0};
     len = sizeof(buffer);
 
-    memset(buffer, 0, sizeof(buffer));
-
-    err = OS_NetworkSocket_read(handle[i], buffer, len, &len);
+    err = OS_NetworkSocket_read(handle, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_close(handle[i]);
+    err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -439,20 +339,22 @@ test_tcp_read_neg()
 {
     TEST_START();
 
-    char                buffer[2048];
-    OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT
-                                     };
+    OS_NetworkSocket_Handle_t handle;
 
-    /* This creates a socket API and gives an handle which can be used
-       for further communication. */
-    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Error_t                err;
-    int                       i = 0;
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = GATEWAY_ADDR,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -462,26 +364,31 @@ test_tcp_read_neg()
     const size_t len_request = strlen(request);
     size_t       len         = len_request;
 
-    err = OS_NetworkSocket_write(handle[i], request, len, &len);
+    err = OS_NetworkSocket_write(handle, request, len, &len);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    char buffer[2048] = {0};
     len = sizeof(buffer);
 
-    memset(buffer, 0, sizeof(buffer));
+    // Creates a length guaranteed larger than that of the dataport, which won't
+    // fit in the dataport and will generate an error case.
+    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
 
-    const OS_Dataport_t dp = config.dataport[0];
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(dp) + 1;
-
-    err = OS_NetworkSocket_read(handle[i], buffer, len, &len);
+    err = OS_NetworkSocket_read(handle, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    // len = OS_Dataport_getSize(dp);
-    // err = OS_NetworkSocket_read(-1, buffer, len, &len);
-    // ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
+    len = OS_Dataport_getSize(handle.ctx.dataport);
 
-    err = OS_NetworkSocket_close(handle[i]);
+    // Test the call with an invalid handle ID.
+    OS_NetworkSocket_Handle_t invalidHandle =
+    {
+        .ctx = handle.ctx,
+        .handleID = -1
+    };
+    err = OS_NetworkSocket_read(invalidHandle, buffer, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
+
+    err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -492,19 +399,22 @@ test_tcp_write_neg()
 {
     TEST_START();
 
-    OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT
-                                     };
+    OS_NetworkSocket_Handle_t handle;
 
-    /* This creates a socket API and gives an handle which can be used
-       for further communication. */
-    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Error_t                err;
-    int                       i = 0;
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = GATEWAY_ADDR,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -514,19 +424,25 @@ test_tcp_write_neg()
     const size_t len_request = strlen(request);
     size_t       len         = len_request;
 
-    const OS_Dataport_t dp = config.dataport[0];
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(dp) + 1;
+    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
 
-    err = OS_NetworkSocket_write(handle[i], request, len, &len);
+    err = OS_NetworkSocket_write(handle, request, len, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    // len = OS_Dataport_getSize(dp);
-    // err = OS_NetworkSocket_write(-1, request, len, &len);
-    // ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
+    len = OS_Dataport_getSize(handle.ctx.dataport);
 
-    err = OS_NetworkSocket_close(handle[i]);
+    // Test the call with an invalid handle ID.
+    OS_NetworkSocket_Handle_t invalidHandle =
+    {
+        .ctx = handle.ctx,
+        .handleID = -1
+    };
+    err = OS_NetworkSocket_write(invalidHandle, request, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
+
+    err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -537,20 +453,22 @@ test_tcp_write_pos()
 {
     TEST_START();
 
-    char                buffer[2048];
-    OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT
-                                     };
+    OS_NetworkSocket_Handle_t handle;
 
-    /* This creates a socket API and gives an handle which can be used
-       for further communication. */
-    OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Error_t                err;
-    int                       i = 0;
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = GATEWAY_ADDR,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    err = OS_NetworkSocket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     char* request = "GET /network/a.txt "
@@ -560,17 +478,16 @@ test_tcp_write_pos()
     const size_t len_request = strlen(request);
     size_t       len         = len_request;
 
-    err = OS_NetworkSocket_write(handle[i], request, len, &len);
+    err = OS_NetworkSocket_write(handle, request, len, &len);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    char buffer[2048] = {0};
     len = sizeof(buffer);
 
-    memset(buffer, 0, sizeof(buffer));
-
-    err = OS_NetworkSocket_read(handle[i], buffer, len, &len);
+    err = OS_NetworkSocket_read(handle, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_close(handle[i]);
+    err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -581,23 +498,33 @@ test_tcp_client()
 {
     TEST_START();
 
-    char                buffer[2048];
-    OS_Network_Socket_t cli_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_STREAM,
-                                       .name   = GATEWAY_ADDR,
-                                       .port   = CFG_REACHABLE_PORT
-                                     };
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = GATEWAY_ADDR,
+        .port = CFG_REACHABLE_PORT
+    };
 
-    /* This creates a socket API and gives an handle which can be used
-       for further communication. */
     OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
-    OS_Error_t                err;
-    int                       socket_max = 0;
-    int                       i;
+    OS_Error_t err;
+    int i;
+
     for (i = 0; i < OS_NETWORK_MAXIMUM_SOCKET_NO; i++)
     {
-        err = OS_NetworkSocket_create(&network_stack, &cli_socket, &handle[i]);
+        err = OS_NetworkSocket_create(
+                  &network_stack,
+                  &handle[i],
+                  OS_AF_INET,
+                  OS_SOCK_STREAM);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR(
+                "client_socket_create() failed, code %d for %d socket",
+                err,
+                i);
+            break;
+        }
 
+        err = OS_NetworkSocket_connect(handle[i], &dstAddr);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR(
@@ -607,7 +534,8 @@ test_tcp_client()
             break;
         }
     }
-    socket_max = i;
+
+    int socket_max = i;
     Debug_LOG_INFO("Send request to host...");
 
     char* request = "GET /network/a.txt "
@@ -618,7 +546,7 @@ test_tcp_client()
     size_t       len         = len_request;
 
     /* Send the request to the host */
-    for (int i = 0; i < socket_max; i++)
+    for (i = 0; i < socket_max; i++)
     {
         size_t offs = 0;
         Debug_LOG_INFO("Writing request to socket %d for %.*s", i, 17, request);
@@ -667,15 +595,15 @@ test_tcp_client()
     */
 
     int flag = 0;
+    char buffer[2048] = {0};
 
     do
     {
-        for (int i = 0; i < socket_max; i++)
+        for (i = 0; i < socket_max; i++)
         {
             len = sizeof(buffer);
             /* Keep calling read until we receive CONNECTION_CLOSED from the
             stack */
-            memset(buffer, 0, sizeof(buffer));
             OS_Error_t err = OS_ERROR_CONNECTION_CLOSED;
             if (!(flag & (1 << i)))
             {
@@ -712,7 +640,7 @@ test_tcp_client()
     while (flag != pow(2, socket_max) - 1);
     Debug_LOG_INFO("Test ended");
 
-    for (int i = 0; i < socket_max; i++)
+    for (i = 0; i < socket_max; i++)
     {
         /* Close the socket communication */
         err = OS_NetworkSocket_close(handle[i]);
@@ -731,18 +659,16 @@ test_dataport_size_check_client_functions()
 {
     TEST_START();
 
-    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
-    static char               buffer[4096];
-    OS_Network_Socket_t       udp_socket;
-    OS_NetworkSocket_Handle_t handle = { .ctx = &network_stack, .handleID = 0};
-    OS_Error_t                err;
+    OS_NetworkSocket_Handle_t handle = { .ctx = network_stack, .handleID = 0};
 
-    const OS_Dataport_t dp = config.dataport[handle.handleID];
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
-    size_t len = OS_Dataport_getSize(dp) + 1;
+    size_t len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
 
-    err = OS_NetworkSocket_read(handle, buffer, len, NULL);
+    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
+    static char buffer[4096];
+
+    OS_Error_t err = OS_NetworkSocket_read(handle, buffer, len, NULL);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -751,7 +677,14 @@ test_dataport_size_check_client_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = OS_NetworkSocket_recvfrom(handle, buffer, len, NULL, &udp_socket);
+    OS_NetworkSocket_Addr_t srcAddr = {0};
+
+    err = OS_NetworkSocket_recvfrom(
+              handle,
+              buffer,
+              len,
+              NULL,
+              &srcAddr);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -772,7 +705,7 @@ test_dataport_size_check_client_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = OS_NetworkSocket_sendto(handle, buffer, len, NULL, udp_socket);
+    err = OS_NetworkSocket_sendto(handle, buffer, len, NULL, &srcAddr);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -791,26 +724,23 @@ test_dataport_size_check_lib_functions()
     TEST_START();
 
     OS_NetworkSocket_Handle_t handle;
-    OS_Network_Socket_t       udp_socket = { .domain = OS_AF_INET,
-                                             .type   = OS_SOCK_DGRAM,
-                                             .name   = DEV_ADDR,
-                                             .port   = CFG_TCP_TEST_PORT
-                                           };
 
-    OS_Error_t err = OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Dataport_t dp = config.dataport[handle.handleID];
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
-    size_t len = OS_Dataport_getSize(dp) + 1;
+    size_t len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
 
-    if_OS_Socket_t* vtable = (if_OS_Socket_t*)handle.ctx;
-    err = vtable->socket_read(handle.handleID, &len);
+    err = handle.ctx.socket_read(handle.handleID, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -819,7 +749,9 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = vtable->socket_recvfrom(handle.handleID, &len, &udp_socket);
+    OS_NetworkSocket_Addr_t srcAddr = {0};
+
+    err = handle.ctx.socket_recvfrom(handle.handleID, &len, &srcAddr);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -828,7 +760,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = vtable->socket_write(handle.handleID, &len);
+    err = handle.ctx.socket_write(handle.handleID, &len);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -837,7 +769,7 @@ test_dataport_size_check_lib_functions()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = vtable->socket_sendto(handle.handleID, &len, udp_socket);
+    err = handle.ctx.socket_sendto(handle.handleID, &len, &srcAddr);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -874,12 +806,10 @@ run()
         test_dataport_size_check_lib_functions();
         test_socket_create_neg();
         test_socket_create_pos();
-        test_server_socket_create_pos();
-        test_server_socket_create_neg();
-        test_server_socket_close_pos();
-        test_server_socket_close_neg();
         test_socket_close_pos();
         test_socket_close_neg();
+        test_socket_connect_pos();
+        test_socket_connect_neg();
         test_tcp_read_pos();
         test_tcp_read_neg();
         test_tcp_write_pos();
