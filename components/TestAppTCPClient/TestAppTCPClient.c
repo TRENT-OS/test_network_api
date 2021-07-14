@@ -16,7 +16,6 @@
 #include "OS_Network.h"
 #include "math.h"
 
-#include "OS_NetworkStackClient.h"
 #include "SysLoggerClient.h"
 #include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
@@ -24,11 +23,6 @@
 
 static const if_OS_Socket_t network_stack =
     IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
-
-static OS_NetworkStackClient_SocketDataports_t config =
-{
-    .number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO
-};
 
 void
 pre_init(void)
