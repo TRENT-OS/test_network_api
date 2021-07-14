@@ -62,57 +62,60 @@ test_udp_recvfrom_pos()
 {
     TEST_START();
 
-    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
-    static char buffer[4096];
-    size_t      len;
-
     OS_NetworkSocket_Handle_t handle;
 
-    OS_Network_Socket_t udp_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_DGRAM,
-                                       .name   = DEV_ADDR,
-                                       .port   = CFG_UDP_TEST_PORT
-                                     };
-
-    OS_Network_Socket_t receive_udp_socket = udp_socket;
-
-    OS_Error_t err =
-        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
         return;
     }
 
-    err = OS_NetworkSocket_bind(handle, udp_socket.port);
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .port = CFG_UDP_TEST_PORT
+    };
+
+    err = OS_NetworkSocket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("bind() failed, code %d", err);
         return;
     }
 
-    len = sizeof(buffer);
     Debug_LOG_INFO("UDP Receive test handle: %d", handle);
+
+    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
+    static char buffer[4096];
+    size_t len = sizeof(buffer);
+
+    OS_NetworkSocket_Addr_t srcAddr = {0};
 
     err = OS_NetworkSocket_recvfrom(
               handle,
               buffer,
               len,
               &len,
-              &receive_udp_socket);
+              &srcAddr);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("recvfrom() failed, code %d", err);
         return;
     }
 
+    printf("Got back\n");
+
     Debug_LOG_INFO(
         "Received %d \"%*s\" : %s %d\n",
         len,
         len,
         buffer,
-        receive_udp_socket.name,
-        receive_udp_socket.port);
+        srcAddr.addr,
+        srcAddr.port);
 
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
@@ -129,44 +132,44 @@ test_udp_sendto_pos()
 {
     TEST_START();
 
-    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
-    static char buffer[4096];
-    const char  test_message[] = "Hello there";
-    size_t      len;
-
     OS_NetworkSocket_Handle_t handle;
 
-    OS_Network_Socket_t udp_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_DGRAM,
-                                       .name   = DEV_ADDR,
-                                       .port   = CFG_UDP_TEST_PORT
-                                     };
-
-    OS_Network_Socket_t receive_udp_socket = udp_socket;
-
-    OS_Error_t err =
-        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
         return;
     }
 
-    err = OS_NetworkSocket_bind(handle, udp_socket.port);
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .port = CFG_UDP_TEST_PORT
+    };
+
+    err = OS_NetworkSocket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("bind() failed, code %d", err);
         return;
     }
 
-    len = sizeof(buffer);
+    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
+    static char buffer[4096] = {0};
+    size_t len = sizeof(buffer);
+
+    OS_NetworkSocket_Addr_t srcAddr = {0};
+
     Debug_LOG_INFO("UDP Send test");
     err = OS_NetworkSocket_recvfrom(
               handle,
               buffer,
               len,
               &len,
-              &receive_udp_socket);
+              &srcAddr);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("recvfrom() failed, code %d", err);
@@ -178,16 +181,17 @@ test_udp_sendto_pos()
         len,
         len,
         buffer,
-        receive_udp_socket.name,
-        receive_udp_socket.port);
+        srcAddr.addr,
+        srcAddr.port);
 
+    const char test_message[] = "Hello there";
     len = sizeof(test_message);
     err = OS_NetworkSocket_sendto(
               handle,
               test_message,
               len,
               &len,
-              receive_udp_socket);
+              &srcAddr);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
@@ -213,27 +217,27 @@ test_udp_recvfrom_neg()
     TEST_START();
 
     OS_NetworkSocket_Handle_t handle;
-    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkServer_Handle_INVALID;
-    OS_Network_Socket_t       udp_socket     = { .domain = OS_AF_INET,
-                                                 .type   = OS_SOCK_DGRAM,
-                                                 .name   = DEV_ADDR,
-                                                 .port   = CFG_UNREACHABLE_PORT
-                                               };
+    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkSocket_Handle_INVALID;
 
-    OS_Error_t err =
-        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Dataport_t dp  = config.dataport[handle.handleID];
-    size_t              len = OS_Dataport_getSize(dp);
+    size_t len = OS_Dataport_getSize(handle.ctx.dataport);
 
-    if_OS_Socket_t* vtable = (if_OS_Socket_t*)handle.ctx;
+    OS_NetworkSocket_Addr_t srcAddr = {0};
 
-    err = vtable->socket_recvfrom(invalid_handle.handleID, &len, &udp_socket);
+    err = handle.ctx.socket_recvfrom(
+              invalid_handle.handleID,
+              &len,
+              &srcAddr);
     if (err != OS_ERROR_INVALID_HANDLE)
     {
         Debug_LOG_ERROR(
@@ -244,9 +248,12 @@ test_udp_recvfrom_neg()
 
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(dp) + 1;
+    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
 
-    err = vtable->socket_recvfrom(handle.handleID, &len, &udp_socket);
+    err = handle.ctx.socket_recvfrom(
+              handle.handleID,
+              &len,
+              &srcAddr);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -274,27 +281,31 @@ test_udp_sendto_neg()
     TEST_START();
 
     OS_NetworkSocket_Handle_t handle;
-    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkServer_Handle_INVALID;
-    OS_Network_Socket_t       udp_socket     = { .domain = OS_AF_INET,
-                                                 .type   = OS_SOCK_DGRAM,
-                                                 .name   = DEV_ADDR,
-                                                 .port   = 24242
-                                               };
+    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkSocket_Handle_INVALID;
 
-    OS_Error_t err =
-        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Dataport_t dp  = config.dataport[handle.handleID];
-    size_t              len = OS_Dataport_getSize(dp);
+    size_t len = OS_Dataport_getSize(handle.ctx.dataport);
 
-    if_OS_Socket_t* vtable = (if_OS_Socket_t*)handle.ctx;
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .addr = DEV_ADDR,
+        .port = 24242
+    };
 
-    err = vtable->socket_sendto(invalid_handle.handleID, &len, udp_socket);
+    err = handle.ctx.socket_sendto(
+              invalid_handle.handleID,
+              &len,
+              &dstAddr);
     if (err != OS_ERROR_INVALID_HANDLE)
     {
         Debug_LOG_ERROR(
@@ -305,9 +316,9 @@ test_udp_sendto_neg()
 
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(dp) + 1;
+    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
 
-    err = vtable->socket_sendto(handle.handleID, &len, udp_socket);
+    err = handle.ctx.socket_sendto(handle.handleID, &len, &dstAddr);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -331,22 +342,13 @@ test_udp_echo()
 {
     TEST_START();
 
-    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
-    static char buffer[4096];
-    size_t      len;
-
     OS_NetworkSocket_Handle_t handle;
 
-    OS_Network_Socket_t udp_socket = { .domain = OS_AF_INET,
-                                       .type   = OS_SOCK_DGRAM,
-                                       .name   = DEV_ADDR,
-                                       .port   = CFG_UDP_TEST_PORT
-                                     };
-
-    OS_Network_Socket_t receive_udp_socket = udp_socket;
-
-    OS_Error_t err =
-        OS_NetworkSocket_create(&network_stack, &udp_socket, &handle);
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
@@ -354,7 +356,12 @@ test_udp_echo()
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_NetworkSocket_bind(handle, udp_socket.port);
+    const OS_NetworkSocket_Addr_t dstAddr =
+    {
+        .port = CFG_UDP_TEST_PORT
+    };
+
+    err = OS_NetworkSocket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("bind() failed, code %d", err);
@@ -362,17 +369,21 @@ test_udp_echo()
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    OS_NetworkSocket_Addr_t srcAddr = {0};
+
+    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
+    static char buffer[4096] = {0};
+
     while (1)
     {
-        len = sizeof(buffer);
+        size_t len = sizeof(buffer);
 
         err = OS_NetworkSocket_recvfrom(
                   handle,
                   buffer,
                   len,
                   &len,
-                  &receive_udp_socket);
-
+                  &srcAddr);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("recvfrom() failed, code %d", err);
@@ -385,7 +396,7 @@ test_udp_echo()
                   buffer,
                   len,
                   &len,
-                  receive_udp_socket);
+                  &srcAddr);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
