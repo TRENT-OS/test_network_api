@@ -82,6 +82,7 @@ run()
 
     const OS_NetworkSocket_Addr_t dstAddr =
     {
+        .addr = OS_INADDR_ANY_STR,
         .port = CFG_TCP_SERVER_PORT
     };
 

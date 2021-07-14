@@ -77,6 +77,7 @@ test_udp_recvfrom_pos()
 
     const OS_NetworkSocket_Addr_t dstAddr =
     {
+        .addr = OS_INADDR_ANY_STR,
         .port = CFG_UDP_TEST_PORT
     };
 
@@ -147,6 +148,7 @@ test_udp_sendto_pos()
 
     const OS_NetworkSocket_Addr_t dstAddr =
     {
+        .addr = OS_INADDR_ANY_STR,
         .port = CFG_UDP_TEST_PORT
     };
 
@@ -358,6 +360,7 @@ test_udp_echo()
 
     const OS_NetworkSocket_Addr_t dstAddr =
     {
+        .addr = OS_INADDR_ANY_STR,
         .port = CFG_UDP_TEST_PORT
     };
 
