@@ -28,27 +28,6 @@ static const if_OS_Socket_t network_stack =
  * of now.
  */
 
-void
-init_client_api()
-{
-    static OS_NetworkStackClient_SocketDataports_t config;
-
-    config.number_of_sockets = OS_NETWORK_MAXIMUM_SOCKET_NO;
-    static OS_Dataport_t dataports[OS_NETWORK_MAXIMUM_SOCKET_NO] = { 0 };
-
-    int i = 0;
-
-#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
-#define LOOP_ELEMENT                                                           \
-    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_PORT(socket_));           \
-    dataports[i]            = GEN_ID(t);                                       \
-    i++;
-#include "util/loop.h"
-
-    config.dataport = dataports;
-    OS_NetworkStackClient_init(&config);
-}
-
 //------------------------------------------------------------------------------
 void
 pre_init(void)
@@ -63,8 +42,6 @@ pre_init(void)
 int
 run()
 {
-    init_client_api();
-
     Debug_LOG_INFO("Starting TestAppTCPServer ...");
 
     OS_NetworkSocket_Handle_t srvHandle;

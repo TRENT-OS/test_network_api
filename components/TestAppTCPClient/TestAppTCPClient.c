@@ -39,23 +39,6 @@ pre_init(void)
 #endif
 }
 
-void
-init_client_api()
-{
-    static OS_Dataport_t dataports[OS_NETWORK_MAXIMUM_SOCKET_NO] = { 0 };
-
-    int i = 0;
-
-#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
-#define LOOP_ELEMENT                                                           \
-    GEN_ID(OS_Dataport_t t) = OS_DATAPORT_ASSIGN(GEN_PORT(socket_));           \
-    dataports[i]            = GEN_ID(t);                                       \
-    i++;
-#include "util/loop.h"
-
-    config.dataport = dataports;
-    OS_NetworkStackClient_init(&config);
-}
 
 void
 test_socket_create_neg()
@@ -793,7 +776,6 @@ test_dataport_size_check_lib_functions()
 int
 run()
 {
-    init_client_api();
     Debug_LOG_INFO("Starting TestAppTCPClient %s...", get_instance_name());
 
 #ifdef TCP_CLIENT
