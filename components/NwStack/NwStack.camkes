@@ -9,6 +9,8 @@
 #include "SysLogger/camkes/SysLogger.camkes"
 #include "os_network_stack/network_stack.camkes"
 
+#include "lib_macros/ForEach.h"
+
 #define NwStack_INTERFACES \
     /* logger */ \
     SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)
