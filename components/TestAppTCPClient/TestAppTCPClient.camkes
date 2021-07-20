@@ -8,7 +8,6 @@
 import <if_OS_Socket.camkes>;
 
 #include "SysLogger/camkes/SysLogger.camkes"
-#include "util/loop_defines.h"
 #include "system_config.h"
 
 component TestAppTCPClient {
@@ -19,11 +18,6 @@ component TestAppTCPClient {
 
              emits    EventApiTestsDone multiple_client_sync_send_ready;
     maybe    consumes EventApiTestsDone multiple_client_sync_recv_ready;
-
-#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
-#define LOOP_ELEMENT \
-    GEN_PORT(dataport Buf socket_);
-#include "util/loop.h"
 
     SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)
 }

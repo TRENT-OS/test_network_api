@@ -171,7 +171,7 @@ post_init(void)
 
         .drv_nic =
         {
-            .from = OS_DATAPORT_CUSTOM_SIZE_ASSIGN(nic_from_port, NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS),
+            .from = OS_DATAPORT_CUSTOM_ASSIGN(nic_from_port, NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS, NULL),
             .to   = OS_DATAPORT_ASSIGN(nic_to_port),
 
             .rpc =

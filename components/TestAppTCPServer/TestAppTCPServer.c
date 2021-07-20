@@ -15,8 +15,10 @@
 #include "util/loop_defines.h"
 #include <camkes.h>
 
+IF_OS_SOCKET_DEFINE(networkStack_rpc);
+
 static const if_OS_Socket_t network_stack =
-    IF_OS_SOCKET_ASSIGN(networkStack_rpc, socket_1_port);
+    IF_OS_SOCKET_ASSIGN(networkStack_rpc);
 
 /*
  * This example demonstrates a server with an incoming connection. Reads
