@@ -81,9 +81,7 @@ assembly {
         NwStack_INSTANCE_CONNECT_CLIENT(
             nwStack,
             testAppUDPServer,
-            networkStack_rpc,
-            LIST(NwStack_SOCKET_PORT_NAME,
-                 OS_NETWORK_MAXIMUM_SOCKET_NO))
+            networkStack_rpc)
 
      }
 
@@ -94,6 +92,10 @@ assembly {
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver)
             nwStack.timeServer_rpc
+        )
+
+        NwStack_CLIENT_ASSIGN_BADGES(
+            testAppUDPServer.networkStack_rpc
         )
 
         NETWORK_TEST_NIC_CONFIG(nwDriver)
