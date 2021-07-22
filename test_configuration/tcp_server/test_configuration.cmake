@@ -36,6 +36,18 @@ DeclareCAmkESComponent(
         syslogger_client
 )
 
+CAmkESAddTemplatesPath(connector)
+
+DeclareCAmkESConnector(
+    trentos_network_stack_connector
+    FROM
+    trentos-from.template.c
+    TO
+    trentos-to.template.c
+    TO_HEADER
+    trentos-to.template.h
+)
+
 DeclareCAmkESComponent(
     TestAppTCPServer
     SOURCES
