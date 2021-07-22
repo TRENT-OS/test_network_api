@@ -98,13 +98,16 @@ post_init(void)
 {
     Debug_LOG_INFO("[NwStack '%s'] starting", get_instance_name());
 
-    if (NUMBER_OF_CLIENTS < networkStack_rpc_num_badges())
+    // attribute int maximum_number_of_client        = 8;
+    // attribute int maximum_number_of_total_sockets = 0;
+
+    if (maximum_number_of_client < networkStack_rpc_num_badges())
     {
         Debug_LOG_FATAL(
             "[NwStack '%s'] is configured for %d clients, but %d clients are "
             "connected",
             get_instance_name(),
-            NUMBER_OF_CLIENTS,
+            maximum_number_of_client,
             networkStack_rpc_num_badges());
         return;
     }
@@ -123,7 +126,25 @@ post_init(void)
         max_clients[i] = OS_NETWORK_MAXIMUM_SOCKET_NO;
         totalSocketsNeeded += max_clients[i]; // sockets needed for client i
     }
-    // TODO: decide how the user configures this
+
+    Debug_LOG_INFO(
+        "[NwStack '%s'] %d sockets required in total",
+        get_instance_name(),
+        totalSocketsNeeded);
+
+    // maximum_number_of_total_sockets = 0 (default) means that the need
+    // is set by the connected clients.
+    if (maximum_number_of_total_sockets)
+        if (totalSocketsNeeded > maximum_number_of_total_sockets)
+        {
+            Debug_LOG_FATAL(
+                "[NwStack '%s'] The connected clients require %d, but only %d "
+                "are "
+                "configured .",
+                totalSocketsNeeded,
+                maximum_number_of_total_sockets);
+            return;
+        }
 
 // will be removed with the event rework
 #define LOOP_ELEMENT                                                           \
