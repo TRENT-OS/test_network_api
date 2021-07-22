@@ -54,12 +54,15 @@
         /*- endif -*/
         /*- set page_size_bits = int(math.log(page_size, 2)) -*/
 
+        /*- set notification = alloc('notification_%d' % client_id, seL4_NotificationObject, write=True) -*/
+
+
         /*? macros.shared_buffer_symbol(sym=shmem_symbol, shmem_size=shmem_size, page_size=page_size) ?*/
         /*? register_shared_variable('%s_%s_data' % (me.parent.name, client_id), shmem_symbol, shmem_size, frame_size=page_size) ?*/
 
         volatile void * /*? shmem_name ?*/ = (volatile void *) & /*? shmem_symbol ?*/;
 
-        /*- do shmems.append((shmem_name, client_id, shmem_size, socket_quota)) -*/
+        /*- do shmems.append((shmem_name, client_id, shmem_size, socket_quota, notification)) -*/
     /*- else -*/
         /* skipping /*? client_id ?*/ */
     /*- endif -*/
@@ -72,7 +75,7 @@ void * /*? me.interface.name ?*/_buf(seL4_Word client_id) {
         return NULL;
     /*- else -*/
         switch (client_id) {
-            /*- for symbol, id, _, _ in shmems -*/
+            /*- for symbol, id, _, _, _ in shmems -*/
             case /*? id ?*/:
                 return (void *) /*? symbol ?*/;
             /*- endfor -*/
@@ -87,7 +90,7 @@ size_t /*? me.interface.name ?*/_buf_size(seL4_Word client_id) {
         return 0;
     /*- else -*/
         switch (client_id) {
-            /*- for _, id, size, _ in shmems -*/
+            /*- for _, id, size, _, _ in shmems -*/
             case /*? id ?*/:
                 return ROUND_UP_UNSAFE(/*? size ?*/, PAGE_SIZE_4K);
             /*- endfor -*/
@@ -106,7 +109,7 @@ seL4_Word /*? me.interface.name ?*/_enumerate_badge(unsigned int i) {
        return -1;
     /*- else -*/
         switch (i) {
-            /*- for _, id, _, _ in shmems -*/
+            /*- for _, id, _, _, _ in shmems -*/
                 case /*? loop.index0 ?*/:
                     return /*? id ?*/;
             /*- endfor -*/
@@ -121,7 +124,7 @@ unsigned int /*? me.interface.name ?*/_socket_quota(seL4_Word client_id) {
        return -1;
     /*- else -*/
         switch (client_id) {
-            /*- for _, id, _, socket_quota in shmems -*/
+            /*- for _, id, _, socket_quota, _ in shmems -*/
             case /*? id ?*/:
                     return /*? socket_quota ?*/;
             /*- endfor -*/
@@ -139,4 +142,24 @@ int /*? me.interface.name ?*/_wrap_ptr(dataport_ptr_t *p, void *ptr) {
 
 void * /*? me.interface.name ?*/_unwrap_ptr(dataport_ptr_t *p) {
     return NULL;
+}
+
+#include <sel4/sel4.h>
+
+/*? macros.show_includes(me.instance.type.includes) ?*/
+
+void /*? me.interface.name ?*/_emit_underlying(seL4_Word client_id) {
+    /*- if len(shmems) == 0 -*/
+    return;
+    /*- else -*/
+    switch (client_id)
+    {
+    /*- for _, id, _, _, notification in shmems -*/
+    case /*? id ?*/:
+        seL4_Signal(/*? notification ?*/);
+        /*- endfor -*/
+    default:
+        return;
+    }
+    /*- endif -*/
 }
