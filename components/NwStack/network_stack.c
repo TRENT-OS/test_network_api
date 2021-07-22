@@ -100,7 +100,7 @@ post_init(void)
 
     if (NUMBER_OF_CLIENTS < networkStack_rpc_num_badges())
     {
-        Debug_LOG_ERROR(
+        Debug_LOG_FATAL(
             "[NwStack '%s'] is configured for %d clients, but %d clients are "
             "connected",
             get_instance_name(),
@@ -112,7 +112,7 @@ post_init(void)
     int* max_clients = calloc(sizeof(int), networkStack_rpc_num_badges());
     if (max_clients == NULL)
     {
-        Debug_LOG_ERROR("[NwStack '%s'] Could not allocate resources.");
+        Debug_LOG_FATAL("[NwStack '%s'] Could not allocate resources.");
         return;
     }
 
