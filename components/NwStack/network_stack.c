@@ -37,6 +37,9 @@ networkStack_rpc_num_badges(void);
 seL4_Word
 networkStack_rpc_enumerate_badge(unsigned int i);
 
+unsigned int
+networkStack_rpc_socket_quota(seL4_Word client_id);
+
 seL4_Word
 networkStack_rpc_get_sender_id(void);
 
@@ -62,6 +65,12 @@ int
 get_client_id_buf_size(void)
 {
     return networkStack_rpc_buf_size(networkStack_rpc_get_sender_id());
+}
+
+int
+get_client_socket_quota(int clientId)
+{
+    return networkStack_rpc_socket_quota(networkStack_rpc_enumerate_badge(clientId));
 }
 
 //------------------------------------------------------------------------------
@@ -123,7 +132,12 @@ post_init(void)
 
     for (int i = 0; i < networkStack_rpc_num_badges(); i++)
     {
-        max_clients[i] = OS_NETWORK_MAXIMUM_SOCKET_NO;
+        max_clients[i] = get_client_socket_quota(i);
+        Debug_LOG_INFO(
+            "[NwStack '%s'] Client %d requires %d sockets",
+            get_instance_name(),
+            i,
+            max_clients[i]);
         totalSocketsNeeded += max_clients[i]; // sockets needed for client i
     }
 

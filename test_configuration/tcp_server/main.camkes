@@ -98,6 +98,7 @@ assembly {
             testAppTCPServer.networkStack_rpc
         )
 
+        testAppTCPServer.networkStack_rpc_socket_quota = 29;
         NETWORK_TEST_NIC_CONFIG(nwDriver)
     }
 }
