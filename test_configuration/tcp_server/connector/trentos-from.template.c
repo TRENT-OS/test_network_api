@@ -107,10 +107,16 @@ static volatile int handoff_value;
 static volatile int lock_count = 1;
 
 /*- set handoffs = [] -*/
+/*- set events = ['none','connect','read','write','close','error'] -*/
 /*- for i in six.moves.range(socket_quota) -*/
-
-/*- set hdof = alloc('handoff_%d_%d' % (client_id, i), seL4_EndpointObject, label=me.instance.name, read=True, write=True) -*/
-/*- do handoffs.append((i, hdof)) -*/
+    /*- set evts = [] -*/
+    /*- set hdof = alloc('handoff_%d_%d' % (client_id, i), seL4_EndpointObject, label=me.instance.name, read=True, write=True) -*/
+    /*- for j in six.moves.range(len(events)) -*/
+        /*- set hdof_events = alloc('handoff_%d_%d_%d' % (client_id, i, j), seL4_EndpointObject, label=me.instance.name, read=True, write=True) -*/
+        /*- do evts.append((j, hdof_events)) -*/
+static volatile int handoff_value_/*? client_id ?*/_/*? i ?*/_/*? events[j] ?*/;
+        /*- endfor -*/
+    /*- do handoffs.append((i, hdof, evts)) -*/
 static volatile int handoff_value_/*? client_id ?*/_/*? i ?*/;
 
 /*- endfor -*/
@@ -118,21 +124,24 @@ static volatile int handoff_value_/*? client_id ?*/_/*? i ?*/;
 
 
 
-static int lock(void) {
+static int lock(void)
+{
     int result = sync_bin_sem_bare_wait(/*? lock ?*/, &lock_count);
     __sync_synchronize();
     return result;
 }
 
-static int unlock(void) {
+static int unlock(void)
+{
     __sync_synchronize();
     return sync_bin_sem_bare_post(/*? lock ?*/, &lock_count);
 }
 
-int /*? me.interface.name ?*/__run(void) {
-    int notification_type = 0;
-    int socket_number = 0;
-    int socket_event = 0;
+int /*? me.interface.name ?*/__run(void)
+{
+    unsigned int notification_type = 0;
+    unsigned int socket_number = 0;
+    unsigned int socket_event = 0;
 
     while (true)
     {
@@ -170,23 +179,34 @@ int /*? me.interface.name ?*/__run(void) {
             * semaphore.
             */
 
-        /*- if len(handoffs) == 0 -*/
-        goto end;
-        /*- else -*/
-        switch (socket_number)
+        if(notification_type == SOCKET_NOTIFICATION)
         {
-        /*- for i, hdf in handoffs -*/
-        case /*? i ?*/:
-            if (handoff_value_/*? client_id ?*/_/*? i ?*/ != INT_MAX)
+            /*- if len(handoffs) == 0 -*/
+            goto end;
+            /*- else -*/
+            switch (socket_number)
             {
-                sync_sem_bare_post(/*? hdf ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/);
-            }
-            goto end;
+            /*- for i, hdf, hdf_evts in handoffs -*/
+            case /*? i ?*/:
+                switch(socket_event)
+                {
+                /*- for j, hdf_events in hdf_evts -*/
+                case  /*? j ?*/:
+                    if (handoff_value_/*? client_id ?*/_/*? i ?*/_/*? events[j] ?*/ != INT_MAX)
+                    {
+                        sync_sem_bare_post(/*? hdf_events ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/_/*? events[j] ?*/);
+                    }
+                    goto end;
+                /*- endfor -*/
+                default:
+                    goto end;
+                }
             /*- endfor -*/
-        default:
-            goto end;
+            default:
+                goto end;
+            }
+            /*- endif -*/
         }
-        /*- endif -*/
 
         if (handoff_value != INT_MAX) {
             sync_sem_bare_post(/*? handoff ?*/, &handoff_value);
@@ -195,14 +215,16 @@ int /*? me.interface.name ?*/__run(void) {
 end:
     result = unlock();
     assert(result == 0);
-}
+    }
 }
 
-int /*? me.interface.name ?*/_poll(void) {
+int /*? me.interface.name ?*/_poll(void)
+{
     return sync_sem_bare_trywait(/*? handoff ?*/, &handoff_value) == 0;
 }
 
-void /*? me.interface.name ?*/_wait(void) {
+void /*? me.interface.name ?*/_wait(void)
+{
 #ifndef CONFIG_KERNEL_MCS
     camkes_protect_reply_cap();
 #endif
@@ -218,39 +240,73 @@ void /*? me.interface.name ?*/_wait(void) {
     }
 }
 
-int /*? me.interface.name ?*/_socket_poll(unsigned int socket) {
+int /*? me.interface.name ?*/_socket_event_poll(
+    unsigned int socket,
+    unsigned int socket_event)
+{
     switch (socket)
     {
-        /*- for i, hdf in handoffs -*/
+        /*- for i, hdf, hdf_evts in handoffs -*/
         case /*? i ?*/:
-             return sync_sem_bare_trywait(/*? hdf ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/) == 0;
+            switch(socket_event)
+            {
+            /*- for j, hdf_events in hdf_evts -*/
+            case  /*? j ?*/:
+                if (handoff_value_/*? client_id ?*/_/*? i ?*/_/*? events[j] ?*/ != INT_MAX)
+                {
+                    return sync_sem_bare_trywait(/*? hdf_events ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/_/*? events[j] ?*/) == 0;
+                }
+            /*- endfor -*/
+            default:
+               return 0;
+            }
         /*- endfor -*/
         default:
             return 0;
     }
 }
 
-void /*? me.interface.name ?*/_socket_wait(unsigned int socket) {
+int /*? me.interface.name ?*/_socket_poll(unsigned int socket) {
+    return /*? me.interface.name ?*/_socket_event_poll(socket, 0);
+}
+
+
+void /*? me.interface.name ?*/_socket_event_wait(
+    unsigned int socket,
+    unsigned int socket_event)
+{
 #ifndef CONFIG_KERNEL_MCS
     camkes_protect_reply_cap();
 #endif
     switch (socket)
     {
-        /*- for i, hdf in handoffs -*/
+        /*- for i, hdf, hdf_evts in handoffs -*/
         case /*? i ?*/:
-            if (unlikely(sync_sem_bare_wait(/*? hdf ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/) != 0)) {
-                ERR(/*? error_handler ?*/, ((camkes_error_t){
-                        .type = CE_OVERFLOW,
-                        .instance = "/*? me.instance.name ?*/",
-                        .interface = "/*? me.interface.name ?*/",
-                        .description = "failed to wait on event due to potential overflow",
-                    }), ({
-                        return;
-                    }));
+            switch(socket_event)
+            {
+            /*- for j, hdf_events in hdf_evts -*/
+            case  /*? j ?*/:
+                if (unlikely(sync_sem_bare_wait(/*? hdf_events ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/_/*? events[j] ?*/) != 0)) {
+                    ERR(/*? error_handler ?*/, ((camkes_error_t){
+                            .type = CE_OVERFLOW,
+                            .instance = "/*? me.instance.name ?*/",
+                            .interface = "/*? me.interface.name ?*/",
+                            .description = "failed to wait on event due to potential overflow",
+                        }), ({
+                            return;
+                        }));
+                }
+                return;
+            /*- endfor -*/
+            default:
+                return;
             }
-            return;
         /*- endfor -*/
         default:
             return;
     }
+}
+
+void /*? me.interface.name ?*/_socket_wait(unsigned int socket) {
+    /*? me.interface.name ?*/_socket_event_wait(socket, 0);
 }

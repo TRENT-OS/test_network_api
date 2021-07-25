@@ -185,9 +185,10 @@ void /*? me.interface.name ?*/_emit(seL4_Word client_id) {
     /*- endif -*/
 }
 
-void /*? me.interface.name ?*/_notify_socket(
+void /*? me.interface.name ?*/_notify_socket_event(
     seL4_Word client_id,
-    unsigned int socket)
+    unsigned int socket,
+    unsigned int socket_event)
 {
     seL4_MessageInfo_t msgInfo = seL4_MessageInfo_new(0, 0, 0, 0);
     /*- if len(shmems) == 0 -*/
@@ -195,11 +196,11 @@ void /*? me.interface.name ?*/_notify_socket(
     /*- else -*/
     switch (client_id)
     {
-    //    seL4_Send(seL4_CPtr dest, seL4_MessageInfo_t msgInfo)
     /*- for _, id, _, _, notification, _ in shmems -*/
         case /*? id ?*/:
             seL4_SetMR(0, SOCKET_NOTIFICATION);
             seL4_SetMR(1, socket);
+            seL4_SetMR(2, socket_event);
             msgInfo = seL4_MessageInfo_set_length(msgInfo, 3);
             seL4_Send(
                 /*? notification ?*/,
@@ -210,4 +211,11 @@ void /*? me.interface.name ?*/_notify_socket(
             return;
         }
     /*- endif -*/
+}
+
+void /*? me.interface.name ?*/_notify_socket(
+    seL4_Word client_id,
+    unsigned int socket)
+{
+    /*? me.interface.name ?*/_notify_socket_event(client_id, socket, 0);
 }
