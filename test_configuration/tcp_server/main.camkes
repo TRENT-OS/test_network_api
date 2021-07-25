@@ -40,6 +40,7 @@ assembly {
             sysLogger,
             nwStack,
             testAppTCPServer
+        //    testAppTCPServer_2
         )
 
         //----------------------------------------------------------------------
@@ -77,11 +78,17 @@ assembly {
         // TCP Echo server
         //----------------------------------------------------------------------
         component TestAppTCPServer testAppTCPServer;
+        //component TestAppTCPServer testAppTCPServer_2;
 
         NwStack_INSTANCE_CONNECT_CLIENT(
             nwStack,
             testAppTCPServer,
             networkStack_rpc)
+
+        //NwStack_INSTANCE_CONNECT_CLIENT(
+        //    nwStack,
+        //    testAppTCPServer_2,
+        //    networkStack_rpc)
 
      }
 
@@ -96,9 +103,11 @@ assembly {
 
         NwStack_CLIENT_ASSIGN_BADGES(
             testAppTCPServer.networkStack_rpc
+        //    testAppTCPServer_2.networkStack_rpc
         )
 
-        testAppTCPServer.networkStack_rpc_socket_quota = 29;
+        testAppTCPServer.networkStack_rpc_socket_quota = 3;
+        // testAppTCPServer_2.networkStack_rpc_socket_quota = 1;
         NETWORK_TEST_NIC_CONFIG(nwDriver)
     }
 }
