@@ -39,22 +39,11 @@ pre_init(void)
 #endif
 }
 
-int networkStack_rpc_reg_callback(void (*cb)(void*), void *arg);
-
-void
-callback_me(UNUSED void* arg)
-{
-    Debug_LOG_ERROR("CALLBACK HERE \n");
-    networkStack_rpc_reg_callback(callback_me, NULL);
-}
-
 //------------------------------------------------------------------------------
 int
 run()
 {
     Debug_LOG_INFO("Starting TestAppTCPServer ...");
-    networkStack_rpc_reg_callback(callback_me, NULL);
-    Debug_LOG_INFO("callback registered ...");
 
     OS_NetworkSocket_Handle_t srvHandle;
 
