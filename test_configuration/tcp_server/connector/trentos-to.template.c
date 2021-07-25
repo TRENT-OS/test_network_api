@@ -4,6 +4,15 @@
  *#SPDX-License-Identifier: BSD-2-Clause
   #*/
 
+#define COMPONENT_NOTIFICATION 0
+#define SOCKET_NOTIFICATION    1
+
+#define SOCKET_NONE_EVENT    0
+#define SOCKET_CONNECT_EVENT 1
+#define SOCKET_READ_EVENT    2
+#define SOCKET_WRITE_EVENT   3
+#define SOCKET_CLOSE_EVENT   4
+#define SOCKET_ERROR_EVENT   5
 
 /*- set client_ids = namespace() -*/
 /*- if me.parent.type.to_threads == 0 -*/
@@ -54,15 +63,21 @@
         /*- endif -*/
         /*- set page_size_bits = int(math.log(page_size, 2)) -*/
 
-        /*- set notification = alloc('notification_%d' % client_id, seL4_NotificationObject, write=True) -*/
+        /*- set notification = alloc('notification_%d' % client_id, seL4_EndpointObject, write=True) -*/
 
+        /*- set socket_notifications = [] -*/
+
+        /*- for i in six.moves.range(socket_quota) -*/
+            /*- set socket_notification = alloc('notification_%d_%d' % (client_id, i), seL4_NotificationObject, write=True) -*/
+            /*- do socket_notifications.append((i, socket_notification)) -*/
+        /*- endfor -*/
 
         /*? macros.shared_buffer_symbol(sym=shmem_symbol, shmem_size=shmem_size, page_size=page_size) ?*/
         /*? register_shared_variable('%s_%s_data' % (me.parent.name, client_id), shmem_symbol, shmem_size, frame_size=page_size) ?*/
 
         volatile void * /*? shmem_name ?*/ = (volatile void *) & /*? shmem_symbol ?*/;
 
-        /*- do shmems.append((shmem_name, client_id, shmem_size, socket_quota, notification)) -*/
+        /*- do shmems.append((shmem_name, client_id, shmem_size, socket_quota, notification, socket_notifications)) -*/
     /*- else -*/
         /* skipping /*? client_id ?*/ */
     /*- endif -*/
@@ -75,7 +90,7 @@ void * /*? me.interface.name ?*/_buf(seL4_Word client_id) {
         return NULL;
     /*- else -*/
         switch (client_id) {
-            /*- for symbol, id, _, _, _ in shmems -*/
+            /*- for symbol, id, _, _, _, _ in shmems -*/
             case /*? id ?*/:
                 return (void *) /*? symbol ?*/;
             /*- endfor -*/
@@ -90,7 +105,7 @@ size_t /*? me.interface.name ?*/_buf_size(seL4_Word client_id) {
         return 0;
     /*- else -*/
         switch (client_id) {
-            /*- for _, id, size, _, _ in shmems -*/
+            /*- for _, id, size, _, _, _ in shmems -*/
             case /*? id ?*/:
                 return ROUND_UP_UNSAFE(/*? size ?*/, PAGE_SIZE_4K);
             /*- endfor -*/
@@ -109,7 +124,7 @@ seL4_Word /*? me.interface.name ?*/_enumerate_badge(unsigned int i) {
        return -1;
     /*- else -*/
         switch (i) {
-            /*- for _, id, _, _, _ in shmems -*/
+            /*- for _, id, _, _, _, _ in shmems -*/
                 case /*? loop.index0 ?*/:
                     return /*? id ?*/;
             /*- endfor -*/
@@ -124,7 +139,7 @@ unsigned int /*? me.interface.name ?*/_socket_quota(seL4_Word client_id) {
        return -1;
     /*- else -*/
         switch (client_id) {
-            /*- for _, id, _, socket_quota, _ in shmems -*/
+            /*- for _, id, _, socket_quota, _, _ in shmems -*/
             case /*? id ?*/:
                     return /*? socket_quota ?*/;
             /*- endfor -*/
@@ -148,18 +163,51 @@ void * /*? me.interface.name ?*/_unwrap_ptr(dataport_ptr_t *p) {
 
 /*? macros.show_includes(me.instance.type.includes) ?*/
 
-void /*? me.interface.name ?*/_emit_underlying(seL4_Word client_id) {
+void /*? me.interface.name ?*/_emit(seL4_Word client_id) {
+    seL4_MessageInfo_t msgInfo = seL4_MessageInfo_new(0, 0, 0, 0);
     /*- if len(shmems) == 0 -*/
     return;
     /*- else -*/
     switch (client_id)
     {
-    /*- for _, id, _, _, notification in shmems -*/
+    /*- for _, id, _, _, notification, _ in shmems -*/
     case /*? id ?*/:
-        seL4_Signal(/*? notification ?*/);
+        seL4_SetMR(0, COMPONENT_NOTIFICATION);
+        msgInfo = seL4_MessageInfo_set_length(msgInfo, 1);
+        seL4_Send(
+            /*? notification ?*/,
+            msgInfo);
+        return;
         /*- endfor -*/
     default:
         return;
     }
+    /*- endif -*/
+}
+
+void /*? me.interface.name ?*/_notify_socket(
+    seL4_Word client_id,
+    unsigned int socket)
+{
+    seL4_MessageInfo_t msgInfo = seL4_MessageInfo_new(0, 0, 0, 0);
+    /*- if len(shmems) == 0 -*/
+    return;
+    /*- else -*/
+    switch (client_id)
+    {
+    //    seL4_Send(seL4_CPtr dest, seL4_MessageInfo_t msgInfo)
+    /*- for _, id, _, _, notification, _ in shmems -*/
+        case /*? id ?*/:
+            seL4_SetMR(0, SOCKET_NOTIFICATION);
+            seL4_SetMR(1, socket);
+            msgInfo = seL4_MessageInfo_set_length(msgInfo, 3);
+            seL4_Send(
+                /*? notification ?*/,
+                msgInfo);
+            return ;
+    /*- endfor -*/
+        default:
+            return;
+        }
     /*- endif -*/
 }

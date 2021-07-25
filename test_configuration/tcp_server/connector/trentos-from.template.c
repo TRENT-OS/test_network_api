@@ -4,6 +4,15 @@
  *#SPDX-License-Identifier: BSD-2-Clause
   #*/
 
+#define COMPONENT_NOTIFICATION 0
+#define SOCKET_NOTIFICATION    1
+
+#define SOCKET_NONE_EVENT    0
+#define SOCKET_CONNECT_EVENT 1
+#define SOCKET_READ_EVENT    2
+#define SOCKET_WRITE_EVENT   3
+#define SOCKET_CLOSE_EVENT   4
+#define SOCKET_ERROR_EVENT   5
 
 /*- set client_ids = namespace() -*/
 /*- if me.parent.type.to_threads == 0 -*/
@@ -89,13 +98,25 @@ void * /*? me.interface.name ?*/_unwrap_ptr(dataport_ptr_t *p) {
 /* Interface-specific error handling. */
 /*- set error_handler = '%s_error_handler' % me.interface.name -*/
 
-/*- set notification = alloc('notification_%d' % client_id, seL4_NotificationObject, read=True) -*/
+/*- set notification = alloc('notification_%d' % client_id, seL4_EndpointObject, read=True) -*/
 
 /*- set handoff = alloc('handoff_%d' % client_id, seL4_EndpointObject, label=me.instance.name, read=True, write=True) -*/
 static volatile int handoff_value;
 
 /*- set lock = alloc('lock_%d' % client_id, seL4_NotificationObject, label=me.instance.name, read=True, write=True) -*/
 static volatile int lock_count = 1;
+
+/*- set handoffs = [] -*/
+/*- for i in six.moves.range(socket_quota) -*/
+
+/*- set hdof = alloc('handoff_%d_%d' % (client_id, i), seL4_EndpointObject, label=me.instance.name, read=True, write=True) -*/
+/*- do handoffs.append((i, hdof)) -*/
+static volatile int handoff_value_/*? client_id ?*/_/*? i ?*/;
+
+/*- endfor -*/
+
+
+
 
 static int lock(void) {
     int result = sync_bin_sem_bare_wait(/*? lock ?*/, &lock_count);
@@ -108,57 +129,77 @@ static int unlock(void) {
     return sync_bin_sem_bare_post(/*? lock ?*/, &lock_count);
 }
 
-static void (*callback)(void*);
-static void *callback_arg;
-
 int /*? me.interface.name ?*/__run(void) {
-    while (true) {
-        seL4_Wait(/*? notification ?*/, NULL);
+    int notification_type = 0;
+    int socket_number = 0;
+    int socket_event = 0;
 
-        if (lock() != 0) {
+    while (true)
+    {
+        notification_type = 0;
+        socket_number     = 0;
+        socket_event      = 0;
+
+        seL4_Recv(/*? notification ?*/, NULL);
+
+        notification_type = seL4_GetMR(0);
+        if(notification_type == SOCKET_NOTIFICATION)
+        {
+            socket_number     = seL4_GetMR(1);
+            socket_event      = seL4_GetMR(2);
+        }
+
+        ZF_LOGE(
+            "\n\nGot $%d$ %d, %d\n\n",
+            notification_type,
+            socket_number,
+            socket_event);
+
+        if (lock() != 0)
+        {
             /* Failed to acquire the lock (`INT_MAX` threads in `register`?).
              * It's unsafe to go on at this point, so just drop the event.
              */
             continue;
         }
 
-        /* Read and deregister any callback. */
-        void (*cb)(void*) = callback;
-        callback = NULL;
-        void *arg = callback_arg;
+        /* Check that we're not about to overflow the handoff semaphore. If
+            * we are, we just silently drop the event as allowed by the
+            * semantics of this connector. Note that there is no race
+            * condition here because we are the only thread incrementing the
+            * semaphore.
+            */
 
-        if (cb == NULL) {
-            /* No callback was registered. */
-
-            /* Check that we're not about to overflow the handoff semaphore. If
-             * we are, we just silently drop the event as allowed by the
-             * semantics of this connector. Note that there is no race
-             * condition here because we are the only thread incrementing the
-             * semaphore.
-             */
-            if (handoff_value != INT_MAX) {
-                sync_sem_bare_post(/*? handoff ?*/, &handoff_value);
+        /*- if len(handoffs) == 0 -*/
+        goto end;
+        /*- else -*/
+        switch (socket_number)
+        {
+        /*- for i, hdf in handoffs -*/
+        case /*? i ?*/:
+            if (handoff_value_/*? client_id ?*/_/*? i ?*/ != INT_MAX)
+            {
+                sync_sem_bare_post(/*? hdf ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/);
             }
+            goto end;
+            /*- endfor -*/
+        default:
+            goto end;
         }
+        /*- endif -*/
 
-        int result UNUSED = unlock();
-        assert(result == 0);
-
-        if (cb != NULL) {
-            /* A callback was registered. Note that `cb` is a local variable
-             * and thus we know that the semaphore post above was not executed.
-             */
-            cb(arg);
+        if (handoff_value != INT_MAX) {
+            sync_sem_bare_post(/*? handoff ?*/, &handoff_value);
         }
-    }
+    int result UNUSED;
+end:
+    result = unlock();
+    assert(result == 0);
 }
-
-static int poll(void) {
-    return sync_sem_bare_trywait(/*? handoff ?*/, &handoff_value) == 0;
 }
 
 int /*? me.interface.name ?*/_poll(void) {
-    return poll();
+    return sync_sem_bare_trywait(/*? handoff ?*/, &handoff_value) == 0;
 }
 
 void /*? me.interface.name ?*/_wait(void) {
@@ -177,42 +218,39 @@ void /*? me.interface.name ?*/_wait(void) {
     }
 }
 
-int /*? me.interface.name ?*/_reg_callback(void (*cb)(void*), void *arg) {
-
-    /* First see if there's a pending event, allowing us to immediately invoke
-     * the callback without having to register it.
-     */
-    if (poll()) {
-        cb(arg);
-        return 0;
+int /*? me.interface.name ?*/_socket_poll(unsigned int socket) {
+    switch (socket)
+    {
+        /*- for i, hdf in handoffs -*/
+        case /*? i ?*/:
+             return sync_sem_bare_trywait(/*? hdf ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/) == 0;
+        /*- endfor -*/
+        default:
+            return 0;
     }
+}
 
-    if (lock() != 0) {
-        /* Failed to acquire the lock (`INT_MAX` threads in this function?). */
-        return -1;
-    }
-
-    if (poll()) {
-        /* An event arrived in between us checking previously and acquiring the
-         * lock.
-         */
-        int result UNUSED = unlock();
-        assert(result == 0);
-        cb(arg);
-        return 0;
-
-    } else if (callback != NULL) {
-        /* There is already a registered callback. */
-        int result UNUSED = unlock();
-        assert(result == 0);
-        return -1;
-
-    } else {
-        /* Register the callback. Expected case. */
-        callback = cb;
-        callback_arg = arg;
-        int result UNUSED = unlock();
-        assert(result == 0);
-        return 0;
+void /*? me.interface.name ?*/_socket_wait(unsigned int socket) {
+#ifndef CONFIG_KERNEL_MCS
+    camkes_protect_reply_cap();
+#endif
+    switch (socket)
+    {
+        /*- for i, hdf in handoffs -*/
+        case /*? i ?*/:
+            if (unlikely(sync_sem_bare_wait(/*? hdf ?*/, &handoff_value_/*? client_id ?*/_/*? i ?*/) != 0)) {
+                ERR(/*? error_handler ?*/, ((camkes_error_t){
+                        .type = CE_OVERFLOW,
+                        .instance = "/*? me.instance.name ?*/",
+                        .interface = "/*? me.interface.name ?*/",
+                        .description = "failed to wait on event due to potential overflow",
+                    }), ({
+                        return;
+                    }));
+            }
+            return;
+        /*- endfor -*/
+        default:
+            return;
     }
 }

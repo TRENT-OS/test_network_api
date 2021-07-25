@@ -268,10 +268,17 @@ run(void)
             get_instance_name());
         return -1;
     }
+    void networkStack_rpc_emit(seL4_Word client_id);
+
+    void networkStack_rpc_notify_socket(
+        seL4_Word    client_id,
+        unsigned int socket);
+
+    networkStack_rpc_emit(networkStack_rpc_enumerate_badge(0));
 
     // The Ticker component sends us a tick every second. Currently there is
-    // no dedicated interface to enable and disable the tick. because we don't
-    // need this. OS_NetworkStack_run() is not supposed to return.
+    // no dedicated interface to enable and disable the tick. because we
+    // don't need this. OS_NetworkStack_run() is not supposed to return.
 
     OS_Error_t ret = OS_NetworkStack_run();
     if (ret != OS_SUCCESS)
