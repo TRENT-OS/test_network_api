@@ -12,7 +12,6 @@
 
 #include "OS_Network.h"
 #include "interfaces/if_OS_Socket.h"
-#include "util/loop_defines.h"
 #include <camkes.h>
 
 IF_OS_SOCKET_DEFINE_CONNECTOR(networkStack_rpc);

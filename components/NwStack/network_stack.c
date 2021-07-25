@@ -14,10 +14,7 @@
 #include "TimeServer.h"
 #include "lib_compiler/compiler.h"
 #include "lib_debug/Debug.h"
-#include "util/loop_defines.h"
 #include <camkes.h>
-
-#define NUMBER_OF_CLIENTS 8
 
 static const OS_NetworkStack_AddressConfig_t config =
 {
