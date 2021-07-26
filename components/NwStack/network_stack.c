@@ -157,23 +157,13 @@ post_init(void)
             return;
         }
 
-// will be removed with the event rework
-#define LOOP_ELEMENT                                                           \
-    {                                                                          \
-        .notify_write      = GEN_EMIT(e_write_),                               \
-        .wait_write        = GEN_WAIT(c_write_),                               \
-        .notify_read       = GEN_EMIT(e_read_),                                \
-        .wait_read         = GEN_WAIT(c_read_),                                \
-        .notify_connection = GEN_EMIT(e_conn_),                                \
-        .wait_connection   = GEN_WAIT(c_conn_),                                \
-        .accepted_handle   = -1,                                               \
-    },
-
-    // will be removed with the event rework
-    static OS_NetworkStack_SocketResources_t socks[OS_NETWORK_MAXIMUM_SOCKET_NO] = {
-#define LOOP_COUNT OS_NETWORK_MAXIMUM_SOCKET_NO
-#include "util/loop.h" // places LOOP_ELEMENT here for LOOP_COUNT times
-    };
+    OS_NetworkStack_SocketResources_t* p_socks = calloc(
+            sizeof(OS_NetworkStack_SocketResources_t), totalSocketsNeeded);
+    if (p_socks == NULL)
+    {
+        Debug_LOG_ERROR("[NwStack '%s'] Could not allocate resources.");
+        return;
+    }
 
     const OS_NetworkStack_CamkesConfig_t camkes_config =
     {
@@ -198,7 +188,7 @@ post_init(void)
             .number_of_clients      = networkStack_rpc_num_badges(),
             .number_of_sockets      = totalSocketsNeeded,
             .client_sockets_quota   = max_clients,
-            .sockets                = socks,
+            .sockets                = p_socks,
         },
 
         .drv_nic =
@@ -216,7 +206,7 @@ post_init(void)
     };
 
     OS_NetworkStack_CamkesConfig_t* p_camkes_config =
-        malloc(sizeof(OS_NetworkStack_CamkesConfig_t));
+        calloc(sizeof(OS_NetworkStack_CamkesConfig_t),1);
     if (p_camkes_config == NULL)
     {
         Debug_LOG_ERROR("[NwStack '%s'] Could not allocate resources.");
@@ -265,13 +255,6 @@ run(void)
             get_instance_name());
         return -1;
     }
-    void networkStack_rpc_emit(seL4_Word client_id);
-
-    void networkStack_rpc_notify_socket(
-        seL4_Word    client_id,
-        unsigned int socket);
-
-    networkStack_rpc_emit(networkStack_rpc_enumerate_badge(0));
 
     // The Ticker component sends us a tick every second. Currently there is
     // no dedicated interface to enable and disable the tick. because we

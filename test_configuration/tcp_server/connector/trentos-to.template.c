@@ -202,6 +202,13 @@ void /*? me.interface.name ?*/_notify_socket_event(
             seL4_SetMR(1, socket);
             seL4_SetMR(2, socket_event);
             msgInfo = seL4_MessageInfo_set_length(msgInfo, 3);
+
+            ZF_LOGE(
+                "\n\nSent $%d$ %d, %d\n\n",
+                SOCKET_NOTIFICATION,
+                socket,
+                socket_event);
+
             seL4_Send(
                 /*? notification ?*/,
                 msgInfo);
