@@ -164,7 +164,7 @@ run()
         {
         /* This means end of read as socket was closed. Exit now and close
          * handle*/
-        case OS_ERROR_CONNECTION_CLOSED:
+        case OS_ERROR_NETWORK_CONN_SHUTDOWN:
             // the test runner checks for this string
             Debug_LOG_INFO("connection closed by server");
             OS_NetworkSocket_close(clientHandle);
