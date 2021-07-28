@@ -73,9 +73,11 @@ run()
         return -1;
     }
 
+    int backlog = 10;
+
     err = OS_NetworkSocket_listen(
               srvHandle,
-              1);
+              backlog);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_listen() failed, code %d", err);
