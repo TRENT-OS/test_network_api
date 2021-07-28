@@ -92,10 +92,12 @@ run()
 
     for (;;)
     {
+        do{
         err = OS_NetworkSocket_accept(
                   srvHandle,
                   &clientHandle,
                   &srcAddr);
+        } while (err == OS_ERROR_TRY_AGAIN);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_accept() failed, error %d", err);
