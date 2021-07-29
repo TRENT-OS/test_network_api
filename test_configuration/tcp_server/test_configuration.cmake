@@ -16,6 +16,10 @@ DeclareCAmkESComponent(
 
 NetworkStack_PicoTcp_DeclareCAmkESComponent(
     NetworkStack_PicoTcp
+    C_FLAGS
+        -DDEV_ADDR="10.0.0.11"
+        -DGATEWAY_ADDR="10.0.0.1"
+        -DSUBNET_MASK="255.255.255.0"
 )
 
 DeclareCAmkESComponent(
