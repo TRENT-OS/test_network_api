@@ -14,7 +14,15 @@ SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
 import "../../components/Ticker/Ticker.camkes";
 import "../../components/TestAppTCPClient/TestAppTCPClient.camkes";
-#include "../../components/NwStack/NwStack.camkes"
+
+#define NetworkStack_PicoTcp_SOCKET_NO 16
+
+#include "NetworkStack_PicoTcp/camkes/NetworkStack_PicoTcp.camkes"
+NetworkStack_PicoTcp_COMPONENT_DEFINE(
+    NetworkStack_PicoTcp,
+    NIC_DRIVER_RINGBUFFER_SIZE,
+    NetworkStack_PicoTcp_SOCKET_NO,
+    SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger))
 
 #include "plat_nic.camkes"
 #include "lib_macros/List.h"
@@ -66,9 +74,9 @@ assembly {
         //----------------------------------------------------------------------
         // Network Stack
         //----------------------------------------------------------------------
-        component NwStack nwStack;
+        component NetworkStack_PicoTcp nwStack;
 
-        NwStack_INSTANCE_CONNECT(
+        NetworkStack_PicoTcp_INSTANCE_CONNECT(
             nwStack,
             ticker.NwStack_event_tick,
             nwDriver
@@ -79,22 +87,10 @@ assembly {
         //----------------------------------------------------------------------
         component TestAppTCPClient testAppTCPClient_client1;
 
-        NwStack_INSTANCE_CONNECT_CLIENT(
-            nwStack,
-            testAppTCPClient_client1,
-            networkStack_rpc)
-
-
         //----------------------------------------------------------------------
         // TCP Client multiple clients - client 2
         //----------------------------------------------------------------------
         component TestAppTCPClient testAppTCPClient_client2;
-
-        NwStack_INSTANCE_CONNECT_CLIENT(
-            nwStack,
-            testAppTCPClient_client2,
-            networkStack_rpc)
-
 
         // Clients sync
         connection seL4Notification testAppTCPClient_1_2_ready(
@@ -105,6 +101,12 @@ assembly {
             from testAppTCPClient_client2.multiple_client_sync_send_ready,
             to   testAppTCPClient_client1.multiple_client_sync_recv_ready);
 
+        // Connect clients to network stack
+        NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
+            nwStack,
+            testAppTCPClient_client1, networkStack_rpc,
+            testAppTCPClient_client2, networkStack_rpc
+        )
 
      }
 
@@ -117,11 +119,16 @@ assembly {
             nwStack.timeServer_rpc
         )
 
-        NwStack_CLIENT_ASSIGN_BADGES(
+        NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGES(
             testAppTCPClient_client1.networkStack_rpc,
             testAppTCPClient_client2.networkStack_rpc
         )
 
+        NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS(
+            nwStack,
+            8,
+            8
+        )
 
         NETWORK_TEST_NIC_CONFIG(nwDriver)
     }

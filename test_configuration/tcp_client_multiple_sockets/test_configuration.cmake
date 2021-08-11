@@ -14,28 +14,8 @@ DeclareCAmkESComponent(
         lib_debug
 )
 
-DeclareCAmkESComponent(
-    NwStack
-    SOURCES
-        components/NwStack/network_stack.c
-    C_FLAGS
-        -Wall
-        -Werror
-        -DOS_NWSTACK_AS_CLIENT
-        -DOS_CONFIG_SERVICE_CAMKES_CLIENT
-        -DOS_NETWORK_MAXIMUM_SOCKET_NO=8
-        -DDEV_ADDR="10.0.0.10"
-        -DGATEWAY_ADDR="10.0.0.1"
-        -DSUBNET_MASK="255.255.255.0"
-    LIBS
-        system_config
-        os_core_api
-        lib_compiler
-        lib_debug
-        lib_macros
-        os_network_lib
-        TimeServer_client
-        syslogger_client
+NetworkStack_PicoTcp_DeclareCAmkESComponent(
+    NetworkStack_PicoTcp
 )
 
 DeclareCAmkESComponent(
