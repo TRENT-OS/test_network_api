@@ -595,7 +595,7 @@ test_tcp_client()
     /*
     As of now the nw stack behavior is as below:
     Keep reading data until you receive one of the return values:
-     a. err = OS_ERROR_CONNECTION_CLOSED indicating end of data read
+     a. err = OS_ERROR_NETWORK_CONN_SHUTDOWN indicating end of data read
               and connection close
      b. err = OS_ERROR_GENERIC  due to error in read
      c. err = OS_SUCCESS and length = 0 indicating no data to read but there
@@ -616,9 +616,9 @@ test_tcp_client()
         for (i = 0; i < socket_max; i++)
         {
             len = sizeof(buffer);
-            /* Keep calling read until we receive CONNECTION_CLOSED from the
-            stack */
-            OS_Error_t err = OS_ERROR_CONNECTION_CLOSED;
+            /* Keep calling read until we receive OS_ERROR_NETWORK_CONN_SHUTDOWN
+            from the stack */
+            OS_Error_t err = OS_ERROR_NETWORK_CONN_SHUTDOWN;
             if (!(flag & (1 << i)))
             {
                 err = OS_NetworkSocket_read(handle[i], buffer, len, &len);
@@ -628,7 +628,7 @@ test_tcp_client()
 
             /* This means end of read or nothing further to read as socket was
              * closed */
-            case OS_ERROR_CONNECTION_CLOSED:
+            case OS_ERROR_NETWORK_CONN_SHUTDOWN:
                 Debug_LOG_INFO(
                     "socket_read() reported connection closed for handle %d",
                     i);
