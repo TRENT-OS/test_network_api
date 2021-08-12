@@ -181,7 +181,7 @@ test_udp_sendto_pos()
               &srcAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
+        Debug_LOG_ERROR("sendto() failed, code %d", err);
         return;
     }
 
