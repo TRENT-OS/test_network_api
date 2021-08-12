@@ -90,8 +90,6 @@ test_udp_recvfrom_pos()
         return;
     }
 
-    printf("Got back\n");
-
     Debug_LOG_INFO(
         "Received %d \"%*s\" : %s %d\n",
         len,
