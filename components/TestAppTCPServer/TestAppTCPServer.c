@@ -137,13 +137,15 @@ run()
             Debug_LOG_DEBUG("read...");
             size_t n = 0;
             // Try to read as much as fits into the buffer
-            do {
+            do
+            {
                 err = OS_NetworkSocket_read(
-                        clientHandle,
-                        buffer,
-                        sizeof(buffer),
-                        &n);
-            } while (err == OS_ERROR_TRY_AGAIN);
+                          clientHandle,
+                          buffer,
+                          sizeof(buffer),
+                          &n);
+            }
+            while (err == OS_ERROR_TRY_AGAIN);
             if (OS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("socket_read() failed, error %d", err);
@@ -155,13 +157,15 @@ run()
 
             while (totalBytesWritten < n)
             {
-                do {
+                do
+                {
                     err = OS_NetworkSocket_write(
-                            clientHandle,
-                            &buffer[totalBytesWritten],
-                            n - totalBytesWritten,
-                            &bytesWritten);
-                } while (err == OS_ERROR_TRY_AGAIN);
+                              clientHandle,
+                              &buffer[totalBytesWritten],
+                              n - totalBytesWritten,
+                              &bytesWritten);
+                }
+                while (err == OS_ERROR_TRY_AGAIN);
                 if (err != OS_SUCCESS)
                 {
                     Debug_LOG_ERROR("socket_write() failed, error %d", err);
