@@ -88,9 +88,9 @@ assembly {
         component TestAppTCPClient testAppTCPClient_multiple_sockets;
 
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
-            nwStack,
-            testAppTCPClient_multiple_sockets,
-            networkStack_rpc)
+            nwStack,                           networkStack,
+            testAppTCPClient_multiple_sockets, networkStack
+        )
 
      }
 
