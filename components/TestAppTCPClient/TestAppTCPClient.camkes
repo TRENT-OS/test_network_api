@@ -5,7 +5,7 @@
  *
  */
 
-import <if_OS_Socket.camkes>;
+#include <if_OS_Socket.camkes>
 
 #include "SysLogger/camkes/SysLogger.camkes"
 #include "system_config.h"
@@ -14,7 +14,7 @@ component TestAppTCPClient {
 
     control;
 
-    uses if_OS_Socket networkStack_rpc;
+    IF_OS_SOCKET_USE(networkStack)
 
              emits    EventApiTestsDone multiple_client_sync_send_ready;
     maybe    consumes EventApiTestsDone multiple_client_sync_recv_ready;

@@ -13,7 +13,8 @@ TimeServer_COMPONENT_DEFINE(TimeServer)
 SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
 import "../../components/Ticker/Ticker.camkes";
-import "../../components/TestAppUDPServer/TestAppUDPServer.camkes";
+
+#include "../../components/TestAppUDPServer/TestAppUDPServer.camkes"
 
 #define NetworkStack_PicoTcp_SOCKET_NO 16
 
