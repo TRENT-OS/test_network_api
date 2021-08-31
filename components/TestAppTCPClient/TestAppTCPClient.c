@@ -248,6 +248,41 @@ test_socket_connect_neg()
     strncpy((char*)dstAddr.addr, CFG_REACHABLE_HOST, sizeof(dstAddr.addr));
     dstAddr.port = CFG_UNREACHABLE_PORT;
     err = OS_NetworkSocket_connect(handle, &dstAddr);
+
+    // Wait until we receive the expected event that the connection to the
+    // unreachable port failed.
+    networkStack_event_notify_wait();
+
+    char buffer[2048] = {0};
+    int numberOfSocketsWithEvents = 0;
+
+    size_t bufferSize = sizeof(buffer);
+
+    err = OS_NetworkSocket_getPendingEvents(
+              &network_stack,
+              buffer,
+              bufferSize,
+              &numberOfSocketsWithEvents);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Verify that the received number of sockets with events is within expected
+    // bounds.
+    ASSERT_LE_INT(numberOfSocketsWithEvents, OS_NETWORK_MAXIMUM_SOCKET_NO);
+    ASSERT_GT_INT(numberOfSocketsWithEvents, 0);
+
+    int offset = 0;
+
+    for (int i = 0; i < numberOfSocketsWithEvents; i++)
+    {
+        OS_NetworkSocket_Evt_t event;
+        memcpy(&event, &buffer[offset], sizeof(event));
+        offset += sizeof(event);
+        if (handle.handleID == event.socketHandle)
+        {
+            err = event.currentError;
+        }
+    }
+
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
 
     // Test forbidden host (connection reset), firewall is configured to reset

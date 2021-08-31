@@ -94,12 +94,17 @@ run()
 
     for (;;)
     {
-        do{
+        // Wait until we get an event for the listening socket.
+        networkStack_event_notify_wait();
+
+        do
+        {
             err = OS_NetworkSocket_accept(
-                    srvHandle,
-                    &clientHandle,
-                    &srcAddr);
-        } while (err == OS_ERROR_TRY_AGAIN);
+                      srvHandle,
+                      &clientHandle,
+                      &srcAddr);
+        }
+        while (err == OS_ERROR_TRY_AGAIN);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("socket_accept() failed, error %d", err);

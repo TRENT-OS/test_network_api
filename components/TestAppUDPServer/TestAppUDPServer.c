@@ -74,6 +74,10 @@ test_udp_recvfrom_pos()
 
     OS_NetworkSocket_Addr_t srcAddr = {0};
 
+    // Wait until we get an event for the bound socket.
+    networkStack_event_notify_wait();
+
+    // Try to read some data.
     err = OS_NetworkSocket_recvfrom(
               handle,
               buffer,
@@ -144,6 +148,11 @@ test_udp_sendto_pos()
     OS_NetworkSocket_Addr_t srcAddr = {0};
 
     Debug_LOG_INFO("UDP Send test");
+
+    // Wait until we get an event for the bound socket.
+    networkStack_event_notify_wait();
+
+    // Try to read some data.
     err = OS_NetworkSocket_recvfrom(
               handle,
               buffer,
@@ -359,6 +368,10 @@ test_udp_echo()
     {
         size_t len = sizeof(buffer);
 
+        // Wait until we get an event for the bound socket.
+        networkStack_event_notify_wait();
+
+        // Try to read some data.
         err = OS_NetworkSocket_recvfrom(
                   handle,
                   buffer,
