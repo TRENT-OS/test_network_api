@@ -104,7 +104,7 @@ assembly {
 
         // Connect clients to network stack
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
-             nwStack,                  networkStack,
+             nwStack,
              testAppTCPClient_client1, networkStack,
              testAppTCPClient_client2, networkStack
         )

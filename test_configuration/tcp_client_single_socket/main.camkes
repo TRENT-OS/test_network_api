@@ -88,7 +88,7 @@ assembly {
         component TestAppTCPClient testAppTCPClient_singleSocket;
 
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
-            nwStack,                       networkStack,
+            nwStack,
             testAppTCPClient_singleSocket, networkStack
         )
      }

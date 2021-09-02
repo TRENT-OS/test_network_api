@@ -88,7 +88,7 @@ assembly {
         component TestAppUDPServer testAppUDPServer;
 
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
-            nwStack,          networkStack,
+            nwStack,
             testAppUDPServer, networkStack
         )
 
