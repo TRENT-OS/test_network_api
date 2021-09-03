@@ -107,7 +107,7 @@ run()
         while (err == OS_ERROR_TRY_AGAIN);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("socket_accept() failed, error %d", err);
+            Debug_LOG_ERROR("OS_NetworkSocket_accept() failed, error %d", err);
             return -1;
         }
 
@@ -148,7 +148,7 @@ run()
             while (err == OS_ERROR_TRY_AGAIN);
             if (OS_SUCCESS != err)
             {
-                Debug_LOG_ERROR("socket_read() failed, error %d", err);
+                Debug_LOG_ERROR("OS_NetworkSocket_read() failed, error %d", err);
                 break;
             }
 
@@ -168,7 +168,7 @@ run()
                 while (err == OS_ERROR_TRY_AGAIN);
                 if (err != OS_SUCCESS)
                 {
-                    Debug_LOG_ERROR("socket_write() failed, error %d", err);
+                    Debug_LOG_ERROR("OS_NetworkSocket_write() failed, error %d", err);
                     break;
                 }
                 totalBytesWritten = totalBytesWritten + bytesWritten;

@@ -532,7 +532,7 @@ test_tcp_client()
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR(
-                "client_socket_create() failed, code %d for %d socket",
+                "OS_NetworkSocket_create() failed, code %d for %d socket",
                 err,
                 i);
             break;
@@ -542,7 +542,7 @@ test_tcp_client()
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR(
-                "client_socket_create() failed, code %d for %d socket",
+                "OS_NetworkSocket_connect() failed, code %d for %d socket",
                 err,
                 i);
             break;
@@ -578,7 +578,7 @@ test_tcp_client()
 
             if (err != OS_SUCCESS)
             {
-                Debug_LOG_ERROR("socket_write() failed, code %d", err);
+                Debug_LOG_ERROR("OS_NetworkSocket_write() failed, code %d", err);
                 OS_NetworkSocket_close(handle[i]);
                 return;
             }
@@ -630,7 +630,7 @@ test_tcp_client()
              * closed */
             case OS_ERROR_NETWORK_CONN_SHUTDOWN:
                 Debug_LOG_INFO(
-                    "socket_read() reported connection closed for handle %d",
+                    "OS_NetworkSocket_read() reported connection closed for handle %d",
                     i);
                 flag |= 1 << i; /* terminate loop and close handle*/
                 break;
@@ -643,7 +643,7 @@ test_tcp_client()
             /* Error case, break and close the handle */
             default:
                 Debug_LOG_INFO(
-                    "socket_read() failed for handle %d, error %d",
+                    "OS_NetworkSocket_read() failed for handle %d, error %d",
                     i,
                     err);
                 flag |= 1 << i; /* terminate loop and close handle */
@@ -660,7 +660,8 @@ test_tcp_client()
         err = OS_NetworkSocket_close(handle[i]);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("close() failed for handle %d, code %d", i, err);
+            Debug_LOG_ERROR("OS_NetworkSocket_close() failed for handle %d, code %d", i,
+                            err);
             return;
         }
     }

@@ -49,7 +49,7 @@ test_udp_recvfrom_pos()
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
         return;
     }
 
@@ -62,7 +62,7 @@ test_udp_recvfrom_pos()
     err = OS_NetworkSocket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("bind() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
         return;
     }
 
@@ -86,7 +86,7 @@ test_udp_recvfrom_pos()
               &srcAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("recvfrom() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
         return;
     }
 
@@ -101,7 +101,7 @@ test_udp_recvfrom_pos()
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
         return;
     }
 
@@ -122,7 +122,7 @@ test_udp_sendto_pos()
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
         return;
     }
 
@@ -135,7 +135,7 @@ test_udp_sendto_pos()
     err = OS_NetworkSocket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("bind() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
         return;
     }
 
@@ -159,7 +159,7 @@ test_udp_sendto_pos()
               &srcAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("recvfrom() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
         return;
     }
 
@@ -181,14 +181,14 @@ test_udp_sendto_pos()
               &srcAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("sendto() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_sendto() failed, code %d", err);
         return;
     }
 
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
         return;
     }
 
@@ -252,7 +252,7 @@ test_udp_recvfrom_neg()
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -317,7 +317,7 @@ test_udp_sendto_neg()
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -338,7 +338,7 @@ test_udp_echo()
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
         return;
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -352,7 +352,7 @@ test_udp_echo()
     err = OS_NetworkSocket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("bind() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
         return;
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -378,7 +378,7 @@ test_udp_echo()
                   &srcAddr);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("recvfrom() failed, code %d", err);
+            Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
             return;
         }
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -391,7 +391,7 @@ test_udp_echo()
                   &srcAddr);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("client_socket_create() failed, code %d", err);
+            Debug_LOG_ERROR("OS_NetworkSocket_sendto() failed, code %d", err);
             return;
         }
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -399,7 +399,7 @@ test_udp_echo()
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
         return;
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
