@@ -23,12 +23,15 @@ following single-NIC targets are currently supported:
 * udp_server
 
 To build test_network_api in a given configuration
-```
+
+```bash
 BUILD_PLATFORM=zynq7000 src/build.sh test_network_api \
 -DTEST_CONFIGURATION=<test_config_name>
 ```
+
 To run the corresponding tests:
-```
+
+```bash
 BUILD_PLATFORM=zynq7000 src/test.sh run test_network_api.py \
 --tc=platform.test_configuration:<test_config_name>
 ```
@@ -37,11 +40,13 @@ BUILD_PLATFORM=zynq7000 src/test.sh run test_network_api.py \
 
 In the CMakeLists.txt set the IP addresses for the network stacks using the
 macros:
-```
+
+```bash
 -DDEV_ADDR="192.168.82.231"
 -DGATEWAY_ADDR="192.168.82.1"
 -DSUBNET_MASK="255.255.255.0"
 ```
+
 DEV_ADDR will be the address of your board, GATEWAY_ADDR will be the address of
 the PC running the test container. SUBNET_MASK depends on the network, but most
 likely won't be different from the default value shown here.
@@ -49,7 +54,7 @@ likely won't be different from the default value shown here.
 Start the network test in the trentos_test container using the following
 command:
 
-```
+```bash
 src/test.sh run test_network_api.py --tc=platform.uart_connected:false
 --tc=network.client_ip:192.168.82.231 --tc=network.server_ip:192.168.82.232
 ```
