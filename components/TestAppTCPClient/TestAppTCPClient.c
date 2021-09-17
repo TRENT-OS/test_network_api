@@ -378,30 +378,8 @@ test_tcp_read_neg()
                          OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_NetworkSocket_Addr_t dstAddr =
-    {
-        .addr = GATEWAY_ADDR,
-        .port = CFG_REACHABLE_PORT
-    };
-
-    err = OS_NetworkSocket_connect(handle, &dstAddr);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    char* request = "GET /network/a.txt "
-                    "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
-                    "\r\nConnection: close\r\n\r\n";
-
-    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    const size_t len_request = strlen(request);
-    size_t       len         = len_request;
-
-    err = OS_NetworkSocket_write(handle, request, len, &len);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
     char buffer[2048] = {0};
-    len = sizeof(buffer);
+    size_t len = sizeof(buffer);
 
     // Creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case.
