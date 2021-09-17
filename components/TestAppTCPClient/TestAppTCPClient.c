@@ -499,20 +499,27 @@ test_tcp_write_pos()
                     "\r\nConnection: close\r\n\r\n";
 
     const size_t len_request = strlen(request);
-    size_t       len         = len_request;
+    size_t offs = 0;
 
-    err = OS_NetworkSocket_write(handle, request, len, &len);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+    // Loop until all data is written.
+    do
+    {
+        const size_t lenRemaining = len_request - offs;
+        size_t       len_io       = lenRemaining;
 
-    char buffer[2048] = {0};
-    len = sizeof(buffer);
+        err = OS_NetworkSocket_write(
+                  handle,
+                  &request[offs],
+                  len_io,
+                  &len_io);
+        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    // Wait until we receive a read event for the socket.
-    err = nb_helper_wait_for_read_ev_on_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+        /* fatal error, this must not happen. API broken*/
+        ASSERT_LE_SZ(len_io, lenRemaining);
 
-    err = OS_NetworkSocket_read(handle, buffer, len, &len);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+        offs += len_io;
+    }
+    while (offs < len_request);
 
     err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
