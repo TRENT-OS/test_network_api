@@ -691,8 +691,9 @@ test_tcp_client()
         err = OS_NetworkSocket_close(handle[i]);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_close() failed for handle %d, code %d", i,
-                            err);
+            Debug_LOG_ERROR(
+                "OS_NetworkSocket_close() failed for handle %d, code %d", i,
+                err);
             return;
         }
         nb_helper_reset_ev_struct_for_socket(handle[i]);
