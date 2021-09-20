@@ -297,11 +297,8 @@ test_socket_connect_neg()
     // err = OS_NetworkSocket_connect(handle, &dstAddr);
     // ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_RESET, err);
 
-    // It seems after the previous failed connection tests the underlying call
-    // to close() will fail.
-    // TODO: Clarify if this behaviour is expected at this point.
     err = OS_NetworkSocket_close(handle);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
