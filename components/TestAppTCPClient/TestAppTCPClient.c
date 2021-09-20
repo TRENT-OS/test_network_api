@@ -672,7 +672,7 @@ test_tcp_client()
             /* Success . continue further reading */
             case OS_SUCCESS:
                 Debug_LOG_INFO("chunk read, length %d, handle %d", len, i);
-                continue;
+                break;
 
             /* Error case, break and close the handle */
             default:
