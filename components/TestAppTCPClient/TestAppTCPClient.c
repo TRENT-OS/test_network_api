@@ -710,7 +710,14 @@ test_dataport_size_check_client_functions()
 {
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle = { .ctx = network_stack, .handleID = 0};
+    OS_NetworkSocket_Handle_t handle;
+
+    OS_Error_t err = OS_NetworkSocket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
