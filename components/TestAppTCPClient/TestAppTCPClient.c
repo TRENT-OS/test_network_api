@@ -635,7 +635,6 @@ test_tcp_client()
 
     Take appropriate actions based on the return value rxd.
 
-    Only a single socket is supported and no multithreading !!!
     Once a webpage is read , display the contents.
     */
 
