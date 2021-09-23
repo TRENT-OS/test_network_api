@@ -26,6 +26,7 @@ DeclareCAmkESComponent(
     TestAppTCPClient
     SOURCES
         components/TestAppTCPClient/TestAppTCPClient.c
+        util/non_blocking_helper.c
     C_FLAGS
         -Wall
         -Werror

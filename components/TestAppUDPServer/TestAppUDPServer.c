@@ -19,6 +19,7 @@
 #include "SysLoggerClient.h"
 #include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
+#include "util/non_blocking_helper.h"
 #include <camkes.h>
 
 IF_OS_SOCKET_DEFINE_CONNECTOR(networkStack_rpc);
@@ -33,6 +34,22 @@ pre_init(void)
     DECL_UNUSED_VAR(OS_Error_t err) = SysLoggerClient_init(sysLogger_Rpc_log);
     Debug_ASSERT(err == OS_SUCCESS);
 #endif
+    // Initialize the helper lib with the required synchronization mechanisms.
+    nb_helper_init(
+        event_received_send_ready_emit,
+        event_received_recv_ready_wait,
+        SharedResourceMutex_lock,
+        SharedResourceMutex_unlock);
+
+    // Set up callback for new received socket events.
+    int ret = networkStack_event_notify_reg_callback(
+                  &nb_helper_collect_pending_ev_handler,
+                  (void*) &network_stack);
+    if (ret < 0)
+    {
+        Debug_LOG_ERROR(
+            "networkStack_event_notify_reg_callback() failed, code %d", err);
+    }
 }
 
 void
@@ -63,6 +80,18 @@ test_udp_recvfrom_pos()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
+
+        err = OS_NetworkSocket_close(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        }
+        err = nb_helper_reset_ev_struct_for_socket(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+        }
+
         return;
     }
 
@@ -74,8 +103,8 @@ test_udp_recvfrom_pos()
 
     OS_NetworkSocket_Addr_t srcAddr = {0};
 
-    // Wait until we get an event for the bound socket.
-    networkStack_event_notify_wait();
+    // Wait until we get a read event for the bound socket.
+    nb_helper_wait_for_read_ev_on_socket(handle);
 
     // Try to read some data.
     err = OS_NetworkSocket_recvfrom(
@@ -87,6 +116,18 @@ test_udp_recvfrom_pos()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
+
+        err = OS_NetworkSocket_close(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        }
+        err = nb_helper_reset_ev_struct_for_socket(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+        }
+
         return;
     }
 
@@ -102,6 +143,13 @@ test_udp_recvfrom_pos()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        return;
+    }
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
         return;
     }
 
@@ -136,6 +184,18 @@ test_udp_sendto_pos()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
+
+        err = OS_NetworkSocket_close(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        }
+        err = nb_helper_reset_ev_struct_for_socket(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+        }
+
         return;
     }
 
@@ -147,8 +207,8 @@ test_udp_sendto_pos()
 
     Debug_LOG_INFO("UDP Send test");
 
-    // Wait until we get an event for the bound socket.
-    networkStack_event_notify_wait();
+    // Wait until we get a read event for the bound socket.
+    nb_helper_wait_for_read_ev_on_socket(handle);
 
     // Try to read some data.
     err = OS_NetworkSocket_recvfrom(
@@ -160,6 +220,18 @@ test_udp_sendto_pos()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
+
+        err = OS_NetworkSocket_close(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        }
+        err = nb_helper_reset_ev_struct_for_socket(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+        }
+
         return;
     }
 
@@ -182,6 +254,18 @@ test_udp_sendto_pos()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_sendto() failed, code %d", err);
+
+        err = OS_NetworkSocket_close(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        }
+        err = nb_helper_reset_ev_struct_for_socket(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+        }
+
         return;
     }
 
@@ -189,6 +273,12 @@ test_udp_sendto_pos()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        return;
+    }
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
         return;
     }
 
@@ -353,7 +443,17 @@ test_udp_echo()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
-        return;
+
+        err = OS_NetworkSocket_close(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        }
+        err = nb_helper_reset_ev_struct_for_socket(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+        }
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -366,22 +466,36 @@ test_udp_echo()
     {
         size_t len = sizeof(buffer);
 
-        // Wait until we get an event for the bound socket.
-        networkStack_event_notify_wait();
+        do
+        {
+            // Wait until we get an event for the bound socket.
+            nb_helper_wait_for_read_ev_on_socket(handle);
 
-        // Try to read some data.
-        err = OS_NetworkSocket_recvfrom(
-                  handle,
-                  buffer,
-                  len,
-                  &len,
-                  &srcAddr);
+            // Try to read some data.
+            err = OS_NetworkSocket_recvfrom(
+                      handle,
+                      buffer,
+                      len,
+                      &len,
+                      &srcAddr);
+        }
+        while (err == OS_ERROR_TRY_AGAIN);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
+
+            err = OS_NetworkSocket_close(handle);
+            if (err != OS_SUCCESS)
+            {
+                Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            }
+            err = nb_helper_reset_ev_struct_for_socket(handle);
+            if (err != OS_SUCCESS)
+            {
+                Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+            }
             return;
         }
-        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
         err = OS_NetworkSocket_sendto(
                   handle,
@@ -392,15 +506,30 @@ test_udp_echo()
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("OS_NetworkSocket_sendto() failed, code %d", err);
+
+            err = OS_NetworkSocket_close(handle);
+            if (err != OS_SUCCESS)
+            {
+                Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            }
+            err = nb_helper_reset_ev_struct_for_socket(handle);
+            if (err != OS_SUCCESS)
+            {
+                Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+            }
             return;
         }
-        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
     }
     err = OS_NetworkSocket_close(handle);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
         return;
+    }
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 

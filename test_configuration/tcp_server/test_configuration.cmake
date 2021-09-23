@@ -26,6 +26,7 @@ DeclareCAmkESComponent(
     TestAppTCPServer
     SOURCES
         components/TestAppTCPServer/TestAppTCPServer.c
+        util/non_blocking_helper.c
     C_FLAGS
         -Wall
         -Werror

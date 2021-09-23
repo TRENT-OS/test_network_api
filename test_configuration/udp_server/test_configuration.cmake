@@ -26,6 +26,7 @@ DeclareCAmkESComponent(
     TestAppUDPServer
     SOURCES
         components/TestAppUDPServer/TestAppUDPServer.c
+        util/non_blocking_helper.c
     C_FLAGS
         -Wall
         -Werror

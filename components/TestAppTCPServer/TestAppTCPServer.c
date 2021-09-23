@@ -13,6 +13,7 @@
 #include "OS_Network.h"
 #include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
+#include "util/non_blocking_helper.h"
 #include <camkes.h>
 
 IF_OS_SOCKET_DEFINE_CONNECTOR(networkStack_rpc);
@@ -37,6 +38,22 @@ pre_init(void)
     DECL_UNUSED_VAR(OS_Error_t err) = SysLoggerClient_init(sysLogger_Rpc_log);
     Debug_ASSERT(err == OS_SUCCESS);
 #endif
+    // Initialize the helper lib with the required synchronization mechanisms.
+    nb_helper_init(
+        event_received_send_ready_emit,
+        event_received_recv_ready_wait,
+        SharedResourceMutex_lock,
+        SharedResourceMutex_unlock);
+
+    // Set up callback for new received socket events.
+    int ret = networkStack_event_notify_reg_callback(
+                  &nb_helper_collect_pending_ev_handler,
+                  (void*) &network_stack);
+    if (ret < 0)
+    {
+        Debug_LOG_ERROR(
+            "networkStack_event_notify_reg_callback() failed, code %d", err);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -70,6 +87,8 @@ run()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
+        OS_NetworkSocket_close(srvHandle);
+        nb_helper_reset_ev_struct_for_socket(srvHandle);
         return -1;
     }
 
@@ -81,6 +100,8 @@ run()
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR("OS_NetworkSocket_listen() failed, code %d", err);
+        OS_NetworkSocket_close(srvHandle);
+        nb_helper_reset_ev_struct_for_socket(srvHandle);
         return -1;
     }
 
@@ -94,11 +115,11 @@ run()
 
     for (;;)
     {
-        // Wait until we get an event for the listening socket.
-        networkStack_event_notify_wait();
-
         do
         {
+            // Wait until we get an conn acpt event for the listening socket.
+            nb_helper_wait_for_conn_acpt_ev_on_socket(srvHandle);
+
             err = OS_NetworkSocket_accept(
                       srvHandle,
                       &clientHandle,
@@ -108,6 +129,8 @@ run()
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR("OS_NetworkSocket_accept() failed, error %d", err);
+            OS_NetworkSocket_close(srvHandle);
+            nb_helper_reset_ev_struct_for_socket(srvHandle);
             return -1;
         }
 
@@ -139,6 +162,9 @@ run()
             // Try to read as much as fits into the buffer
             do
             {
+                // Wait until we receive a read event for the socket.
+                nb_helper_wait_for_read_ev_on_socket(clientHandle);
+
                 err = OS_NetworkSocket_read(
                           clientHandle,
                           buffer,
@@ -146,6 +172,7 @@ run()
                           &n);
             }
             while (err == OS_ERROR_TRY_AGAIN);
+
             if (OS_SUCCESS != err)
             {
                 Debug_LOG_ERROR("OS_NetworkSocket_read() failed, error %d", err);
@@ -183,11 +210,13 @@ run()
             // the test runner checks for this string
             Debug_LOG_INFO("connection closed by server");
             OS_NetworkSocket_close(clientHandle);
+            nb_helper_reset_ev_struct_for_socket(clientHandle);
             continue;
         /* Any other value is a failure in read, hence exit and close handle  */
         default:
             Debug_LOG_ERROR("server socket failure, error %d", err);
             OS_NetworkSocket_close(clientHandle);
+            nb_helper_reset_ev_struct_for_socket(clientHandle);
             continue;
         } // end of switch
     }

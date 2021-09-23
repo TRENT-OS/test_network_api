@@ -87,6 +87,10 @@ assembly {
         //----------------------------------------------------------------------
         component TestAppTCPClient testAppTCPClient_singleSocket;
 
+        connection seL4Notification testAppTCPClient_event_received(
+            from testAppTCPClient_singleSocket.event_received_send_ready,
+            to   testAppTCPClient_singleSocket.event_received_recv_ready);
+
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
             nwStack,
             testAppTCPClient_singleSocket, networkStack

@@ -19,6 +19,7 @@
 #include "SysLoggerClient.h"
 #include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
+#include "util/non_blocking_helper.h"
 #include <camkes.h>
 
 IF_OS_SOCKET_DEFINE_CONNECTOR(networkStack_rpc);
@@ -33,6 +34,22 @@ pre_init(void)
     DECL_UNUSED_VAR(OS_Error_t err) = SysLoggerClient_init(sysLogger_Rpc_log);
     Debug_ASSERT(err == OS_SUCCESS);
 #endif
+    // Initialize the helper lib with the required synchronization mechanisms.
+    nb_helper_init(
+        event_received_send_ready_emit,
+        event_received_recv_ready_wait,
+        SharedResourceMutex_lock,
+        SharedResourceMutex_unlock);
+
+    // Set up callback for new received socket events.
+    int ret = networkStack_event_notify_reg_callback(
+                  &nb_helper_collect_pending_ev_handler,
+                  (void*) &network_stack);
+    if (ret < 0)
+    {
+        Debug_LOG_ERROR(
+            "networkStack_event_notify_reg_callback() failed, code %d", err);
+    }
 }
 
 
@@ -92,6 +109,8 @@ test_socket_create_neg()
     {
         OS_Error_t err = OS_NetworkSocket_close(handle[i]);
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+        err = nb_helper_reset_ev_struct_for_socket(handle[i]);
+        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
     }
 
     TEST_FINISH();
@@ -130,6 +149,8 @@ test_socket_create_pos()
         {
             OS_Error_t err = OS_NetworkSocket_close(handle[i]);
             ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+            err = nb_helper_reset_ev_struct_for_socket(handle[i]);
+            ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
         }
     }
 
@@ -151,6 +172,9 @@ test_socket_close_pos()
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -182,6 +206,9 @@ test_socket_close_neg()
     err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     TEST_FINISH();
 }
 
@@ -208,7 +235,13 @@ test_socket_connect_pos()
     err = OS_NetworkSocket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -248,41 +281,11 @@ test_socket_connect_neg()
     strncpy((char*)dstAddr.addr, CFG_REACHABLE_HOST, sizeof(dstAddr.addr));
     dstAddr.port = CFG_UNREACHABLE_PORT;
     err = OS_NetworkSocket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     // Wait until we receive the expected event that the connection to the
     // unreachable port failed.
-    networkStack_event_notify_wait();
-
-    char buffer[2048] = {0};
-    int numberOfSocketsWithEvents = 0;
-
-    size_t bufferSize = sizeof(buffer);
-
-    err = OS_NetworkSocket_getPendingEvents(
-              &network_stack,
-              buffer,
-              bufferSize,
-              &numberOfSocketsWithEvents);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // Verify that the received number of sockets with events is within expected
-    // bounds.
-    ASSERT_LE_INT(numberOfSocketsWithEvents, OS_NETWORK_MAXIMUM_SOCKET_NO);
-    ASSERT_GT_INT(numberOfSocketsWithEvents, 0);
-
-    int offset = 0;
-
-    for (int i = 0; i < numberOfSocketsWithEvents; i++)
-    {
-        OS_NetworkSocket_Evt_t event;
-        memcpy(&event, &buffer[offset], sizeof(event));
-        offset += sizeof(event);
-        if (handle.handleID == event.socketHandle)
-        {
-            err = event.currentError;
-        }
-    }
-
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
 
     // Test forbidden host (connection reset), firewall is configured to reset
@@ -299,6 +302,9 @@ test_socket_connect_neg()
     // TODO: Clarify if this behaviour is expected at this point.
     err = OS_NetworkSocket_close(handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
 }
@@ -326,6 +332,9 @@ test_tcp_read_pos()
     err = OS_NetworkSocket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     char* request = "GET /network/a.txt "
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
@@ -339,10 +348,17 @@ test_tcp_read_pos()
     char buffer[2048] = {0};
     len = sizeof(buffer);
 
+    // Wait until we receive a read event for the socket.
+    err = nb_helper_wait_for_read_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     err = OS_NetworkSocket_read(handle, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -375,6 +391,9 @@ test_tcp_read_neg()
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
 
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     const size_t len_request = strlen(request);
     size_t       len         = len_request;
 
@@ -403,6 +422,9 @@ test_tcp_read_neg()
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
     err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -435,6 +457,9 @@ test_tcp_write_neg()
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
 
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     const size_t len_request = strlen(request);
     size_t       len         = len_request;
 
@@ -457,6 +482,9 @@ test_tcp_write_neg()
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
     err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -485,6 +513,9 @@ test_tcp_write_pos()
     err = OS_NetworkSocket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     char* request = "GET /network/a.txt "
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
@@ -498,10 +529,17 @@ test_tcp_write_pos()
     char buffer[2048] = {0};
     len = sizeof(buffer);
 
+    // Wait until we receive a read event for the socket.
+    err = nb_helper_wait_for_read_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     err = OS_NetworkSocket_read(handle, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = OS_NetworkSocket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
@@ -547,6 +585,16 @@ test_tcp_client()
                 i);
             break;
         }
+
+        err = nb_helper_wait_for_conn_est_ev_on_socket(handle[i]);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR(
+                "nb_helper_wait_for_conn_est_ev_on_socket() failed, code %d for %d socket",
+                err,
+                i);
+            break;
+        }
     }
 
     int socket_max = i;
@@ -580,6 +628,7 @@ test_tcp_client()
             {
                 Debug_LOG_ERROR("OS_NetworkSocket_write() failed, code %d", err);
                 OS_NetworkSocket_close(handle[i]);
+                nb_helper_reset_ev_struct_for_socket(handle[i]);
                 return;
             }
 
@@ -619,7 +668,11 @@ test_tcp_client()
             /* Keep calling read until we receive OS_ERROR_NETWORK_CONN_SHUTDOWN
             from the stack */
             OS_Error_t err = OS_ERROR_NETWORK_CONN_SHUTDOWN;
-            if (!(flag & (1 << i)))
+
+            // Wait until we receive a read event for the socket.
+            err = nb_helper_wait_for_read_ev_on_socket(handle[i]);
+
+            if (!(flag & (1 << i)) && (err == OS_SUCCESS))
             {
                 err = OS_NetworkSocket_read(handle[i], buffer, len, &len);
             }
@@ -664,6 +717,7 @@ test_tcp_client()
                             err);
             return;
         }
+        nb_helper_reset_ev_struct_for_socket(handle[i]);
     }
 
     TEST_FINISH();
@@ -683,7 +737,7 @@ test_dataport_size_check_client_functions()
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096];
 
-    OS_Error_t err = OS_NetworkSocket_read(handle, buffer, len, NULL);
+    err = OS_NetworkSocket_read(handle, buffer, len, NULL);
     if (err != OS_ERROR_INVALID_PARAMETER)
     {
         Debug_LOG_ERROR(
@@ -729,6 +783,20 @@ test_dataport_size_check_client_functions()
             err);
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+
+    err = OS_NetworkSocket_close(handle);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("close() failed, code %d", err);
+    }
+
+    nb_helper_reset_ev_struct_for_socket(handle);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+    }
+
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
 }
@@ -799,6 +867,13 @@ test_dataport_size_check_lib_functions()
     {
         Debug_LOG_ERROR("close() failed, code %d", err);
     }
+
+    nb_helper_reset_ev_struct_for_socket(handle);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+    }
+
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();

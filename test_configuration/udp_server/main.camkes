@@ -87,6 +87,10 @@ assembly {
         //----------------------------------------------------------------------
         component TestAppUDPServer testAppUDPServer;
 
+        connection seL4Notification testAppUDPServer_event_received(
+            from testAppUDPServer.event_received_send_ready,
+            to   testAppUDPServer.event_received_recv_ready);
+
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
             nwStack,
             testAppUDPServer, networkStack

@@ -102,6 +102,15 @@ assembly {
             from testAppTCPClient_client2.multiple_client_sync_send_ready,
             to   testAppTCPClient_client1.multiple_client_sync_recv_ready);
 
+
+        connection seL4Notification testAppTCPClient_1_event_received(
+            from testAppTCPClient_client1.event_received_send_ready,
+            to   testAppTCPClient_client1.event_received_recv_ready);
+
+        connection seL4Notification testAppTCPClient_2__event_received(
+            from testAppTCPClient_client2.event_received_send_ready,
+            to   testAppTCPClient_client2.event_received_recv_ready);
+
         // Connect clients to network stack
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
              nwStack,
