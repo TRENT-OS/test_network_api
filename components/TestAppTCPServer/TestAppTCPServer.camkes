@@ -7,13 +7,16 @@
 
 #include <if_OS_Socket.camkes>
 
+#include "NetworkStack_PicoTcp/camkes/if_NetworkStack_PicoTcp_Config.camkes"
 #include "SysLogger/camkes/SysLogger.camkes"
 #include "system_config.h"
 
 component TestAppTCPServer {
 
     control;
-
+#if !defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
+    if_NetworkStack_PicoTcp_Config_USE(networkStack_PicoTcp_Config)
+#endif
     IF_OS_SOCKET_USE(networkStack)
 
     emits    EventReceived event_received_send_ready;

@@ -17,6 +17,7 @@ DeclareCAmkESComponent(
 NetworkStack_PicoTcp_DeclareCAmkESComponent(
     NetworkStack_PicoTcp
     C_FLAGS
+        -DNetworkStack_PicoTcp_USE_HARDCODED_IPADDR
         -DDEV_ADDR="10.0.0.10"
         -DGATEWAY_ADDR="10.0.0.1"
         -DSUBNET_MASK="255.255.255.0"

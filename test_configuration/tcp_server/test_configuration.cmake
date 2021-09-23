@@ -38,6 +38,7 @@ DeclareCAmkESComponent(
         lib_macros
         os_network_api
         syslogger_client
+        networkStack_PicoTcp
 )
 
 DeclareCAmkESComponent_SysLogger(

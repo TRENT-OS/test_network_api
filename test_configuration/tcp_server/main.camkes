@@ -91,11 +91,16 @@ assembly {
             from testAppTCPServer.event_received_send_ready,
             to   testAppTCPServer.event_received_recv_ready);
 
+#if !defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
+        NetworkStack_PicoTcp_INSTANCE_CONNECT_CONFIG_CLIENT(
+            nwStack,
+            testAppTCPServer, networkStack_PicoTcp_Config
+        )
+#endif
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
             nwStack,
             testAppTCPServer, networkStack
         )
-
      }
 
     configuration {

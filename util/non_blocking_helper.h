@@ -22,6 +22,10 @@ nb_helper_collect_pending_ev_handler(
     void* ctx);
 
 OS_Error_t
+nb_helper_wait_for_network_stack_init(
+    const if_OS_Socket_t* const ctx);
+
+OS_Error_t
 nb_helper_wait_for_read_ev_on_socket(
     const OS_NetworkSocket_Handle_t handle);
 

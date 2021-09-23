@@ -126,6 +126,42 @@ nb_helper_collect_pending_ev_handler(
 
 //------------------------------------------------------------------------------
 OS_Error_t
+nb_helper_wait_for_network_stack_init(
+    const if_OS_Socket_t* const ctx)
+{
+    OS_Error_t err;
+    OS_NetworkSocket_Handle_t handle;
+
+    do
+    {
+        err = OS_NetworkSocket_create(
+                  ctx,
+                  &handle,
+                  OS_AF_INET,
+                  OS_SOCK_STREAM);
+        if (OS_ERROR_NOT_INITIALIZED == err)
+        {
+            // just yield to wait until the stack is up and running
+            seL4_Yield();
+        }
+    }
+    while (OS_ERROR_NOT_INITIALIZED == err);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+    }
+
+    err = OS_NetworkSocket_close(handle);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+    }
+
+    return err;
+}
+
+//------------------------------------------------------------------------------
+OS_Error_t
 nb_helper_wait_for_read_ev_on_socket(
     const OS_NetworkSocket_Handle_t handle)
 {

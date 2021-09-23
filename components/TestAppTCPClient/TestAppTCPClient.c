@@ -30,8 +30,9 @@ static const if_OS_Socket_t network_stack =
 void
 pre_init(void)
 {
+    OS_Error_t err;
 #if defined(Debug_Config_PRINT_TO_LOG_SERVER)
-    DECL_UNUSED_VAR(OS_Error_t err) = SysLoggerClient_init(sysLogger_Rpc_log);
+    err = SysLoggerClient_init(sysLogger_Rpc_log);
     Debug_ASSERT(err == OS_SUCCESS);
 #endif
     // Initialize the helper lib with the required synchronization mechanisms.
@@ -50,6 +51,13 @@ pre_init(void)
         Debug_LOG_ERROR(
             "networkStack_event_notify_reg_callback() failed, code %d", err);
     }
+
+    err = nb_helper_wait_for_network_stack_init(&network_stack);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("nb_helper_wait_for_network_stack_init() failed, code %d", err);
+    }
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 }
 
 
