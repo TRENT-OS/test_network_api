@@ -83,16 +83,17 @@ run()
     do
     {
         err = OS_NetworkSocket_create(
-                         &network_stack,
-                         &srvHandle,
-                         OS_AF_INET,
-                         OS_SOCK_STREAM);
+                  &network_stack,
+                  &srvHandle,
+                  OS_AF_INET,
+                  OS_SOCK_STREAM);
         if (OS_ERROR_NOT_INITIALIZED == err)
         {
             // just yield to wait until the stack is up and running
             seL4_Yield();
         }
-    } while (OS_ERROR_NOT_INITIALIZED == err);
+    }
+    while (OS_ERROR_NOT_INITIALIZED == err);
 
     if (err != OS_SUCCESS)
     {
