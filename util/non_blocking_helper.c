@@ -66,12 +66,16 @@ nb_helper_collect_pending_ev_handler(
 
     size_t bufferSize = sizeof(eventBuffer);
 
+    sync_func.shared_resource_lock();
+
     OS_Error_t err = OS_NetworkSocket_getPendingEvents(
                          ctx,
                          eventBuffer,
                          bufferSize,
                          &numberOfSocketsWithEvents);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    sync_func.shared_resource_unlock();
 
     // Verify that the received number of sockets with events is within expected
     // bounds.
