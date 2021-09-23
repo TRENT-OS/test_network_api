@@ -12,8 +12,6 @@ TimeServer_COMPONENT_DEFINE(TimeServer)
 #include "SysLogger/camkes/SysLogger.camkes"
 SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
-import "../../components/Ticker/Ticker.camkes";
-
 #include "../../components/TestAppUDPServer/TestAppUDPServer.camkes"
 
 #define NetworkStack_PicoTcp_SOCKET_NO 16
@@ -30,15 +28,6 @@ NetworkStack_PicoTcp_COMPONENT_DEFINE(
 
 assembly {
     composition {
-
-        //----------------------------------------------------------------------
-        // Ticker
-        // It's a very pragmatic approach to create a 1 second tick for each
-        // network stack. Actually, we don't need this, because the TimeServer
-        // should provide two timers per client, one for timeouts and once for
-        // the periodic tick.
-        //----------------------------------------------------------------------
-        component Ticker ticker;
 
         //----------------------------------------------------------------------
         // SysLogger
@@ -59,7 +48,6 @@ assembly {
 
         TimeServer_INSTANCE_CONNECT_CLIENTS(
             timeServer,
-            ticker.timeServer_rpc, ticker.timeServer_notify,
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver)
@@ -78,7 +66,6 @@ assembly {
 
         NetworkStack_PicoTcp_INSTANCE_CONNECT(
             nwStack,
-            ticker.NwStack_event_tick,
             nwDriver
         )
 
@@ -100,7 +87,6 @@ assembly {
 
     configuration {
         TimeServer_CLIENT_ASSIGN_BADGES(
-            ticker.timeServer_rpc,
             // connect platform specific components. The comma needs to be part
             // of the macro expansion
             NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver)

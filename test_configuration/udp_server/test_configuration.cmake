@@ -2,18 +2,6 @@ TimeServer_DeclareCAmkESComponent(
     TimeServer
 )
 
-DeclareCAmkESComponent(
-    Ticker
-    SOURCES
-        components/Ticker/Ticker.c
-    C_FLAGS
-        -Wall
-        -Werror
-    LIBS
-        os_core_api
-        lib_debug
-)
-
 NetworkStack_PicoTcp_DeclareCAmkESComponent(
     NetworkStack_PicoTcp
     C_FLAGS

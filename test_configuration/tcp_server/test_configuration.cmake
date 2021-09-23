@@ -3,18 +3,6 @@ TimeServer_DeclareCAmkESComponent(
 )
 
 DeclareCAmkESComponent(
-    Ticker
-    SOURCES
-        components/Ticker/Ticker.c
-    C_FLAGS
-        -Wall
-        -Werror
-    LIBS
-        os_core_api
-        lib_debug
-)
-
-DeclareCAmkESComponent(
     NwStackConfigurator
     SOURCES
         components/NwStackConfigurator/NwStackConfigurator.c
