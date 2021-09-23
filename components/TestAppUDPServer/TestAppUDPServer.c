@@ -140,7 +140,7 @@ test_udp_recvfrom_pos()
     }
 
     Debug_LOG_INFO(
-        "Received %d \"%*s\" : %s %d\n",
+        "Received %d \"%*s\" : %s %d",
         len,
         len,
         buffer,
@@ -244,7 +244,7 @@ test_udp_sendto_pos()
     }
 
     Debug_LOG_INFO(
-        "Received %d \"%*s\" : %s %d\n",
+        "Received %d \"%*s\" : %s %d",
         len,
         len,
         buffer,
