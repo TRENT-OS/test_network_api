@@ -191,13 +191,11 @@ run()
                 // Wait until we receive a read event for the socket.
                 nb_helper_wait_for_read_ev_on_socket(clientHandle);
 
-                DECL_UNUSED_VAR(int t1) = SharedResourceMutex_lock();
                 err = OS_NetworkSocket_read(
                           clientHandle,
                           buffer,
                           sizeof(buffer),
                           &n);
-                DECL_UNUSED_VAR(int t2) = SharedResourceMutex_unlock();
             }
             while (err == OS_ERROR_TRY_AGAIN);
 
@@ -214,13 +212,11 @@ run()
             {
                 do
                 {
-                    DECL_UNUSED_VAR(int t3) =  SharedResourceMutex_lock();
                     err = OS_NetworkSocket_write(
                               clientHandle,
                               &buffer[totalBytesWritten],
                               n - totalBytesWritten,
                               &bytesWritten);
-                    DECL_UNUSED_VAR(int t4) = SharedResourceMutex_unlock();
                 }
                 while (err == OS_ERROR_TRY_AGAIN);
                 if (err != OS_SUCCESS)
