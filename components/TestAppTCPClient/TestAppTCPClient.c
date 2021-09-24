@@ -25,7 +25,7 @@
 IF_OS_SOCKET_DEFINE_CONNECTOR(networkStack_rpc);
 
 static const if_OS_Socket_t network_stack =
-    IF_OS_SOCKET_ASSIGN(networkStack_rpc);
+    IF_OS_SOCKET_ASSIGN(networkStack);
 
 void
 pre_init(void)

@@ -20,7 +20,7 @@
 IF_OS_SOCKET_DEFINE_CONNECTOR(networkStack_rpc);
 
 static const if_OS_Socket_t network_stack =
-    IF_OS_SOCKET_ASSIGN(networkStack_rpc);
+    IF_OS_SOCKET_ASSIGN(networkStack);
 
 static const if_NetworkStack_PicoTcp_Config_t networkStackConfig =
     if_NetworkStack_PicoTcp_Config_ASSIGN(networkStack_PicoTcp_Config_rpc);
