@@ -1,0 +1,12 @@
+/*
+ * NwStackConfigurator
+ *
+ * Copyright (C) 2021, HENSOLDT Cyber GmbH
+ */
+
+#include "NetworkStack_PicoTcp/camkes/if_NetworkStack_PicoTcp_Config.camkes"
+
+component NwStackConfigurator {
+
+    if_NetworkStack_PicoTcp_Config_USE(networkStack_PicoTcp_Config)
+}

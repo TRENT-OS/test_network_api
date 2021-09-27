@@ -14,12 +14,26 @@ DeclareCAmkESComponent(
         lib_debug
 )
 
+DeclareCAmkESComponent(
+    NwStackConfigurator
+    SOURCES
+        components/NwStackConfigurator/NwStackConfigurator.c
+    C_FLAGS
+        -Wall
+        -Werror
+        -DNWSTACK_DEV_ADDR="10.0.0.11"
+        -DNWSTACK_GATEWAY_ADDR="10.0.0.1"
+        -DNWSTACK_SUBNET_MASK="255.255.255.0"
+    LIBS
+        system_config
+        os_core_api
+        os_network_api
+        lib_debug
+        networkStack_PicoTcp
+)
+
 NetworkStack_PicoTcp_DeclareCAmkESComponent(
     NetworkStack_PicoTcp
-    C_FLAGS
-        -DDEV_ADDR="10.0.0.11"
-        -DGATEWAY_ADDR="10.0.0.1"
-        -DSUBNET_MASK="255.255.255.0"
 )
 
 DeclareCAmkESComponent(
@@ -38,7 +52,6 @@ DeclareCAmkESComponent(
         lib_macros
         os_network_api
         syslogger_client
-        networkStack_PicoTcp
 )
 
 DeclareCAmkESComponent_SysLogger(

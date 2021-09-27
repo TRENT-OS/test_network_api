@@ -12,7 +12,6 @@
 
 #include "OS_Network.h"
 #include "interfaces/if_OS_Socket.h"
-#include "if_NetworkStack_PicoTcp_Config.h"
 #include "util/loop_defines.h"
 #include "util/non_blocking_helper.h"
 #include <camkes.h>
@@ -21,9 +20,6 @@ IF_OS_SOCKET_DEFINE_CONNECTOR(networkStack_rpc);
 
 static const if_OS_Socket_t network_stack =
     IF_OS_SOCKET_ASSIGN(networkStack);
-
-static const if_NetworkStack_PicoTcp_Config_t networkStackConfig =
-    if_NetworkStack_PicoTcp_Config_ASSIGN(networkStack_PicoTcp_Config_rpc);
 
 /*
  * This example demonstrates a server with an incoming connection. Reads
@@ -69,17 +65,6 @@ run()
     OS_NetworkSocket_Handle_t srvHandle;
     OS_Error_t err = OS_ERROR_GENERIC;
 
-#if !defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
-    static const OS_NetworkStack_AddressConfig_t ipAddrConfig =
-    {
-        .dev_addr       = "10.0.0.11",
-        .gateway_addr   = "10.0.0.1",
-        .subnet_mask    = "255.255.255.0"
-    };
-
-    err = networkStackConfig.configIpAddr(&ipAddrConfig);
-    Debug_ASSERT(err == OS_SUCCESS);
-#endif
     do
     {
         err = OS_NetworkSocket_create(

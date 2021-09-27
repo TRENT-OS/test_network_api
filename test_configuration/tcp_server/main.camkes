@@ -14,6 +14,7 @@ SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
 
 import "../../components/Ticker/Ticker.camkes";
 
+#include "../../components/NwStackConfigurator/NwStackConfigurator.camkes"
 #include "../../components/TestAppTCPServer/TestAppTCPServer.camkes"
 
 #define NetworkStack_PicoTcp_SOCKET_NO 16
@@ -83,6 +84,16 @@ assembly {
         )
 
         //----------------------------------------------------------------------
+        // Network Stack Configurator
+        //----------------------------------------------------------------------
+        component NwStackConfigurator nwStackConfigurator;
+
+        NetworkStack_PicoTcp_INSTANCE_CONNECT_CONFIG_CLIENT(
+            nwStack,
+            nwStackConfigurator, networkStack_PicoTcp_Config
+        )
+
+        //----------------------------------------------------------------------
         // TCP Echo server
         //----------------------------------------------------------------------
         component TestAppTCPServer testAppTCPServer;
@@ -91,12 +102,6 @@ assembly {
             from testAppTCPServer.event_received_send_ready,
             to   testAppTCPServer.event_received_recv_ready);
 
-#if !defined(NetworkStack_PicoTcp_USE_HARDCODED_IPADDR)
-        NetworkStack_PicoTcp_INSTANCE_CONNECT_CONFIG_CLIENT(
-            nwStack,
-            testAppTCPServer, networkStack_PicoTcp_Config
-        )
-#endif
         NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
             nwStack,
             testAppTCPServer, networkStack
