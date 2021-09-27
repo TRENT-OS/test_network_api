@@ -103,7 +103,7 @@ assembly {
         )
 
         NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGES(
-            testAppTCPServer.networkStack_rpc
+            testAppTCPServer, networkStack
         )
 
         NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS(

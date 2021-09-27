@@ -13,7 +13,7 @@
 
 //------------------------------------------------------------------------------
 static const if_NetworkStack_PicoTcp_Config_t networkStackConfig =
-    if_NetworkStack_PicoTcp_Config_ASSIGN(networkStack_PicoTcp_Config_rpc);
+    if_NetworkStack_PicoTcp_Config_ASSIGN(networkStack_PicoTcp_Config);
 
 
 //------------------------------------------------------------------------------

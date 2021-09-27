@@ -116,8 +116,8 @@ assembly {
         )
 
         NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGES(
-            testAppTCPClient_client1.networkStack_rpc,
-            testAppTCPClient_client2.networkStack_rpc
+            testAppTCPClient_client1, networkStack,
+            testAppTCPClient_client2, networkStack
         )
 
         NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS(

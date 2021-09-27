@@ -94,7 +94,7 @@ assembly {
         )
 
         NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGES(
-            testAppUDPServer.networkStack_rpc
+            testAppUDPServer, networkStack
         )
 
         NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS(
