@@ -129,35 +129,26 @@ OS_Error_t
 nb_helper_wait_for_network_stack_init(
     const if_OS_Socket_t* const ctx)
 {
-    OS_Error_t err;
-    OS_NetworkSocket_Handle_t handle;
+    OS_NetworkStack_State_t networkStackState;
 
     do
     {
-        err = OS_NetworkSocket_create(
-                  ctx,
-                  &handle,
-                  OS_AF_INET,
-                  OS_SOCK_STREAM);
-        if (OS_ERROR_NOT_INITIALIZED == err)
+        networkStackState = OS_NetworkSocket_getStatus(ctx);
+        if (networkStackState == UNINITIALIZED || networkStackState == INITIALIZED)
         {
             // just yield to wait until the stack is up and running
             seL4_Yield();
         }
+        if (networkStackState == FATAL_ERROR)
+        {
+            // NetworkStack will not come up.
+            Debug_LOG_ERROR("A FATAL_ERROR occurred in the Network Stack component.")
+            return OS_ERROR_ABORTED;
+        }
     }
-    while (OS_ERROR_NOT_INITIALIZED == err);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
-    }
+    while (networkStackState != RUNNING);
 
-    err = OS_NetworkSocket_close(handle);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
-    }
-
-    return err;
+    return OS_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
