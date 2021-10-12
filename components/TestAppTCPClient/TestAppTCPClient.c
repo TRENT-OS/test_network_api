@@ -41,14 +41,16 @@ pre_init(void)
         SharedResourceMutex_unlock);
 
     // Set up callback for new received socket events.
-    int ret = networkStack_event_notify_reg_callback(
-                  &nb_helper_collect_pending_ev_handler,
-                  (void*) &network_stack);
-    if (ret < 0)
+    err = OS_NetworkSocket_regCallback(
+              &network_stack,
+              &nb_helper_collect_pending_ev_handler,
+              (void*) &network_stack);
+    if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR(
-            "networkStack_event_notify_reg_callback() failed, code %d", err);
+            "OS_NetworkSocket_regCallback() failed, code %d", err);
     }
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = nb_helper_wait_for_network_stack_init(&network_stack);
     if (err != OS_SUCCESS)

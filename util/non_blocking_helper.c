@@ -114,14 +114,16 @@ nb_helper_collect_pending_ev_handler(
     }
 
     // Re-register the callback function.
-    int ret = networkStack_event_notify_reg_callback(
-                  &nb_helper_collect_pending_ev_handler,
-                  ctx);
-    if (ret < 0)
+    err = OS_NetworkSocket_regCallback(
+              ctx,
+              &nb_helper_collect_pending_ev_handler,
+              ctx);
+    if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR(
-            "networkStack_event_notify_reg_callback() failed, code %d", err);
+            "OS_NetworkSocket_regCallback() failed, code %d", err);
     }
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 }
 
 //------------------------------------------------------------------------------
