@@ -15,7 +15,7 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
-        os_network_api
+        os_network
         lib_debug
         networkStack_PicoTcp
 )
@@ -38,7 +38,7 @@ DeclareCAmkESComponent(
         lib_compiler
         lib_debug
         lib_macros
-        os_network_api
+        os_network
         syslogger_client
 )
 
