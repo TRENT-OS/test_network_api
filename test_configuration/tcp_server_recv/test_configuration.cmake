@@ -1,0 +1,49 @@
+TimeServer_DeclareCAmkESComponent(
+    TimeServer
+)
+
+DeclareCAmkESComponent(
+    NwStackConfigurator
+    SOURCES
+        components/NwStackConfigurator/NwStackConfigurator.c
+    C_FLAGS
+        -Wall
+        -Werror
+        -DNWSTACK_DEV_ADDR="10.0.0.11"
+        -DNWSTACK_GATEWAY_ADDR="10.0.0.1"
+        -DNWSTACK_SUBNET_MASK="255.255.255.0"
+    LIBS
+        system_config
+        os_core_api
+        os_network_api
+        lib_debug
+        networkStack_PicoTcp
+)
+
+NetworkStack_PicoTcp_DeclareCAmkESComponent(
+    NetworkStack_PicoTcp
+)
+
+DeclareCAmkESComponent(
+    TestAppTCPServer_recv
+    SOURCES
+        components/TestAppTCPServer_recv/TestAppTCPServer_recv.c
+        util/non_blocking_helper.c
+    C_FLAGS
+        -Wall
+        -Werror
+    LIBS
+        system_config
+        os_core_api
+        lib_compiler
+        lib_debug
+        lib_macros
+        os_network_api
+        syslogger_client
+        TimeServer_client
+)
+
+DeclareCAmkESComponent_SysLogger(
+    SysLogger
+    system_config
+)
