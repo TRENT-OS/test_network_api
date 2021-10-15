@@ -380,7 +380,7 @@ run()
         // Keep calling read until we receive CONNECTION_CLOSED from the stack
          
         uint64_t timestamp = 0;
-        TimeServer_getTime(&timer, 0, &timestamp); // 0 -> Time in seconds
+        TimeServer_getTime(&timer, 1, &timestamp); // 0 -> Time in seconds
         Debug_LOG_DEBUG("Reset timestamp to: %u", timestamp);     
         
         size_t total_bytes = 0;
@@ -433,7 +433,7 @@ run()
                             sizeof(buffer),
                             &n);
                 } while (err == OS_ERROR_TRY_AGAIN);
-                Debug_LOG_DEBUG("Received %i bytes", n);
+                //Debug_LOG_DEBUG("Received %i bytes", n);
                 total_bytes += n;
             }
             else if (eventMask & OS_SOCK_EV_CLOSE)
@@ -442,10 +442,13 @@ run()
                 OS_NetworkSocket_close(clientHandle);
                 nb_helper_reset_ev_struct_for_socket_local(clientHandle);
                 uint64_t timestamp_after = 0;
-                TimeServer_getTime(&timer, 0, &timestamp_after);
-                Debug_LOG_DEBUG("Received SOCK_EV_CLOSE -> closing socket \n Received a total of: %i BYTES", total_bytes);
+                TimeServer_getTime(&timer, 1, &timestamp_after);
+                //Debug_LOG_DEBUG("Received SOCK_EV_CLOSE -> closing socket \n Received a total of: %i BYTES", total_bytes);
                 // xgetTime does not work as expected -> results seem to be somehow random in nature
-                //Debug_LOG_ERROR("timestamp:%u, timestamp_after: %u", timestamp, timestamp_after);
+                uint64_t delta = timestamp_after - timestamp;
+                uint64_t kbps = (total_bytes/1024)/(delta/1000);
+                //Debug_LOG_DEBUG("duration: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
+                printf("\n\nduration: %"PRIu64"ms\n\n speed: %"PRIu64" kb/s", delta, kbps);
                 break;
             }
             else

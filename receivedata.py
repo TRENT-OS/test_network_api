@@ -20,10 +20,10 @@ PORT = 5555         # non-privileged ports are > 1023
 # ------------------------------------------------------------------------------
 
 def receive_file(addr, port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind((addr, port))
+    sock.listen()
     while True:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind((addr, port))
-        sock.listen()
         conn, client_addr = sock.accept()
         print("socket acceptet")
         received_bytes = 0
@@ -31,6 +31,7 @@ def receive_file(addr, port):
             print(f"Connected by {client_addr}")
             while True:
                 data = conn.recv(1024)
+                #print(f"Data received {data}")
                 received_bytes += len(data)
                 if not data:
                     print(f"received {received_bytes} bytes of data")

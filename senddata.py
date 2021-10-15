@@ -41,7 +41,7 @@ def send_file(receiver_addr, filename_in, multi):
             # read the bytes from the file
             bytes_read = f_in.read()
             # we use sendall to assure transimission in
-            print(bytes_read)
+            #print(bytes_read)
             total_bytes_read = b""
             for i in range (0, multi):
                 total_bytes_read += bytes_read
@@ -70,6 +70,7 @@ def main() -> int:
     parser.add_argument('--addr', required=False, default=RECEIVER_ADDRESS, help='destination IP address')
     parser.add_argument('--port', required=False, default=RECEIVER_PORT, type=int, help='destination port')
     parser.add_argument('--multi', required=False, default=1, type=int, help='multiply data')
+    parser.add_argument('--runs', required=False, default=1, type=int, help='run test multiple times')
     args = parser.parse_args()
 
     try:
@@ -78,9 +79,9 @@ def main() -> int:
         receiver_addr = (args.addr, args.port)
         print("Sending all messages to {}".format(*receiver_addr))
 
-        #for i in range(0, 10):
-        #print(f"Sending File {i} of 10...")
-        send_file(receiver_addr, args.input, args.multi)
+        for i in range(0, args.runs):
+            print(f"Run {i+1} of {args.runs}")
+            send_file(receiver_addr, args.input, args.multi)
 
         print("All messages transmitted")
 
