@@ -9,7 +9,7 @@
 #include <camkes.h>
 
 #include "OS_Error.h"
-#include "OS_Network.h"
+#include "OS_Socket.h"
 #include "OS_Types.h"
 
 #include "lib_debug/Debug.h"
@@ -29,7 +29,7 @@ typedef struct
     mutex_unlock_func_t shared_resource_unlock;
 } nh_helper_sync_func;
 
-static OS_NetworkSocket_Evt_t eventCollection[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
+static OS_Socket_Evt_t eventCollection[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
 
 static nh_helper_sync_func sync_func;
 
@@ -61,12 +61,12 @@ nb_helper_collect_pending_ev_handler(
 {
     Debug_ASSERT(NULL != ctx);
 
-    OS_NetworkSocket_Evt_t eventBuffer[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
+    OS_Socket_Evt_t eventBuffer[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
     int numberOfSocketsWithEvents = 0;
 
     size_t bufferSize = sizeof(eventBuffer);
 
-    OS_Error_t err = OS_NetworkSocket_getPendingEvents(
+    OS_Error_t err = OS_Socket_getPendingEvents(
                          ctx,
                          eventBuffer,
                          bufferSize,
@@ -80,7 +80,7 @@ nb_helper_collect_pending_ev_handler(
 
     for (int i = 0; i < numberOfSocketsWithEvents; i++)
     {
-        OS_NetworkSocket_Evt_t event;
+        OS_Socket_Evt_t event;
         memcpy(&event, &eventBuffer[i], sizeof(event));
 
         if (event.socketHandle >= 0
@@ -114,14 +114,14 @@ nb_helper_collect_pending_ev_handler(
     }
 
     // Re-register the callback function.
-    err = OS_NetworkSocket_regCallback(
+    err = OS_Socket_regCallback(
               ctx,
               &nb_helper_collect_pending_ev_handler,
               ctx);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR(
-            "OS_NetworkSocket_regCallback() failed, code %d", err);
+            "OS_Socket_regCallback() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 }
@@ -135,7 +135,7 @@ nb_helper_wait_for_network_stack_init(
 
     do
     {
-        networkStackState = OS_NetworkSocket_getStatus(ctx);
+        networkStackState = OS_Socket_getStatus(ctx);
         if (networkStackState == UNINITIALIZED || networkStackState == INITIALIZED)
         {
             // just yield to wait until the stack is up and running
@@ -156,7 +156,7 @@ nb_helper_wait_for_network_stack_init(
 //------------------------------------------------------------------------------
 OS_Error_t
 nb_helper_wait_for_read_ev_on_socket(
-    const OS_NetworkSocket_Handle_t handle)
+    const OS_Socket_Handle_t handle)
 {
     CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
@@ -209,7 +209,7 @@ nb_helper_wait_for_read_ev_on_socket(
 //------------------------------------------------------------------------------
 OS_Error_t
 nb_helper_wait_for_conn_est_ev_on_socket(
-    const OS_NetworkSocket_Handle_t handle)
+    const OS_Socket_Handle_t handle)
 {
     CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
@@ -257,7 +257,7 @@ nb_helper_wait_for_conn_est_ev_on_socket(
 //------------------------------------------------------------------------------
 OS_Error_t
 nb_helper_wait_for_conn_acpt_ev_on_socket(
-    const OS_NetworkSocket_Handle_t handle)
+    const OS_Socket_Handle_t handle)
 {
     CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
@@ -305,14 +305,14 @@ nb_helper_wait_for_conn_acpt_ev_on_socket(
 //------------------------------------------------------------------------------
 OS_Error_t
 nb_helper_reset_ev_struct_for_socket(
-    const OS_NetworkSocket_Handle_t handle)
+    const OS_Socket_Handle_t handle)
 {
     CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
     Debug_ASSERT(NULL != sync_func.shared_resource_lock);
     sync_func.shared_resource_lock();
 
-    memset(&eventCollection[handle.handleID], 0, sizeof(OS_NetworkSocket_Evt_t));
+    memset(&eventCollection[handle.handleID], 0, sizeof(OS_Socket_Evt_t));
 
     Debug_ASSERT(NULL != sync_func.shared_resource_unlock);
     sync_func.shared_resource_unlock();

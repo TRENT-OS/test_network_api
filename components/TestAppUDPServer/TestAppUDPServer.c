@@ -13,7 +13,7 @@
 #include "system_config.h"
 #include <string.h>
 
-#include "OS_Network.h"
+#include "OS_Socket.h"
 #include "math.h"
 
 #include "SysLoggerClient.h"
@@ -41,14 +41,14 @@ pre_init(void)
         SharedResourceMutex_unlock);
 
     // Set up callback for new received socket events.
-    err = OS_NetworkSocket_regCallback(
+    err = OS_Socket_regCallback(
               &network_stack,
               &nb_helper_collect_pending_ev_handler,
               (void*) &network_stack);
     if (err != OS_SUCCESS)
     {
         Debug_LOG_ERROR(
-            "OS_NetworkSocket_regCallback() failed, code %d", err);
+            "OS_Socket_regCallback() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -65,34 +65,34 @@ test_udp_recvfrom_pos()
 {
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle;
+    OS_Socket_Handle_t handle;
 
-    OS_Error_t err = OS_NetworkSocket_create(
+    OS_Error_t err = OS_Socket_create(
                          &network_stack,
                          &handle,
                          OS_AF_INET,
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
         return;
     }
 
-    const OS_NetworkSocket_Addr_t dstAddr =
+    const OS_Socket_Addr_t dstAddr =
     {
         .addr = OS_INADDR_ANY_STR,
         .port = CFG_UDP_TEST_PORT
     };
 
-    err = OS_NetworkSocket_bind(handle, &dstAddr);
+    err = OS_Socket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_bind() failed, code %d", err);
 
-        err = OS_NetworkSocket_close(handle);
+        err = OS_Socket_close(handle);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         }
         err = nb_helper_reset_ev_struct_for_socket(handle);
         if (err != OS_SUCCESS)
@@ -109,13 +109,13 @@ test_udp_recvfrom_pos()
     static char buffer[4096];
     size_t len = sizeof(buffer);
 
-    OS_NetworkSocket_Addr_t srcAddr = {0};
+    OS_Socket_Addr_t srcAddr = {0};
 
     // Wait until we get a read event for the bound socket.
     nb_helper_wait_for_read_ev_on_socket(handle);
 
     // Try to read some data.
-    err = OS_NetworkSocket_recvfrom(
+    err = OS_Socket_recvfrom(
               handle,
               buffer,
               len,
@@ -123,12 +123,12 @@ test_udp_recvfrom_pos()
               &srcAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_recvfrom() failed, code %d", err);
 
-        err = OS_NetworkSocket_close(handle);
+        err = OS_Socket_close(handle);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         }
         err = nb_helper_reset_ev_struct_for_socket(handle);
         if (err != OS_SUCCESS)
@@ -147,10 +147,10 @@ test_udp_recvfrom_pos()
         srcAddr.addr,
         srcAddr.port);
 
-    err = OS_NetworkSocket_close(handle);
+    err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         return;
     }
 
@@ -169,34 +169,34 @@ test_udp_sendto_pos()
 {
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle;
+    OS_Socket_Handle_t handle;
 
-    OS_Error_t err = OS_NetworkSocket_create(
+    OS_Error_t err = OS_Socket_create(
                          &network_stack,
                          &handle,
                          OS_AF_INET,
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
         return;
     }
 
-    const OS_NetworkSocket_Addr_t dstAddr =
+    const OS_Socket_Addr_t dstAddr =
     {
         .addr = OS_INADDR_ANY_STR,
         .port = CFG_UDP_TEST_PORT
     };
 
-    err = OS_NetworkSocket_bind(handle, &dstAddr);
+    err = OS_Socket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_bind() failed, code %d", err);
 
-        err = OS_NetworkSocket_close(handle);
+        err = OS_Socket_close(handle);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         }
         err = nb_helper_reset_ev_struct_for_socket(handle);
         if (err != OS_SUCCESS)
@@ -211,7 +211,7 @@ test_udp_sendto_pos()
     static char buffer[4096] = {0};
     size_t len = sizeof(buffer);
 
-    OS_NetworkSocket_Addr_t srcAddr = {0};
+    OS_Socket_Addr_t srcAddr = {0};
 
     Debug_LOG_INFO("UDP Send test");
 
@@ -219,7 +219,7 @@ test_udp_sendto_pos()
     nb_helper_wait_for_read_ev_on_socket(handle);
 
     // Try to read some data.
-    err = OS_NetworkSocket_recvfrom(
+    err = OS_Socket_recvfrom(
               handle,
               buffer,
               len,
@@ -227,12 +227,12 @@ test_udp_sendto_pos()
               &srcAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_recvfrom() failed, code %d", err);
 
-        err = OS_NetworkSocket_close(handle);
+        err = OS_Socket_close(handle);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         }
         err = nb_helper_reset_ev_struct_for_socket(handle);
         if (err != OS_SUCCESS)
@@ -253,7 +253,7 @@ test_udp_sendto_pos()
 
     const char test_message[] = "Hello there";
     len = sizeof(test_message);
-    err = OS_NetworkSocket_sendto(
+    err = OS_Socket_sendto(
               handle,
               test_message,
               len,
@@ -261,12 +261,12 @@ test_udp_sendto_pos()
               &srcAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_sendto() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_sendto() failed, code %d", err);
 
-        err = OS_NetworkSocket_close(handle);
+        err = OS_Socket_close(handle);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         }
         err = nb_helper_reset_ev_struct_for_socket(handle);
         if (err != OS_SUCCESS)
@@ -277,10 +277,10 @@ test_udp_sendto_pos()
         return;
     }
 
-    err = OS_NetworkSocket_close(handle);
+    err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         return;
     }
     err = nb_helper_reset_ev_struct_for_socket(handle);
@@ -301,23 +301,23 @@ test_udp_recvfrom_neg()
     // port) and check that the create() fails
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle;
-    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkSocket_Handle_INVALID;
+    OS_Socket_Handle_t handle;
+    OS_Socket_Handle_t invalid_handle = OS_Socket_Handle_INVALID;
 
-    OS_Error_t err = OS_NetworkSocket_create(
+    OS_Error_t err = OS_Socket_create(
                          &network_stack,
                          &handle,
                          OS_AF_INET,
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     size_t len = OS_Dataport_getSize(handle.ctx.dataport);
 
-    OS_NetworkSocket_Addr_t srcAddr = {0};
+    OS_Socket_Addr_t srcAddr = {0};
 
     err = handle.ctx.socket_recvfrom(
               invalid_handle.handleID,
@@ -347,10 +347,10 @@ test_udp_recvfrom_neg()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = OS_NetworkSocket_close(handle);
+    err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -365,23 +365,23 @@ test_udp_sendto_neg()
     // port) and check that the create() fails
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle;
-    OS_NetworkSocket_Handle_t invalid_handle = OS_NetworkSocket_Handle_INVALID;
+    OS_Socket_Handle_t handle;
+    OS_Socket_Handle_t invalid_handle = OS_Socket_Handle_INVALID;
 
-    OS_Error_t err = OS_NetworkSocket_create(
+    OS_Error_t err = OS_Socket_create(
                          &network_stack,
                          &handle,
                          OS_AF_INET,
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     size_t len = OS_Dataport_getSize(handle.ctx.dataport);
 
-    const OS_NetworkSocket_Addr_t dstAddr =
+    const OS_Socket_Addr_t dstAddr =
     {
         .addr = DEV_ADDR,
         .port = 24242
@@ -412,10 +412,10 @@ test_udp_sendto_neg()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = OS_NetworkSocket_close(handle);
+    err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -427,35 +427,35 @@ test_udp_echo()
 {
     TEST_START();
 
-    OS_NetworkSocket_Handle_t handle;
+    OS_Socket_Handle_t handle;
 
-    OS_Error_t err = OS_NetworkSocket_create(
+    OS_Error_t err = OS_Socket_create(
                          &network_stack,
                          &handle,
                          OS_AF_INET,
                          OS_SOCK_DGRAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
         return;
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_NetworkSocket_Addr_t dstAddr =
+    const OS_Socket_Addr_t dstAddr =
     {
         .addr = OS_INADDR_ANY_STR,
         .port = CFG_UDP_TEST_PORT
     };
 
-    err = OS_NetworkSocket_bind(handle, &dstAddr);
+    err = OS_Socket_bind(handle, &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_bind() failed, code %d", err);
 
-        err = OS_NetworkSocket_close(handle);
+        err = OS_Socket_close(handle);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         }
         err = nb_helper_reset_ev_struct_for_socket(handle);
         if (err != OS_SUCCESS)
@@ -465,7 +465,7 @@ test_udp_echo()
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    OS_NetworkSocket_Addr_t srcAddr = {0};
+    OS_Socket_Addr_t srcAddr = {0};
 
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096] = {0};
@@ -480,7 +480,7 @@ test_udp_echo()
             nb_helper_wait_for_read_ev_on_socket(handle);
 
             // Try to read some data.
-            err = OS_NetworkSocket_recvfrom(
+            err = OS_Socket_recvfrom(
                       handle,
                       buffer,
                       len,
@@ -490,12 +490,12 @@ test_udp_echo()
         while (err == OS_ERROR_TRY_AGAIN);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_recvfrom() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_recvfrom() failed, code %d", err);
 
-            err = OS_NetworkSocket_close(handle);
+            err = OS_Socket_close(handle);
             if (err != OS_SUCCESS)
             {
-                Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+                Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
             }
             err = nb_helper_reset_ev_struct_for_socket(handle);
             if (err != OS_SUCCESS)
@@ -505,7 +505,7 @@ test_udp_echo()
             return;
         }
 
-        err = OS_NetworkSocket_sendto(
+        err = OS_Socket_sendto(
                   handle,
                   buffer,
                   len,
@@ -513,12 +513,12 @@ test_udp_echo()
                   &srcAddr);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_sendto() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_sendto() failed, code %d", err);
 
-            err = OS_NetworkSocket_close(handle);
+            err = OS_Socket_close(handle);
             if (err != OS_SUCCESS)
             {
-                Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+                Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
             }
             err = nb_helper_reset_ev_struct_for_socket(handle);
             if (err != OS_SUCCESS)
@@ -528,10 +528,10 @@ test_udp_echo()
             return;
         }
     }
-    err = OS_NetworkSocket_close(handle);
+    err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_close() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
         return;
     }
     err = nb_helper_reset_ev_struct_for_socket(handle);

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "OS_Network.h"
+#include "OS_Socket.h"
 #include "OS_Types.h"
 
 //------------------------------------------------------------------------------
@@ -27,16 +27,16 @@ nb_helper_wait_for_network_stack_init(
 
 OS_Error_t
 nb_helper_wait_for_read_ev_on_socket(
-    const OS_NetworkSocket_Handle_t handle);
+    const OS_Socket_Handle_t handle);
 
 OS_Error_t
 nb_helper_wait_for_conn_est_ev_on_socket(
-    const OS_NetworkSocket_Handle_t handle);
+    const OS_Socket_Handle_t handle);
 
 OS_Error_t
 nb_helper_wait_for_conn_acpt_ev_on_socket(
-    const OS_NetworkSocket_Handle_t handle);
+    const OS_Socket_Handle_t handle);
 
 OS_Error_t
 nb_helper_reset_ev_struct_for_socket(
-    const OS_NetworkSocket_Handle_t handle);
+    const OS_Socket_Handle_t handle);
