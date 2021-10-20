@@ -887,74 +887,65 @@ test_dataport_size_check_lib_functions()
 {
     TEST_START();
 
-    OS_Socket_Handle_t handle;
+    OS_Socket_Handle_t handle_tcp;
 
     OS_Error_t err = OS_Socket_create(
-                         &network_stack,
-                         &handle,
-                         OS_AF_INET,
-                         OS_SOCK_DGRAM);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
-    }
+                        &network_stack,
+                        &handle_tcp,
+                        OS_AF_INET,
+                        OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    const OS_Socket_Addr_t dstAddr = { .addr = CFG_REACHABLE_HOST,
+                                       .port = CFG_REACHABLE_PORT };
+
+    err = OS_Socket_connect(handle_tcp, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_tcp);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     // creates a length guaranteed larger than that of the dataport, which won't
     // fit in the dataport and will generate an error case
-    size_t len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
+    size_t len = OS_Dataport_getSize(handle_tcp.ctx.dataport) + 1;
 
-    err = handle.ctx.socket_read(handle.handleID, &len);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Lib socket read with invalid dataport size failed, error %d",
-            err);
-    }
+    err = handle_tcp.ctx.socket_read(handle_tcp.handleID, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    OS_Socket_Addr_t srcAddr = {0};
-
-    err = handle.ctx.socket_recvfrom(handle.handleID, &len, &srcAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Lib socket recvfrom with invalid dataport size failed, error %d",
-            err);
-    }
+    err = handle_tcp.ctx.socket_write(handle_tcp.handleID, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = handle.ctx.socket_write(handle.handleID, &len);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Lib socket write with invalid dataport size failed, error %d",
-            err);
-    }
+    err = OS_Socket_close(handle_tcp);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    nb_helper_reset_ev_struct_for_socket(handle_tcp);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    OS_Socket_Handle_t handle_udp;
+
+    err = OS_Socket_create(
+                &network_stack,
+                &handle_udp,
+                OS_AF_INET,
+                OS_SOCK_DGRAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // creates a length guaranteed larger than that of the dataport, which won't
+    // fit in the dataport and will generate an error case
+    len = OS_Dataport_getSize(handle_udp.ctx.dataport) + 1;
+
+    OS_Socket_Addr_t srcAddr = { 0 };
+
+    err = handle_udp.ctx.socket_recvfrom(handle_udp.handleID, &len, &srcAddr);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = handle.ctx.socket_sendto(handle.handleID, &len, &srcAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Lib socket sendto with invalid dataport size failed, error %d",
-            err);
-    }
+    err = handle_udp.ctx.socket_sendto(handle_udp.handleID, &len, &srcAddr);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = OS_Socket_close(handle);
+    err = OS_Socket_close(handle_udp);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("close() failed, code %d", err);
-    }
-
-    nb_helper_reset_ev_struct_for_socket(handle);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
-    }
-
+    nb_helper_reset_ev_struct_for_socket(handle_udp);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
