@@ -332,6 +332,9 @@ test_socket_non_blocking_neg()
         OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     OS_Socket_Addr_t dstAddr = { .addr = CFG_REACHABLE_HOST,
                                  .port = CFG_UNREACHABLE_PORT };
 
@@ -370,6 +373,9 @@ test_socket_non_blocking_neg()
         &handle_connection_timedout,
         OS_AF_INET,
         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = OS_Socket_connect(handle_connection_timedout, &dstAddr);
@@ -417,6 +423,9 @@ test_tcp_read_pos()
         .addr = GATEWAY_ADDR,
         .port = CFG_REACHABLE_PORT
     };
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = OS_Socket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
