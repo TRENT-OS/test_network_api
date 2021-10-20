@@ -315,6 +315,90 @@ test_socket_connect_neg()
 }
 
 void
+test_socket_non_blocking_neg()
+{
+    TEST_START();
+
+    char* request = "GET /network/a.txt "
+                    "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
+                    "\r\nConnection: close\r\n\r\n";
+
+    OS_Socket_Handle_t handle;
+
+    OS_Error_t err = OS_Socket_create(
+        &network_stack,
+        &handle,
+        OS_AF_INET,
+        OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    OS_Socket_Addr_t dstAddr = { .addr = CFG_REACHABLE_HOST,
+                                 .port = CFG_UNREACHABLE_PORT };
+
+    OS_Socket_Addr_t srcAddr = { 0 };
+
+    char   buffer[2048] = { 0 };
+    size_t len          = sizeof(buffer);
+
+    // Try to connect to a host that will let the connection timeout. While
+    // the connect is pending, try the other socket functions.
+    err = OS_Socket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = OS_Socket_read(handle, buffer, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
+
+    err = OS_Socket_write(handle, request, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
+
+    err = OS_Socket_recvfrom(handle, buffer, len, &len, &srcAddr);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO, err);
+
+    err = OS_Socket_sendto(handle, buffer, len, &len, &srcAddr);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO, err);
+
+    err = OS_Socket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Try to connect to a host that will let the connection timeout. After the
+    // connection timedout, try the other socket functions.
+
+    OS_Socket_Handle_t handle_connection_timedout;
+
+    err = OS_Socket_create(
+        &network_stack,
+        &handle_connection_timedout,
+        OS_AF_INET,
+        OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = OS_Socket_connect(handle_connection_timedout, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Wait until we receive the expected event that the connection to the
+    // unreachable port failed.
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_connection_timedout);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
+
+    err = OS_Socket_read(handle_connection_timedout, buffer, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
+
+    err = OS_Socket_write(handle_connection_timedout, request, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
+
+    err = OS_Socket_recvfrom(handle, buffer, len, &len, &srcAddr);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO, err);
+
+    err = OS_Socket_sendto(handle, buffer, len, &len, &srcAddr);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO, err);
+
+    err = OS_Socket_close(handle_connection_timedout);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    TEST_FINISH();
+}
+
+void
 test_tcp_read_pos()
 {
     TEST_START();
@@ -896,6 +980,7 @@ run()
         test_socket_close_neg();
         test_socket_connect_pos();
         test_socket_connect_neg();
+        test_socket_non_blocking_neg();
         test_tcp_read_pos();
         test_tcp_read_neg();
         test_tcp_write_pos();
