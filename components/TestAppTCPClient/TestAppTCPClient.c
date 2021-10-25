@@ -262,12 +262,7 @@ test_socket_connect_neg()
 
     OS_Socket_Handle_t handle;
 
-    OS_Error_t err = OS_Socket_create(
-                         &network_stack,
-                         &handle,
-                         OS_AF_INET,
-                         OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+    OS_Error_t err;
 
     OS_Socket_Addr_t dstAddr =
     {
@@ -276,16 +271,43 @@ test_socket_connect_neg()
     };
 
     // Test invalid empty destination address.
+    err = OS_Socket_create(
+        &network_stack,
+        &handle,
+        OS_AF_INET,
+        OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     memset(dstAddr.addr, 0, sizeof(dstAddr.addr));
     err = OS_Socket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
+    err = OS_Socket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     // Test connecting to an unreachable host.
+    err = OS_Socket_create(
+        &network_stack,
+        &handle,
+        OS_AF_INET,
+        OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     strncpy((char*)dstAddr.addr, CFG_UNREACHABLE_HOST, sizeof(dstAddr.addr));
     err = OS_Socket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_HOST_UNREACHABLE, err);
 
+    err = OS_Socket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     // Test connection refused, now with reachable address but port closed.
+    err = OS_Socket_create(
+        &network_stack,
+        &handle,
+        OS_AF_INET,
+        OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     strncpy((char*)dstAddr.addr, CFG_REACHABLE_HOST, sizeof(dstAddr.addr));
     dstAddr.port = CFG_UNREACHABLE_PORT;
     err = OS_Socket_connect(handle, &dstAddr);
@@ -296,13 +318,22 @@ test_socket_connect_neg()
     err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
 
-    // Test forbidden host (connection reset), firewall is configured to reset
-    // TCP for this host.
+    err = OS_Socket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Test forbidden host (connection reset), firewall is configured to send a
+    // TCP reset for packets with source and destination port 88.
+    err = OS_Socket_create(
+        &network_stack,
+        &handle,
+        OS_AF_INET,
+        OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
     // This test is momentarily suppressed as it seems that picotcp is not
     // behaving correctly. There is need of further investigations to establish
     // whether is an issue with iptables or with picotcp
     // strncpy((char*)dstAddr.addr, CFG_FORBIDDEN_HOST, sizeof(dstAddr.addr));
-    // err = OS_Socket_connect(handle, &dstAddr);
+    // err = OS_NetworkSocket_connect(handle, &dstAddr);
     // ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_RESET, err);
 
     err = OS_Socket_close(handle);
