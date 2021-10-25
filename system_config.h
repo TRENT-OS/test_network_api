@@ -19,7 +19,7 @@
 #endif
 
 #if !defined(Debug_Config_LOG_LEVEL)
-#define Debug_Config_LOG_LEVEL Debug_LOG_LEVEL_DEBUG
+#define Debug_Config_LOG_LEVEL Debug_LOG_LEVEL_INFO
 #endif
 #define Debug_Config_INCLUDE_LEVEL_IN_MSG
 #define Debug_Config_LOG_WITH_FILE_LINE
@@ -75,7 +75,7 @@
 #define CFG_ETH_SUBNET_MASK_VALUE "255.255.255.0"
 
 #ifndef OS_NETWORK_MAXIMUM_SOCKET_NO
-#define OS_NETWORK_MAXIMUM_SOCKET_NO 16
+#define OS_NETWORK_MAXIMUM_SOCKET_NO 32
 #endif
 
 #define NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS 16
