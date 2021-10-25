@@ -329,12 +329,20 @@ test_socket_connect_neg()
         OS_AF_INET,
         OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-    // This test is momentarily suppressed as it seems that picotcp is not
-    // behaving correctly. There is need of further investigations to establish
-    // whether is an issue with iptables or with picotcp
-    // strncpy((char*)dstAddr.addr, CFG_FORBIDDEN_HOST, sizeof(dstAddr.addr));
-    // err = OS_NetworkSocket_connect(handle, &dstAddr);
-    // ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_RESET, err);
+
+    const OS_Socket_Addr_t srcAddr = { .addr = CFG_ETH_ADDR_CLIENT_VALUE,
+                                              .port = CFG_FORBIDDEN_PORT };
+
+    err = OS_Socket_bind(handle, &srcAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    dstAddr.port = CFG_FORBIDDEN_PORT;
+    strncpy((char*)dstAddr.addr, CFG_FORBIDDEN_HOST, sizeof(dstAddr.addr));
+    err = OS_Socket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
 
     err = OS_Socket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);

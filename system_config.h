@@ -52,11 +52,12 @@
 // App1
 #define DOMAIN_NWSTACK "STACK"
 
-#define CFG_FORBIDDEN_HOST      "11.0.0.1"
+#define CFG_FORBIDDEN_HOST      "10.0.0.1"
 #define CFG_UNREACHABLE_HOST    "0.0.0.0"
 #define CFG_REACHABLE_HOST      "10.0.0.1"
 #define CFG_UNREACHABLE_PORT    88
 #define CFG_REACHABLE_PORT      80
+#define CFG_FORBIDDEN_PORT      88
 #define CFG_TCP_TEST_PORT       8888
 #define CFG_TCP_SERVER_PORT     5555
 #define CFG_UDP_TEST_PORT       8888
