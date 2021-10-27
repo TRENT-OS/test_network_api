@@ -8,6 +8,7 @@
 #include "OS_Socket.h"
 #include "if_NetworkStack_PicoTcp_Config.h"
 
+#include "lib_compiler/compiler.h"
 #include "lib_debug/Debug.h"
 #include <camkes.h>
 
@@ -27,6 +28,7 @@ post_init(void)
         .subnet_mask    = NWSTACK_SUBNET_MASK
     };
 
-    OS_Error_t err = networkStackConfig.configIpAddr(&ipAddrConfig);
+    DECL_UNUSED_VAR(OS_Error_t err) =
+        networkStackConfig.configIpAddr(&ipAddrConfig);
     Debug_ASSERT(err == OS_SUCCESS);
 }

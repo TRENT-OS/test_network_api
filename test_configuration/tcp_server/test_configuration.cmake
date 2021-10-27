@@ -16,6 +16,7 @@ DeclareCAmkESComponent(
         system_config
         os_core_api
         lib_debug
+        lib_compiler
         networkStack_PicoTcp_api
 )
 
