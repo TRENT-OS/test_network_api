@@ -1,5 +1,5 @@
 /*
- *  Network API Test System, RPi board configuration
+ *  Network API Test System, RPi3 board configuration
  *
  *  Copyright (C) 2021, HENSOLDT Cyber GmbH
  */
@@ -7,10 +7,9 @@
 #pragma once
 
 #include "NIC_RPi/NIC_RPi.camkes"
+NIC_RPi_COMPONENT_DEFINE(NIC_RPi, NIC_DRIVER_RINGBUFFER_SIZE)
 NIC_RPi_Mailbox_COMPONENT_DEFINE(NIC_RPi_Mailbox)
 NIC_RPi_USB_COMPONENT_DEFINE(NIC_RPi_USB)
-NIC_RPi_COMPONENT_DEFINE(NIC_RPi, NIC_DRIVER_RINGBUFFER_SIZE)
-
 
 
 #define NETWORK_TEST_NIC_INSTANCE(_nic_) \
