@@ -6,6 +6,8 @@
 
 cmake_minimum_required(VERSION 3.7.2)
 
-NIC_RPi_DeclareCAmkESComponent(
-    NIC_RPi
-)
+DeclareCAmkESComponents_for_NIC()
+
+# NIC_RPi_DeclareCAmkESComponent(
+#     NIC_RPi
+# )

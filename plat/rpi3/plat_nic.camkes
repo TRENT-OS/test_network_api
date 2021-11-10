@@ -6,35 +6,40 @@
 
 #pragma once
 
-#include "NIC_RPi/NIC_RPi.camkes"
-NIC_RPi_Mailbox_COMPONENT_DEFINE(NIC_RPi_Mailbox)
-NIC_RPi_USB_COMPONENT_DEFINE(NIC_RPi_USB)
-NIC_RPi_COMPONENT_DEFINE(NIC_RPi, NIC_DRIVER_RINGBUFFER_SIZE)
-
+#include "NIC_RPi4/NIC_RPi4.camkes"
+NIC_RPi4_COMPONENT_DEFINE(NIC_RPi4, NIC_DRIVER_RINGBUFFER_SIZE)
+NIC_RPi4_Mailbox_COMPONENT_DEFINE(NIC_RPi4_Mailbox)
+NIC_RPi4_Systimer_COMPONENT_DEFINE(NIC_RPi4_Systimer)
+NIC_RPi4_Genet_COMPONENT_DEFINE(NIC_RPi4_Genet)
 
 
 #define NETWORK_TEST_NIC_INSTANCE(_nic_) \
-    component NIC_RPi           _nic_; \
-    component NIC_RPi_Mailbox   nic_mailbox; \
-    component NIC_RPi_USB       nic_usb; \
+    component NIC_RPi4           _nic_; \
+    component NIC_RPi4_Mailbox   nic_mailbox; \
+    component NIC_RPi4_Systimer nic_systimer; \
+    component NIC_RPi4_Genet    nic_genet; \
     \
-    NIC_RPi_INSTANCE_CONNECT( \
+    NIC_RPi4_INSTANCE_CONNECT( \
         _nic_, \
         nic_mailbox, \
-        nic_usb \
+        nic_systimer, \
+        nic_genet \
     )
 
 /* Macro used to configure the RPi3 driver component. It sets up a DMA pool
  * of 40 pages (4 KiB each)
  */
 #define NETWORK_TEST_NIC_CONFIG(_nic_) \
-        NIC_RPi_Mailbox_INSTANCE_CONFIGURE_SELF( \
+        NIC_RPi4_Mailbox_INSTANCE_CONFIGURE_SELF( \
             nic_mailbox \
         ) \
-        NIC_RPi_USB_INSTANCE_CONFIGURE_SELF( \
-            nic_usb \
+        NIC_RPi4_Systimer_INSTANCE_CONFIGURE_SELF( \
+            nic_systimer \
         ) \
-        NIC_RPi_INSTANCE_CONFIGURE( \
+        NIC_RPi4_Genet_INSTANCE_CONFIGURE_SELF( \
+            nic_genet \
+        ) \
+        NIC_RPi4_INSTANCE_CONFIGURE( \
             _nic_, \
             40*4096 \
         )
