@@ -446,6 +446,9 @@ test_socket_non_blocking_neg()
     err = OS_Socket_close(handle_connection_timedout);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
+    err = nb_helper_reset_ev_struct_for_socket(handle_connection_timedout);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     TEST_FINISH();
 }
 
