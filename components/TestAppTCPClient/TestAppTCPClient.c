@@ -272,10 +272,10 @@ test_socket_connect_neg()
 
     // Test invalid empty destination address.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     memset(dstAddr.addr, 0, sizeof(dstAddr.addr));
@@ -287,10 +287,10 @@ test_socket_connect_neg()
 
     // Test connecting to an unreachable host.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     strncpy((char*)dstAddr.addr, CFG_UNREACHABLE_HOST, sizeof(dstAddr.addr));
@@ -302,10 +302,10 @@ test_socket_connect_neg()
 
     // Test connection refused, now with reachable address but port closed.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     strncpy((char*)dstAddr.addr, CFG_REACHABLE_HOST, sizeof(dstAddr.addr));
@@ -324,14 +324,17 @@ test_socket_connect_neg()
     // Test forbidden host (connection reset), firewall is configured to send a
     // TCP reset for packets with source and destination port 88.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Socket_Addr_t srcAddr = { .addr = CFG_ETH_ADDR_CLIENT_VALUE,
-                                              .port = CFG_FORBIDDEN_PORT };
+    const OS_Socket_Addr_t srcAddr =
+    {
+        .addr = CFG_ETH_ADDR_CLIENT_VALUE,
+        .port = CFG_FORBIDDEN_PORT
+    };
 
     err = OS_Socket_bind(handle, &srcAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -365,17 +368,20 @@ test_socket_non_blocking_neg()
     OS_Socket_Handle_t handle;
 
     OS_Error_t err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    OS_Socket_Addr_t dstAddr = { .addr = CFG_REACHABLE_HOST,
-                                 .port = CFG_UNREACHABLE_PORT };
+    OS_Socket_Addr_t dstAddr =
+    {
+        .addr = CFG_REACHABLE_HOST,
+        .port = CFG_UNREACHABLE_PORT
+    };
 
     OS_Socket_Addr_t srcAddr = { 0 };
 
@@ -408,10 +414,10 @@ test_socket_non_blocking_neg()
     OS_Socket_Handle_t handle_connection_timedout;
 
     err = OS_Socket_create(
-        &network_stack,
-        &handle_connection_timedout,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle_connection_timedout,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = nb_helper_reset_ev_struct_for_socket(handle);
