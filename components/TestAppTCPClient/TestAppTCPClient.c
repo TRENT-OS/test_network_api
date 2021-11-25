@@ -904,10 +904,10 @@ run()
         test_socket_connect_pos();
         test_socket_connect_neg();
         test_socket_non_blocking_neg();
-        test_tcp_read_pos();
-        test_tcp_read_neg();
         test_tcp_write_pos();
         test_tcp_write_neg();
+        test_tcp_read_pos();
+        test_tcp_read_neg();
     }
 #endif
 
