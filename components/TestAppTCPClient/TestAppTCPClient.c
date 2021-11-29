@@ -895,23 +895,17 @@ run()
     Debug_LOG_INFO("Starting TestAppTCPClient %s...", get_instance_name());
 
 #ifdef TCP_CLIENT
-    if ((0 == strcmp(get_instance_name(), "testAppTCPClient_singleSocket")) ||
-        (0 == strcmp(get_instance_name(), "testAppTCPClient_client1")))
-    {
-        // The following API tests do not need to be executed in parallel
-        // therefore only testAppTCPClient_client1 will execute them.
-        test_socket_create_neg();
-        test_socket_create_pos();
-        test_socket_close_pos();
-        test_socket_close_neg();
-        test_socket_connect_pos();
-        test_socket_connect_neg();
-        test_socket_non_blocking_neg();
-        test_tcp_write_pos();
-        test_tcp_write_neg();
-        test_tcp_read_pos();
-        test_tcp_read_neg();
-    }
+    test_socket_create_neg();
+    test_socket_create_pos();
+    test_socket_close_pos();
+    test_socket_close_neg();
+    test_socket_connect_pos();
+    test_socket_connect_neg();
+    test_socket_non_blocking_neg();
+    test_tcp_write_pos();
+    test_tcp_write_neg();
+    test_tcp_read_pos();
+    test_tcp_read_neg();
 #endif
 
 #ifdef TCP_CLIENT_MULTIPLE_CLIENTS
