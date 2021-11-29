@@ -409,13 +409,13 @@ test_socket_non_blocking_neg()
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     // Try to connect to a host that will let the connection timeout. After the
-    // connection timedout, try the other socket functions.
+    // connection timeout, try the other socket functions.
 
-    OS_Socket_Handle_t handle_connection_timedout;
+    OS_Socket_Handle_t handle_connection_timeout;
 
     err = OS_Socket_create(
               &network_stack,
-              &handle_connection_timedout,
+              &handle_connection_timeout,
               OS_AF_INET,
               OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -423,18 +423,18 @@ test_socket_non_blocking_neg()
     err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_Socket_connect(handle_connection_timedout, &dstAddr);
+    err = OS_Socket_connect(handle_connection_timeout, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     // Wait until we receive the expected event that the connection to the
     // unreachable port failed.
-    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_connection_timedout);
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_connection_timeout);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
 
-    err = OS_Socket_read(handle_connection_timedout, buffer, len, &len);
+    err = OS_Socket_read(handle_connection_timeout, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
 
-    err = OS_Socket_write(handle_connection_timedout, request, len, &len);
+    err = OS_Socket_write(handle_connection_timeout, request, len, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
 
     err = OS_Socket_recvfrom(handle, buffer, len, &len, &srcAddr);
@@ -443,10 +443,10 @@ test_socket_non_blocking_neg()
     err = OS_Socket_sendto(handle, buffer, len, &len, &srcAddr);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO, err);
 
-    err = OS_Socket_close(handle_connection_timedout);
+    err = OS_Socket_close(handle_connection_timeout);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = nb_helper_reset_ev_struct_for_socket(handle_connection_timedout);
+    err = nb_helper_reset_ev_struct_for_socket(handle_connection_timeout);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
