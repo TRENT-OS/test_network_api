@@ -453,6 +453,143 @@ test_socket_non_blocking_neg()
 }
 
 void
+test_tcp_write_pos()
+{
+    TEST_START();
+
+    OS_Socket_Handle_t handle;
+
+    OS_Error_t err = OS_Socket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    const OS_Socket_Addr_t dstAddr =
+    {
+        .addr = GATEWAY_ADDR,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    err = OS_Socket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    char* request = "GET /network/a.txt "
+                    "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
+                    "\r\nConnection: close\r\n\r\n";
+
+    size_t len_request = strlen(request);
+    size_t offs = 0;
+
+    // Loop until all data is written.
+    do
+    {
+        const size_t lenRemaining = len_request - offs;
+        size_t       len_io       = lenRemaining;
+
+        err = OS_Socket_write(
+                  handle,
+                  &request[offs],
+                  len_io,
+                  &len_io);
+        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+        /* fatal error, this must not happen. API broken*/
+        ASSERT_LE_SZ(len_io, lenRemaining);
+
+        offs += len_io;
+    }
+    while (offs < len_request);
+
+    // Intentionally choose a buffer size larger than the underlying dataport.
+    static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
+    len_request = sizeof(buffer);
+    size_t len_actual = 0;
+
+    err = OS_Socket_write(
+              handle,
+              &request[offs],
+              len_request,
+              &len_actual);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Verify that we were only able to write at most the size of the underlying
+    // dataport and not the requested size.
+    ASSERT_LE_SZ(len_actual, networkStack_rpc_get_size());
+
+    err = OS_Socket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    TEST_FINISH();
+}
+
+void
+test_tcp_write_neg()
+{
+    TEST_START();
+
+    OS_Socket_Handle_t handle;
+
+    OS_Error_t err = OS_Socket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    const OS_Socket_Addr_t dstAddr =
+    {
+        .addr = GATEWAY_ADDR,
+        .port = CFG_REACHABLE_PORT
+    };
+
+    err = OS_Socket_connect(handle, &dstAddr);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    char* request = "GET /network/a.txt "
+                    "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
+                    "\r\nConnection: close\r\n\r\n";
+
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    const size_t len_request = strlen(request);
+    size_t len_actual = 0;
+
+    // Pass a null pointer for the buffer.
+    err = OS_Socket_write(handle, NULL, len_request, &len_actual);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+
+    // Pass a null pointer for the actual length return parameter.
+    err = OS_Socket_write(handle, request, len_request, NULL);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+
+    // Test the call with an invalid handle ID.
+    OS_Socket_Handle_t invalidHandle =
+    {
+        .ctx = handle.ctx,
+        .handleID = -1
+    };
+    err = OS_Socket_write(invalidHandle, request, len_request, &len_actual);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
+
+    err = OS_Socket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    TEST_FINISH();
+}
+
+void
 test_tcp_read_pos()
 {
     TEST_START();
@@ -563,143 +700,6 @@ test_tcp_read_neg()
     };
     err = OS_Socket_read(invalidHandle, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
-
-    err = OS_Socket_close(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = nb_helper_reset_ev_struct_for_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
-void
-test_tcp_write_neg()
-{
-    TEST_START();
-
-    OS_Socket_Handle_t handle;
-
-    OS_Error_t err = OS_Socket_create(
-                         &network_stack,
-                         &handle,
-                         OS_AF_INET,
-                         OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    const OS_Socket_Addr_t dstAddr =
-    {
-        .addr = GATEWAY_ADDR,
-        .port = CFG_REACHABLE_PORT
-    };
-
-    err = OS_Socket_connect(handle, &dstAddr);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    char* request = "GET /network/a.txt "
-                    "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
-                    "\r\nConnection: close\r\n\r\n";
-
-    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    const size_t len_request = strlen(request);
-    size_t len_actual = 0;
-
-    // Pass a null pointer for the buffer.
-    err = OS_Socket_write(handle, NULL, len_request, &len_actual);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    // Pass a null pointer for the actual length return parameter.
-    err = OS_Socket_write(handle, request, len_request, NULL);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    // Test the call with an invalid handle ID.
-    OS_Socket_Handle_t invalidHandle =
-    {
-        .ctx = handle.ctx,
-        .handleID = -1
-    };
-    err = OS_Socket_write(invalidHandle, request, len_request, &len_actual);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
-
-    err = OS_Socket_close(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = nb_helper_reset_ev_struct_for_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
-void
-test_tcp_write_pos()
-{
-    TEST_START();
-
-    OS_Socket_Handle_t handle;
-
-    OS_Error_t err = OS_Socket_create(
-                         &network_stack,
-                         &handle,
-                         OS_AF_INET,
-                         OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    const OS_Socket_Addr_t dstAddr =
-    {
-        .addr = GATEWAY_ADDR,
-        .port = CFG_REACHABLE_PORT
-    };
-
-    err = OS_Socket_connect(handle, &dstAddr);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = nb_helper_wait_for_conn_est_ev_on_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    char* request = "GET /network/a.txt "
-                    "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
-                    "\r\nConnection: close\r\n\r\n";
-
-    size_t len_request = strlen(request);
-    size_t offs = 0;
-
-    // Loop until all data is written.
-    do
-    {
-        const size_t lenRemaining = len_request - offs;
-        size_t       len_io       = lenRemaining;
-
-        err = OS_Socket_write(
-                  handle,
-                  &request[offs],
-                  len_io,
-                  &len_io);
-        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-        /* fatal error, this must not happen. API broken*/
-        ASSERT_LE_SZ(len_io, lenRemaining);
-
-        offs += len_io;
-    }
-    while (offs < len_request);
-
-    // Intentionally choose a buffer size larger than the underlying dataport.
-    static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
-    len_request = sizeof(buffer);
-    size_t len_actual = 0;
-
-    err = OS_Socket_write(
-              handle,
-              &request[offs],
-              len_request,
-              &len_actual);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // Verify that we were only able to write at most the size of the underlying
-    // dataport and not the requested size.
-    ASSERT_LE_SZ(len_actual, networkStack_rpc_get_size());
 
     err = OS_Socket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
