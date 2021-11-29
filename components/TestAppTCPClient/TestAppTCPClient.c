@@ -507,6 +507,8 @@ test_tcp_write_pos()
 
     // Intentionally choose a buffer size larger than the underlying dataport.
     static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
+    ASSERT_GT_SZ(sizeof(buffer), networkStack_rpc_get_size());
+
     len_request = sizeof(buffer);
     size_t len_actual = 0;
 
@@ -630,6 +632,7 @@ test_tcp_read_pos()
 
     // Intentionally choose a buffer size larger than the underlying dataport.
     static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
+    ASSERT_GT_SZ(sizeof(buffer), networkStack_rpc_get_size());
 
     // Wait until we receive a read event for the socket.
     err = nb_helper_wait_for_read_ev_on_socket(handle);
