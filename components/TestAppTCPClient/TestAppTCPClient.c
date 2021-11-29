@@ -482,21 +482,39 @@ test_tcp_read_pos()
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
 
-    const size_t len_request = strlen(request);
-    size_t       len         = len_request;
+    size_t len_request = strlen(request);
+    size_t len_actual = 0;
 
-    err = OS_Socket_write(handle, request, len, &len);
+    err = OS_Socket_write(handle, request, len_request, &len_actual);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    char buffer[2048] = {0};
-    len = sizeof(buffer);
+    // Intentionally choose a buffer size larger than the underlying dataport.
+    static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
 
     // Wait until we receive a read event for the socket.
     err = nb_helper_wait_for_read_ev_on_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_Socket_read(handle, buffer, len, &len);
+    // Read a small chunk that should fit into the underlying dataport.
+    len_request = 256;
+    err = OS_Socket_read(handle, buffer, len_request, &len_actual);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+    // Verify that we read some bytes.
+    ASSERT_GT_SZ(len_actual, 0);
+
+    // Read an amount that should not fit into the underlying dataport. The API
+    // should adjust this size to the max size of the underlying dataport.
+    len_request = sizeof(buffer);
+
+    // Wait until we receive a read event for the socket.
+    err = nb_helper_wait_for_read_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = OS_Socket_read(handle, buffer, len_request, &len_actual);
+
+    // Verify that we were only able to read at most the size of the underlying
+    // dataport and not the requested size.
+    ASSERT_LE_SZ(len_actual, networkStack_rpc_get_size());
 
     err = OS_Socket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -524,11 +542,12 @@ test_tcp_read_neg()
     char buffer[2048] = {0};
     size_t len = sizeof(buffer);
 
-    // Creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case.
-    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
+    // Pass a null pointer for the buffer.
+    err = OS_Socket_read(handle, NULL, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    err = OS_Socket_read(handle, buffer, len, &len);
+    // Pass a null pointer for the actual length return parameter.
+    err = OS_Socket_read(handle, buffer, len, NULL);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     len = OS_Dataport_getSize(handle.ctx.dataport);
@@ -582,16 +601,15 @@ test_tcp_write_neg()
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     const size_t len_request = strlen(request);
-    size_t       len         = len_request;
+    size_t len_actual = 0;
 
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
-
-    err = OS_Socket_write(handle, request, len, &len);
+    // Pass a null pointer for the buffer.
+    err = OS_Socket_write(handle, NULL, len_request, &len_actual);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    len = OS_Dataport_getSize(handle.ctx.dataport);
+    // Pass a null pointer for the actual length return parameter.
+    err = OS_Socket_write(handle, request, len_request, NULL);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     // Test the call with an invalid handle ID.
     OS_Socket_Handle_t invalidHandle =
@@ -599,7 +617,7 @@ test_tcp_write_neg()
         .ctx = handle.ctx,
         .handleID = -1
     };
-    err = OS_Socket_write(invalidHandle, request, len, &len);
+    err = OS_Socket_write(invalidHandle, request, len_request, &len_actual);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
     err = OS_Socket_close(handle);
@@ -641,7 +659,7 @@ test_tcp_write_pos()
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
 
-    const size_t len_request = strlen(request);
+    size_t len_request = strlen(request);
     size_t offs = 0;
 
     // Loop until all data is written.
@@ -663,6 +681,22 @@ test_tcp_write_pos()
         offs += len_io;
     }
     while (offs < len_request);
+
+    // Intentionally choose a buffer size larger than the underlying dataport.
+    static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
+    len_request = sizeof(buffer);
+    size_t len_actual = 0;
+
+    err = OS_Socket_write(
+              handle,
+              &request[offs],
+              len_request,
+              &len_actual);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Verify that we were only able to write at most the size of the underlying
+    // dataport and not the requested size.
+    ASSERT_LE_SZ(len_actual, networkStack_rpc_get_size());
 
     err = OS_Socket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -851,160 +885,6 @@ test_tcp_client()
     TEST_FINISH();
 }
 
-void
-test_dataport_size_check_client_functions()
-{
-    TEST_START();
-
-    OS_Socket_Handle_t handle;
-
-    OS_Error_t err = OS_Socket_create(
-                         &network_stack,
-                         &handle,
-                         OS_AF_INET,
-                         OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    size_t len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
-
-    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
-    static char buffer[4096];
-
-    err = OS_Socket_read(handle, buffer, len, NULL);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket read with invalid dataport size failed, error %d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    OS_Socket_Addr_t srcAddr = {0};
-
-    err = OS_Socket_recvfrom(
-              handle,
-              buffer,
-              len,
-              NULL,
-              &srcAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket recvfrom with invalid dataport size failed, "
-            "error "
-            "%d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_write(handle, buffer, len, NULL);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket write with invalid dataport size failed, error "
-            "%d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_sendto(handle, buffer, len, NULL, &srcAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket sendto with invalid dataport size failed, error "
-            "%d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_close(handle);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("close() failed, code %d", err);
-    }
-
-    nb_helper_reset_ev_struct_for_socket(handle);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
-    }
-
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
-void
-test_dataport_size_check_lib_functions()
-{
-    TEST_START();
-
-    OS_Socket_Handle_t handle_tcp;
-
-    OS_Error_t err = OS_Socket_create(
-                        &network_stack,
-                        &handle_tcp,
-                        OS_AF_INET,
-                        OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    const OS_Socket_Addr_t dstAddr = { .addr = CFG_REACHABLE_HOST,
-                                       .port = CFG_REACHABLE_PORT };
-
-    err = OS_Socket_connect(handle_tcp, &dstAddr);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_tcp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    size_t len = OS_Dataport_getSize(handle_tcp.ctx.dataport) + 1;
-
-    err = handle_tcp.ctx.socket_read(handle_tcp.handleID, &len);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = handle_tcp.ctx.socket_write(handle_tcp.handleID, &len);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_close(handle_tcp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    nb_helper_reset_ev_struct_for_socket(handle_tcp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    OS_Socket_Handle_t handle_udp;
-
-    err = OS_Socket_create(
-                &network_stack,
-                &handle_udp,
-                OS_AF_INET,
-                OS_SOCK_DGRAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(handle_udp.ctx.dataport) + 1;
-
-    OS_Socket_Addr_t srcAddr = { 0 };
-
-    err = handle_udp.ctx.socket_recvfrom(handle_udp.handleID, &len, &srcAddr);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = handle_udp.ctx.socket_sendto(handle_udp.handleID, &len, &srcAddr);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_close(handle_udp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    nb_helper_reset_ev_struct_for_socket(handle_udp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
 //------------------------------------------------------------------------------
 int
 run()
@@ -1017,8 +897,6 @@ run()
     {
         // The following API tests do not need to be executed in parallel
         // therefore only testAppTCPClient_client1 will execute them.
-        test_dataport_size_check_client_functions();
-        test_dataport_size_check_lib_functions();
         test_socket_create_neg();
         test_socket_create_pos();
         test_socket_close_pos();
