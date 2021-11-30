@@ -1,5 +1,5 @@
 /*
- * TestAppTCPClient
+ * TestAppTCPClient_send
  *
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  *
@@ -112,55 +112,7 @@ pre_init(void)
     }
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 }
-/*
-//------------------------------------------------------------------------------
-OS_Error_t
-nb_helper_wait_for_conn_est_ev_on_socket_debug(
-    const OS_NetworkSocket_Handle_t handle)
-{
-    CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
-    OS_Error_t err;
-    uint8_t eventMask = 0;
-    bool foundRelevantEvent = false;
-
-    do
-    {
-        Debug_ASSERT(NULL != sync_func.shared_resource_lock);
-        sync_func.shared_resource_lock();
-
-        eventMask = eventCollection[handle.handleID].eventMask;
-        err = eventCollection[handle.handleID].currentError;
-
-        Debug_ASSERT(NULL != sync_func.shared_resource_unlock);
-        sync_func.shared_resource_unlock();
-
-        if ((eventMask & OS_SOCK_EV_CONN_EST || eventMask & OS_SOCK_EV_ERROR
-             || eventMask & OS_SOCK_EV_FIN))
-        {
-            foundRelevantEvent = true;
-        }
-        else
-        {
-            // Wait for the arrival of new events.
-            Debug_ASSERT(NULL != sync_func.wait_on_new_events);
-            sync_func.wait_on_new_events();
-        }
-    }
-    while (!foundRelevantEvent);
-
-    if (eventMask & OS_SOCK_EV_CONN_EST)
-    {
-        eventCollection[handle.handleID].eventMask &= ~OS_SOCK_EV_CONN_EST;
-        return OS_SUCCESS;
-    }
-    else
-    {
-        eventCollection[handle.handleID].eventMask &= ~OS_SOCK_EV_ERROR;
-        return err;
-    }
-}
-*/
 OS_Error_t
 check_for_socket_event(
     const OS_NetworkSocket_Handle_t handle)
@@ -169,7 +121,6 @@ check_for_socket_event(
 
     OS_Error_t err = OS_SUCCESS;
     uint8_t eventMask = 0;
-    //bool foundRelevantEvent = false;
 
     Debug_ASSERT(NULL != sync_func.shared_resource_lock);
     sync_func.shared_resource_lock();
@@ -179,7 +130,6 @@ check_for_socket_event(
     sync_func.shared_resource_unlock();
     if (eventMask & OS_SOCK_EV_CONN_EST)
     {
-        //foundRelevantEvent = true;
         Debug_LOG_DEBUG("OS_SOCK_EV_CONN_EST");
     } else if (eventMask & OS_SOCK_EV_ERROR) {
         Debug_LOG_DEBUG("OS_SOCK_EV_ERROR");
@@ -204,10 +154,7 @@ test_tcp_client_send_only()
         printf("\nRUN: %i of %i", (m+1), RUNS);
         uint64_t timestamp_setup = 0;
         TimeServer_getTime(&timer, 1, &timestamp_setup); // 0 -> Time in seconds
-        //Debug_LOG_DEBUG("Reset timestamp to: %u", timestamp_setup);
-
-
-        
+        Debug_LOG_TRACE("Reset timestamp to: %u", timestamp_setup);
 
         OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
         OS_Error_t err;
@@ -247,20 +194,18 @@ test_tcp_client_send_only()
                 return;
         }
 
-        //Debug_LOG_INFO("Send request to host...");
-
-
+        Debug_LOG_TRACE("Send request to host...");
         char data[1024];
 
         size_t datalen = sizeof(data);
         for (int i=0; i<datalen;i++) {data[i] = 'a';} 
         size_t kilobytes = datalen * KILOBYTE;
 
-        //Debug_LOG_INFO("\nWriting data to socket: Data: %i BYTE... \n", kilobytes);
+        Debug_LOG_TRACE("\nWriting data to socket: Data: %i BYTE... \n", kilobytes);
 
         uint64_t timestamp = 0;
         TimeServer_getTime(&timer, 1, &timestamp); // 0 -> Time in seconds
-        //Debug_LOG_DEBUG("Reset timestamp to: %u", timestamp);
+        Debug_LOG_TRACE("Reset timestamp to: %u", timestamp);
 
         size_t bytes_written = 0;
         do
@@ -284,7 +229,7 @@ test_tcp_client_send_only()
 
             bytes_written += datalen;
 
-            //Debug_LOG_DEBUG("Sent %i BYTES of %i BYTES\n", bytes_written, kilobytes);
+            Debug_LOG_TRACE("Sent %i BYTES of %i BYTES\n", bytes_written, kilobytes);
         }
         while (bytes_written < kilobytes);
 
@@ -300,19 +245,20 @@ test_tcp_client_send_only()
         nb_helper_reset_ev_struct_for_socket(handle[i]);
         uint64_t timestamp_after = 0;
         TimeServer_getTime(&timer, 1, &timestamp_after);
-        //Debug_LOG_DEBUG("Received SOCK_EV_CLOSE -> closing socket \n Received a total of: %i BYTES", total_bytes);
+
+        Debug_LOG_DEBUG("Received SOCK_EV_CLOSE -> closing socket \n Received a total of: %i BYTES", total_bytes);
         uint64_t delta = timestamp_after - timestamp_setup;
         uint64_t kbps = (bytes_written/1024)/(delta/1000);
-        //Debug_LOG_DEBUG("duration from setup: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
-        printf("\ndata: %iMB\n", ((bytes_written/1024)/1024));
-        printf("setup: %"PRIu64"ms speed: %"PRIu64" kb/s\n", delta, kbps);
+
+        Debug_LOG_INFO("\ndata: %iMB\n", ((bytes_written/1024)/1024));
+        Debug_LOG_INFO("setup: %"PRIu64"ms speed: %"PRIu64" kb/s\n", delta, kbps);
         delta = timestamp_after - timestamp;
         kbps = (bytes_written/1024)/(delta/1000);
-        //Debug_LOG_DEBUG("duration: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
-        printf("sending: %"PRIu64"ms speed: %"PRIu64" kb/s\n", delta, kbps);
+        Debug_LOG_DEBUG("duration: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
+        Debug_LOG_INFO("sending: %"PRIu64"ms speed: %"PRIu64" kb/s\n", delta, kbps);
     }
     TEST_FINISH();
-    Debug_LOG_DEBUG("Tests finished!");
+    Debug_LOG_INFO("Tests finished!");
 }
     
 

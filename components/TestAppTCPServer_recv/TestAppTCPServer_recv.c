@@ -1,5 +1,5 @@
 /*
- * TestAppTCPServer
+ * TestAppTCPServer_recv
  *
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  *
@@ -433,7 +433,7 @@ run()
                             sizeof(buffer),
                             &n);
                 } while (err == OS_ERROR_TRY_AGAIN);
-                //Debug_LOG_DEBUG("Received %i bytes", n);
+                Debug_LOG_TRACE("Received %i bytes", n);
                 total_bytes += n;
             }
             else if (eventMask & OS_SOCK_EV_CLOSE)
@@ -443,12 +443,12 @@ run()
                 nb_helper_reset_ev_struct_for_socket_local(clientHandle);
                 uint64_t timestamp_after = 0;
                 TimeServer_getTime(&timer, 1, &timestamp_after);
-                //Debug_LOG_DEBUG("Received SOCK_EV_CLOSE -> closing socket \n Received a total of: %i BYTES", total_bytes);
-                // xgetTime does not work as expected -> results seem to be somehow random in nature
+                Debug_LOG_DEBUG("Received SOCK_EV_CLOSE -> closing socket \n Received a total of: %i BYTES", total_bytes);
+
                 uint64_t delta = timestamp_after - timestamp;
                 uint64_t kbps = (total_bytes/1024)/(delta/1000);
-                //Debug_LOG_DEBUG("duration: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
-                printf("\n\nduration: %"PRIu64"ms\n\n speed: %"PRIu64" kb/s", delta, kbps);
+                Debug_LOG_DEBUG("duration: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
+                Debug_LOG_INFO("\n\nduration: %"PRIu64"ms\n\n speed: %"PRIu64" kb/s", delta, kbps);
                 break;
             }
             else
