@@ -639,8 +639,9 @@ test_tcp_read_pos()
     len_request = 256;
     err = OS_Socket_read(handle, buffer, len_request, &len_actual);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-    // Verify that we read some bytes.
+    // Verify that we read at least 1 byte and at most the requested length.
     ASSERT_GT_SZ(len_actual, 0);
+    ASSERT_LE_SZ(len_actual, len_request);
 
     // Read an amount that should not fit into the underlying dataport. The API
     // should adjust this size to the max size of the underlying dataport.
