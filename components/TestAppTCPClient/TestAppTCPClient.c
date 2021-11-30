@@ -489,19 +489,19 @@ test_tcp_write_pos()
     do
     {
         const size_t lenRemaining = len_request - offs;
-        size_t       len_io       = lenRemaining;
+        size_t lenWritten = 0;
 
         err = OS_Socket_write(
                   handle,
                   &request[offs],
-                  len_io,
-                  &len_io);
+                  lenRemaining,
+                  &lenWritten);
         ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
         /* fatal error, this must not happen. API broken*/
-        ASSERT_LE_SZ(len_io, lenRemaining);
+        ASSERT_LE_SZ(lenWritten, lenRemaining);
 
-        offs += len_io;
+        offs += lenWritten;
     }
     while (offs < len_request);
 
@@ -785,13 +785,13 @@ test_tcp_client()
         do
         {
             const size_t lenRemaining = len_request - offs;
-            size_t       len_io       = lenRemaining;
+            size_t lenWritten = 0;
 
             err = OS_Socket_write(
                       handle[i],
                       &request[offs],
-                      len_io,
-                      &len_io);
+                      lenRemaining,
+                      &lenWritten);
 
             if (err != OS_SUCCESS)
             {
@@ -802,9 +802,9 @@ test_tcp_client()
             }
 
             /* fatal error, this must not happen. API broken*/
-            ASSERT_LE_SZ(len_io, lenRemaining);
+            ASSERT_LE_SZ(lenWritten, lenRemaining);
 
-            offs += len_io;
+            offs += lenWritten;
         }
         while (offs < len_request);
     }
