@@ -801,7 +801,7 @@ test_tcp_client()
                 return;
             }
 
-            /* fatal error, this must not happen. API broken*/
+            // Verify that the length written is at most the requested length.
             ASSERT_LE_SZ(lenWritten, lenRemaining);
 
             offs += lenWritten;
