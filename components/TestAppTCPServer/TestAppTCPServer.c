@@ -166,7 +166,7 @@ run()
          */
         for (;;)
         {
-            Debug_LOG_DEBUG("read...");
+            Debug_LOG_TRACE("read...");
             size_t n = 0;
             // Try to read as much as fits into the buffer
             do
