@@ -15,9 +15,9 @@ DeclareCAmkESComponent(
     LIBS
         system_config
         os_core_api
+        os_network_api
         lib_debug
-        lib_compiler
-        networkStack_PicoTcp_api
+        networkStack_PicoTcp
 )
 
 NetworkStack_PicoTcp_DeclareCAmkESComponent(
@@ -25,9 +25,9 @@ NetworkStack_PicoTcp_DeclareCAmkESComponent(
 )
 
 DeclareCAmkESComponent(
-    TestAppTCPServer
+    TestAppTCPServer_recv
     SOURCES
-        components/TestAppTCPServer/TestAppTCPServer.c
+        components/TestAppTCPServer_recv/TestAppTCPServer_recv.c
         util/non_blocking_helper.c
     C_FLAGS
         -Wall
@@ -38,8 +38,9 @@ DeclareCAmkESComponent(
         lib_compiler
         lib_debug
         lib_macros
-        os_socket_client
+        os_network_api
         syslogger_client
+        TimeServer_client
 )
 
 DeclareCAmkESComponent_SysLogger(

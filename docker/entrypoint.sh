@@ -37,6 +37,7 @@ sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo iptables -A FORWARD -i ${BRIDGE_NAME} -j ACCEPT
 
 # forward external packets through NAT
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 5555:5555 -j DNAT  --to 10.0.0.11:5555
 sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 11000:11004 -j DNAT  --to 10.0.0.11:11000-11004
 sudo iptables -t nat -A PREROUTING -i eth0 -p udp --dport 11000:11004 -j DNAT  --to 10.0.0.11:11000-11004
 sudo iptables -t nat -A PREROUTING -i eth0 -p udp --dport 12000:12004 -j DNAT  --to 10.0.0.11:12000-12004

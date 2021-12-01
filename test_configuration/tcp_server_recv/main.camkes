@@ -1,0 +1,115 @@
+/*
+ *  Network API Test System
+ *
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ */
+
+#include "system_config.h"
+
+#include "TimeServer/camkes/TimeServer.camkes"
+TimeServer_COMPONENT_DEFINE(TimeServer)
+
+#include "SysLogger/camkes/SysLogger.camkes"
+SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(SysLogger)
+
+#include "../../components/NwStackConfigurator/NwStackConfigurator.camkes"
+#include "../../components/TestAppTCPServer_recv/TestAppTCPServer_recv.camkes"
+
+#include "NetworkStack_PicoTcp/camkes/NetworkStack_PicoTcp.camkes"
+NetworkStack_PicoTcp_COMPONENT_DEFINE(
+    NetworkStack_PicoTcp,
+    NIC_DRIVER_RINGBUFFER_SIZE,
+    SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger))
+
+#include "plat_nic.camkes"
+#include "lib_macros/List.h"
+
+assembly {
+    composition {
+        //----------------------------------------------------------------------
+        // SysLogger
+        //----------------------------------------------------------------------
+        component   SysLogger       sysLogger;
+
+        SysLogger_INSTANCE_CONNECT_CLIENTS(
+            sysLogger,
+            nwStack,
+            testAppTCPServer
+        )
+
+        //----------------------------------------------------------------------
+        // TimeServer
+        //----------------------------------------------------------------------
+        component TimeServer timeServer;
+
+
+        TimeServer_INSTANCE_CONNECT_CLIENTS(
+            timeServer,
+            // connect platform specific components. The comma needs to be part
+            // of the macro expansion
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER(nwDriver)
+            nwStack.timeServer_rpc, nwStack.timeServer_notify,
+            testAppTCPServer.timeServer_rpc, testAppTCPServer.timeServer_notify
+        )
+
+        //----------------------------------------------------------------------
+        // NICs
+        //----------------------------------------------------------------------
+        NETWORK_TEST_NIC_INSTANCE(nwDriver)
+
+        //----------------------------------------------------------------------
+        // Network Stack
+        //----------------------------------------------------------------------
+        component NetworkStack_PicoTcp nwStack;
+
+        NetworkStack_PicoTcp_INSTANCE_CONNECT(
+            nwStack,
+            nwDriver
+        )
+
+        //----------------------------------------------------------------------
+        // Network Stack Configurator
+        //----------------------------------------------------------------------
+        component NwStackConfigurator nwStackConfigurator;
+
+        NetworkStack_PicoTcp_INSTANCE_CONNECT_CONFIG_CLIENT(
+            nwStack,
+            nwStackConfigurator, networkStack_PicoTcp_Config
+        )
+
+        //----------------------------------------------------------------------
+        // TCP Echo server
+        //----------------------------------------------------------------------
+        component TestAppTCPServer_recv testAppTCPServer;
+
+        connection seL4Notification testAppTCPServer_event_received(
+            from testAppTCPServer.event_received_send_ready,
+            to   testAppTCPServer.event_received_recv_ready);
+
+        NetworkStack_PicoTcp_INSTANCE_CONNECT_CLIENTS(
+            nwStack,
+            testAppTCPServer, networkStack
+        )
+     }
+
+    configuration {
+        TimeServer_CLIENT_ASSIGN_BADGES(
+            // connect platform specific components. The comma needs to be part
+            // of the macro expansion
+            NETWORK_TEST_OPTIONAL_TIMESERVER_CLIENTS_NETWORK_DRIVER_BADGES(nwDriver)
+            nwStack.timeServer_rpc,
+            testAppTCPServer.timeServer_rpc
+        )
+
+        NetworkStack_PicoTcp_CLIENT_ASSIGN_BADGES(
+            testAppTCPServer, networkStack
+        )
+
+        NetworkStack_PicoTcp_INSTANCE_CONFIGURE_CLIENTS(
+            nwStack,
+            8
+        )
+
+        NETWORK_TEST_NIC_CONFIG(nwDriver)
+    }
+}

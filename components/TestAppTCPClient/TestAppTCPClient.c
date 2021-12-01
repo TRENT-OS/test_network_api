@@ -272,10 +272,10 @@ test_socket_connect_neg()
 
     // Test invalid empty destination address.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     memset(dstAddr.addr, 0, sizeof(dstAddr.addr));
@@ -287,10 +287,10 @@ test_socket_connect_neg()
 
     // Test connecting to an unreachable host.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     strncpy((char*)dstAddr.addr, CFG_UNREACHABLE_HOST, sizeof(dstAddr.addr));
@@ -302,10 +302,10 @@ test_socket_connect_neg()
 
     // Test connection refused, now with reachable address but port closed.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     strncpy((char*)dstAddr.addr, CFG_REACHABLE_HOST, sizeof(dstAddr.addr));
@@ -324,14 +324,17 @@ test_socket_connect_neg()
     // Test forbidden host (connection reset), firewall is configured to send a
     // TCP reset for packets with source and destination port 88.
     err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    const OS_Socket_Addr_t srcAddr = { .addr = CFG_ETH_ADDR_CLIENT_VALUE,
-                                              .port = CFG_FORBIDDEN_PORT };
+    const OS_Socket_Addr_t srcAddr =
+    {
+        .addr = CFG_ETH_ADDR_CLIENT_VALUE,
+        .port = CFG_FORBIDDEN_PORT
+    };
 
     err = OS_Socket_bind(handle, &srcAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -365,17 +368,20 @@ test_socket_non_blocking_neg()
     OS_Socket_Handle_t handle;
 
     OS_Error_t err = OS_Socket_create(
-        &network_stack,
-        &handle,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    OS_Socket_Addr_t dstAddr = { .addr = CFG_REACHABLE_HOST,
-                                 .port = CFG_UNREACHABLE_PORT };
+    OS_Socket_Addr_t dstAddr =
+    {
+        .addr = CFG_REACHABLE_HOST,
+        .port = CFG_UNREACHABLE_PORT
+    };
 
     OS_Socket_Addr_t srcAddr = { 0 };
 
@@ -403,32 +409,32 @@ test_socket_non_blocking_neg()
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     // Try to connect to a host that will let the connection timeout. After the
-    // connection timedout, try the other socket functions.
+    // connection timeout, try the other socket functions.
 
-    OS_Socket_Handle_t handle_connection_timedout;
+    OS_Socket_Handle_t handle_connection_timeout;
 
     err = OS_Socket_create(
-        &network_stack,
-        &handle_connection_timedout,
-        OS_AF_INET,
-        OS_SOCK_STREAM);
+              &network_stack,
+              &handle_connection_timeout,
+              OS_AF_INET,
+              OS_SOCK_STREAM);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     err = nb_helper_reset_ev_struct_for_socket(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
-    err = OS_Socket_connect(handle_connection_timedout, &dstAddr);
+    err = OS_Socket_connect(handle_connection_timeout, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     // Wait until we receive the expected event that the connection to the
     // unreachable port failed.
-    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_connection_timedout);
+    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_connection_timeout);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_REFUSED, err);
 
-    err = OS_Socket_read(handle_connection_timedout, buffer, len, &len);
+    err = OS_Socket_read(handle_connection_timeout, buffer, len, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
 
-    err = OS_Socket_write(handle_connection_timedout, request, len, &len);
+    err = OS_Socket_write(handle_connection_timeout, request, len, &len);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_CONN_NONE, err);
 
     err = OS_Socket_recvfrom(handle, buffer, len, &len, &srcAddr);
@@ -437,14 +443,17 @@ test_socket_non_blocking_neg()
     err = OS_Socket_sendto(handle, buffer, len, &len, &srcAddr);
     ASSERT_EQ_OS_ERR(OS_ERROR_NETWORK_PROTO, err);
 
-    err = OS_Socket_close(handle_connection_timedout);
+    err = OS_Socket_close(handle_connection_timeout);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle_connection_timeout);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     TEST_FINISH();
 }
 
 void
-test_tcp_read_pos()
+test_tcp_write_pos()
 {
     TEST_START();
 
@@ -463,9 +472,6 @@ test_tcp_read_pos()
         .port = CFG_REACHABLE_PORT
     };
 
-    err = nb_helper_reset_ev_struct_for_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
     err = OS_Socket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -476,65 +482,46 @@ test_tcp_read_pos()
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
 
-    const size_t len_request = strlen(request);
-    size_t       len         = len_request;
+    size_t len_request = strlen(request);
+    size_t offs = 0;
 
-    err = OS_Socket_write(handle, request, len, &len);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    char buffer[2048] = {0};
-    len = sizeof(buffer);
-
-    // Wait until we receive a read event for the socket.
-    err = nb_helper_wait_for_read_ev_on_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = OS_Socket_read(handle, buffer, len, &len);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = OS_Socket_close(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = nb_helper_reset_ev_struct_for_socket(handle);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
-void
-test_tcp_read_neg()
-{
-    TEST_START();
-
-    OS_Socket_Handle_t handle;
-
-    OS_Error_t err = OS_Socket_create(
-                         &network_stack,
-                         &handle,
-                         OS_AF_INET,
-                         OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    char buffer[2048] = {0};
-    size_t len = sizeof(buffer);
-
-    // Creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case.
-    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
-
-    err = OS_Socket_read(handle, buffer, len, &len);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    len = OS_Dataport_getSize(handle.ctx.dataport);
-
-    // Test the call with an invalid handle ID.
-    OS_Socket_Handle_t invalidHandle =
+    // Loop until all data is written.
+    do
     {
-        .ctx = handle.ctx,
-        .handleID = -1
-    };
-    err = OS_Socket_read(invalidHandle, buffer, len, &len);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
+        const size_t lenRemaining = len_request - offs;
+        size_t lenWritten = 0;
+
+        err = OS_Socket_write(
+                  handle,
+                  &request[offs],
+                  lenRemaining,
+                  &lenWritten);
+        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+        /* fatal error, this must not happen. API broken*/
+        ASSERT_LE_SZ(lenWritten, lenRemaining);
+
+        offs += lenWritten;
+    }
+    while (offs < len_request);
+
+    // Intentionally choose a buffer size larger than the underlying dataport.
+    static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
+    ASSERT_GT_SZ(sizeof(buffer), networkStack_rpc_get_size());
+
+    len_request = sizeof(buffer);
+    size_t len_actual = 0;
+
+    err = OS_Socket_write(
+              handle,
+              &request[offs],
+              len_request,
+              &len_actual);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Verify that we were only able to write at most the size of the underlying
+    // dataport and not the requested size.
+    ASSERT_LE_SZ(len_actual, networkStack_rpc_get_size());
 
     err = OS_Socket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -576,16 +563,15 @@ test_tcp_write_neg()
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
     const size_t len_request = strlen(request);
-    size_t       len         = len_request;
+    size_t len_actual = 0;
 
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
-
-    err = OS_Socket_write(handle, request, len, &len);
+    // Pass a null pointer for the buffer.
+    err = OS_Socket_write(handle, NULL, len_request, &len_actual);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
-    len = OS_Dataport_getSize(handle.ctx.dataport);
+    // Pass a null pointer for the actual length return parameter.
+    err = OS_Socket_write(handle, request, len_request, NULL);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     // Test the call with an invalid handle ID.
     OS_Socket_Handle_t invalidHandle =
@@ -593,7 +579,7 @@ test_tcp_write_neg()
         .ctx = handle.ctx,
         .handleID = -1
     };
-    err = OS_Socket_write(invalidHandle, request, len, &len);
+    err = OS_Socket_write(invalidHandle, request, len_request, &len_actual);
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
     err = OS_Socket_close(handle);
@@ -606,7 +592,7 @@ test_tcp_write_neg()
 }
 
 void
-test_tcp_write_pos()
+test_tcp_read_pos()
 {
     TEST_START();
 
@@ -625,6 +611,9 @@ test_tcp_write_pos()
         .port = CFG_REACHABLE_PORT
     };
 
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
     err = OS_Socket_connect(handle, &dstAddr);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
 
@@ -635,28 +624,86 @@ test_tcp_write_pos()
                     "HTTP/1.0\r\nHost: " CFG_TEST_HTTP_SERVER
                     "\r\nConnection: close\r\n\r\n";
 
-    const size_t len_request = strlen(request);
-    size_t offs = 0;
+    size_t len_request = strlen(request);
+    size_t len_actual = 0;
 
-    // Loop until all data is written.
-    do
+    err = OS_Socket_write(handle, request, len_request, &len_actual);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Intentionally choose a buffer size larger than the underlying dataport.
+    static char buffer[OS_DATAPORT_DEFAULT_SIZE + 1] = {0};
+    ASSERT_GT_SZ(sizeof(buffer), networkStack_rpc_get_size());
+
+    // Wait until we receive a read event for the socket.
+    err = nb_helper_wait_for_read_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    // Read a small chunk that should fit into the underlying dataport.
+    len_request = 256;
+    err = OS_Socket_read(handle, buffer, len_request, &len_actual);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+    // Verify that we read at least 1 byte and at most the requested length.
+    ASSERT_GT_SZ(len_actual, 0);
+    ASSERT_LE_SZ(len_actual, len_request);
+
+    // Read an amount that should not fit into the underlying dataport. The API
+    // should adjust this size to the max size of the underlying dataport.
+    len_request = sizeof(buffer);
+
+    // Wait until we receive a read event for the socket.
+    err = nb_helper_wait_for_read_ev_on_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = OS_Socket_read(handle, buffer, len_request, &len_actual);
+
+    // Verify that we were only able to read at most the size of the underlying
+    // dataport and not the requested size.
+    ASSERT_LE_SZ(len_actual, networkStack_rpc_get_size());
+
+    err = OS_Socket_close(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    err = nb_helper_reset_ev_struct_for_socket(handle);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    TEST_FINISH();
+}
+
+void
+test_tcp_read_neg()
+{
+    TEST_START();
+
+    OS_Socket_Handle_t handle;
+
+    OS_Error_t err = OS_Socket_create(
+                         &network_stack,
+                         &handle,
+                         OS_AF_INET,
+                         OS_SOCK_STREAM);
+    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
+
+    char buffer[2048] = {0};
+    size_t len = sizeof(buffer);
+
+    // Pass a null pointer for the buffer.
+    err = OS_Socket_read(handle, NULL, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+
+    // Pass a null pointer for the actual length return parameter.
+    err = OS_Socket_read(handle, buffer, len, NULL);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
+
+    len = OS_Dataport_getSize(handle.ctx.dataport);
+
+    // Test the call with an invalid handle ID.
+    OS_Socket_Handle_t invalidHandle =
     {
-        const size_t lenRemaining = len_request - offs;
-        size_t       len_io       = lenRemaining;
-
-        err = OS_Socket_write(
-                  handle,
-                  &request[offs],
-                  len_io,
-                  &len_io);
-        ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-        /* fatal error, this must not happen. API broken*/
-        ASSERT_LE_SZ(len_io, lenRemaining);
-
-        offs += len_io;
-    }
-    while (offs < len_request);
+        .ctx = handle.ctx,
+        .handleID = -1
+    };
+    err = OS_Socket_read(invalidHandle, buffer, len, &len);
+    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
     err = OS_Socket_close(handle);
     ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
@@ -738,13 +785,13 @@ test_tcp_client()
         do
         {
             const size_t lenRemaining = len_request - offs;
-            size_t       len_io       = lenRemaining;
+            size_t lenWritten = 0;
 
             err = OS_Socket_write(
                       handle[i],
                       &request[offs],
-                      len_io,
-                      &len_io);
+                      lenRemaining,
+                      &lenWritten);
 
             if (err != OS_SUCCESS)
             {
@@ -754,10 +801,10 @@ test_tcp_client()
                 return;
             }
 
-            /* fatal error, this must not happen. API broken*/
-            ASSERT_LE_SZ(len_io, lenRemaining);
+            // Verify that the length written is at most the requested length.
+            ASSERT_LE_SZ(lenWritten, lenRemaining);
 
-            offs += len_io;
+            offs += lenWritten;
         }
         while (offs < len_request);
     }
@@ -845,160 +892,6 @@ test_tcp_client()
     TEST_FINISH();
 }
 
-void
-test_dataport_size_check_client_functions()
-{
-    TEST_START();
-
-    OS_Socket_Handle_t handle;
-
-    OS_Error_t err = OS_Socket_create(
-                         &network_stack,
-                         &handle,
-                         OS_AF_INET,
-                         OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    size_t len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
-
-    // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
-    static char buffer[4096];
-
-    err = OS_Socket_read(handle, buffer, len, NULL);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket read with invalid dataport size failed, error %d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    OS_Socket_Addr_t srcAddr = {0};
-
-    err = OS_Socket_recvfrom(
-              handle,
-              buffer,
-              len,
-              NULL,
-              &srcAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket recvfrom with invalid dataport size failed, "
-            "error "
-            "%d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_write(handle, buffer, len, NULL);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket write with invalid dataport size failed, error "
-            "%d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_sendto(handle, buffer, len, NULL, &srcAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "Client socket sendto with invalid dataport size failed, error "
-            "%d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_close(handle);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("close() failed, code %d", err);
-    }
-
-    nb_helper_reset_ev_struct_for_socket(handle);
-    if (err != OS_SUCCESS)
-    {
-        Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
-    }
-
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
-void
-test_dataport_size_check_lib_functions()
-{
-    TEST_START();
-
-    OS_Socket_Handle_t handle_tcp;
-
-    OS_Error_t err = OS_Socket_create(
-                        &network_stack,
-                        &handle_tcp,
-                        OS_AF_INET,
-                        OS_SOCK_STREAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    const OS_Socket_Addr_t dstAddr = { .addr = CFG_REACHABLE_HOST,
-                                       .port = CFG_REACHABLE_PORT };
-
-    err = OS_Socket_connect(handle_tcp, &dstAddr);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    err = nb_helper_wait_for_conn_est_ev_on_socket(handle_tcp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    size_t len = OS_Dataport_getSize(handle_tcp.ctx.dataport) + 1;
-
-    err = handle_tcp.ctx.socket_read(handle_tcp.handleID, &len);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = handle_tcp.ctx.socket_write(handle_tcp.handleID, &len);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_close(handle_tcp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    nb_helper_reset_ev_struct_for_socket(handle_tcp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    OS_Socket_Handle_t handle_udp;
-
-    err = OS_Socket_create(
-                &network_stack,
-                &handle_udp,
-                OS_AF_INET,
-                OS_SOCK_DGRAM);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(handle_udp.ctx.dataport) + 1;
-
-    OS_Socket_Addr_t srcAddr = { 0 };
-
-    err = handle_udp.ctx.socket_recvfrom(handle_udp.handleID, &len, &srcAddr);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = handle_udp.ctx.socket_sendto(handle_udp.handleID, &len, &srcAddr);
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
-    err = OS_Socket_close(handle_udp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    nb_helper_reset_ev_struct_for_socket(handle_udp);
-    ASSERT_EQ_OS_ERR(OS_SUCCESS, err);
-
-    TEST_FINISH();
-}
-
 //------------------------------------------------------------------------------
 int
 run()
@@ -1006,25 +899,17 @@ run()
     Debug_LOG_INFO("Starting TestAppTCPClient %s...", get_instance_name());
 
 #ifdef TCP_CLIENT
-    if ((0 == strcmp(get_instance_name(), "testAppTCPClient_singleSocket")) ||
-        (0 == strcmp(get_instance_name(), "testAppTCPClient_client1")))
-    {
-        // The following API tests do not need to be executed in parallel
-        // therefore only testAppTCPClient_client1 will execute them.
-        test_dataport_size_check_client_functions();
-        test_dataport_size_check_lib_functions();
-        test_socket_create_neg();
-        test_socket_create_pos();
-        test_socket_close_pos();
-        test_socket_close_neg();
-        test_socket_connect_pos();
-        test_socket_connect_neg();
-        test_socket_non_blocking_neg();
-        test_tcp_read_pos();
-        test_tcp_read_neg();
-        test_tcp_write_pos();
-        test_tcp_write_neg();
-    }
+    test_socket_create_neg();
+    test_socket_create_pos();
+    test_socket_close_pos();
+    test_socket_close_neg();
+    test_socket_connect_pos();
+    test_socket_connect_neg();
+    test_socket_non_blocking_neg();
+    test_tcp_write_pos();
+    test_tcp_write_neg();
+    test_tcp_read_pos();
+    test_tcp_read_neg();
 #endif
 
 #ifdef TCP_CLIENT_MULTIPLE_CLIENTS

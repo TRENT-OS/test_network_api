@@ -107,7 +107,8 @@ test_udp_recvfrom_pos()
 
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096];
-    size_t len = sizeof(buffer);
+    size_t len_requested = sizeof(buffer);
+    size_t len_actual = 0;
 
     OS_Socket_Addr_t srcAddr = {0};
 
@@ -118,8 +119,8 @@ test_udp_recvfrom_pos()
     err = OS_Socket_recvfrom(
               handle,
               buffer,
-              len,
-              &len,
+              len_requested,
+              &len_actual,
               &srcAddr);
     if (err != OS_SUCCESS)
     {
@@ -141,11 +142,43 @@ test_udp_recvfrom_pos()
 
     Debug_LOG_INFO(
         "Received %d \"%*s\" : %s %d",
-        len,
-        len,
+        len_actual,
+        len_actual,
         buffer,
         srcAddr.addr,
         srcAddr.port);
+
+    // Wait until we get a read event for the bound socket.
+    nb_helper_wait_for_read_ev_on_socket(handle);
+
+    // Read an amount that should not fit into the underlying dataport. The API
+    // should adjust this size to the max size of the underlying dataport.
+    err = OS_Socket_recvfrom(
+              handle,
+              buffer,
+              (len_requested + 1),
+              &len_actual,
+              &srcAddr);
+    if (err != OS_SUCCESS)
+    {
+        Debug_LOG_ERROR("OS_Socket_recvfrom() failed, code %d", err);
+
+        err = OS_Socket_close(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("OS_Socket_close() failed, code %d", err);
+        }
+        err = nb_helper_reset_ev_struct_for_socket(handle);
+        if (err != OS_SUCCESS)
+        {
+            Debug_LOG_ERROR("nb_helper_reset_ev_struct_for_socket() failed, code %d", err);
+        }
+
+        return;
+    }
+    // Verify that we were only able to read at most the size of the underlying
+    // dataport and not the requested size.
+    ASSERT_LE_SZ(len_actual, networkStack_rpc_get_size());
 
     err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)
@@ -209,7 +242,8 @@ test_udp_sendto_pos()
 
     // Buffer big enough to hold 2 frames, rounded to the nearest power of 2
     static char buffer[4096] = {0};
-    size_t len = sizeof(buffer);
+    size_t len_requested = sizeof(buffer);
+    size_t len_actual;
 
     OS_Socket_Addr_t srcAddr = {0};
 
@@ -222,8 +256,8 @@ test_udp_sendto_pos()
     err = OS_Socket_recvfrom(
               handle,
               buffer,
-              len,
-              &len,
+              len_requested,
+              &len_actual,
               &srcAddr);
     if (err != OS_SUCCESS)
     {
@@ -245,19 +279,19 @@ test_udp_sendto_pos()
 
     Debug_LOG_INFO(
         "Received %d \"%*s\" : %s %d",
-        len,
-        len,
+        len_actual,
+        len_actual,
         buffer,
         srcAddr.addr,
         srcAddr.port);
 
     const char test_message[] = "Hello there";
-    len = sizeof(test_message);
+    len_requested = sizeof(test_message);
     err = OS_Socket_sendto(
               handle,
               test_message,
-              len,
-              &len,
+              len_requested,
+              &len_actual,
               &srcAddr);
     if (err != OS_SUCCESS)
     {
@@ -331,22 +365,6 @@ test_udp_recvfrom_neg()
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
 
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
-
-    err = handle.ctx.socket_recvfrom(
-              handle.handleID,
-              &len,
-              &srcAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "UDP recvfrom() with invalid dataport size failed, error %d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
-
     err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)
     {
@@ -398,19 +416,6 @@ test_udp_sendto_neg()
             err);
     }
     ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_HANDLE, err);
-
-    // creates a length guaranteed larger than that of the dataport, which won't
-    // fit in the dataport and will generate an error case
-    len = OS_Dataport_getSize(handle.ctx.dataport) + 1;
-
-    err = handle.ctx.socket_sendto(handle.handleID, &len, &dstAddr);
-    if (err != OS_ERROR_INVALID_PARAMETER)
-    {
-        Debug_LOG_ERROR(
-            "UDP sendto() with invalid dataport size failed, error %d",
-            err);
-    }
-    ASSERT_EQ_OS_ERR(OS_ERROR_INVALID_PARAMETER, err);
 
     err = OS_Socket_close(handle);
     if (err != OS_SUCCESS)

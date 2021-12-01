@@ -1,0 +1,33 @@
+/*
+ * TestAppTCPServer
+ *
+ * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
+ *
+ */
+
+#include <if_OS_Socket.camkes>
+
+#include "SysLogger/camkes/SysLogger.camkes"
+
+//#include <if_OS_Timer.camkes>
+
+
+#include "TimeServer/camkes/TimeServer.camkes"
+#include "system_config.h"
+
+component TestAppTCPServer_recv {
+
+    control;
+
+    IF_OS_SOCKET_USE(networkStack)
+
+    emits    EventReceived event_received_send_ready;
+    consumes EventReceived event_received_recv_ready;
+
+    has mutex SharedResourceMutex;
+
+    SysLogger_CLIENT_DECLARE_CONNECTOR(sysLogger)
+
+    uses if_OS_Timer timeServer_rpc;
+    consumes TimerReady timeServer_notify;
+}
