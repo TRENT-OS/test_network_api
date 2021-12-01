@@ -4,6 +4,7 @@
  * Copyright (C) 2019-2021, HENSOLDT Cyber GmbH
  *
  */
+
 #include "OS_Error.h"
 #include "lib_compiler/compiler.h"
 #include "lib_debug/Debug.h"
@@ -12,7 +13,8 @@
 #include "stdint.h"
 #include <string.h>
 
-#include "OS_Network.h"
+//#include "OS_Network.h"
+#include "OS_Socket.h" //renaming??
 #include "interfaces/if_OS_Socket.h"
 #include "util/loop_defines.h"
 
@@ -36,7 +38,7 @@ typedef struct
 
 static const if_OS_Socket_t network_stack = IF_OS_SOCKET_ASSIGN(networkStack);
 
-static OS_NetworkSocket_Evt_t eventCollection[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
+static OS_Socket_Evt_t eventCollection[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
 
 static nh_helper_sync_func sync_func;
 
@@ -73,12 +75,12 @@ nb_helper_collect_pending_ev_handler_local(
 {
     Debug_ASSERT(NULL != ctx);
 
-    OS_NetworkSocket_Evt_t eventBuffer[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
+    OS_Socket_Evt_t eventBuffer[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
     int numberOfSocketsWithEvents = 0;
 
     size_t bufferSize = sizeof(eventBuffer);
 
-    OS_Error_t err = OS_NetworkSocket_getPendingEvents(
+    OS_Error_t err = OS_Socket_getPendingEvents(
                          ctx,
                          eventBuffer,
                          bufferSize,
@@ -92,7 +94,7 @@ nb_helper_collect_pending_ev_handler_local(
 
     for (int i = 0; i < numberOfSocketsWithEvents; i++)
     {
-        OS_NetworkSocket_Evt_t event;
+        OS_Socket_Evt_t event;
         memcpy(&event, &eventBuffer[i], sizeof(event));
 
         if (event.socketHandle >= 0
@@ -146,7 +148,7 @@ nb_helper_wait_for_network_stack_init_local(
 
     do
     {
-        networkStackState = OS_NetworkSocket_getStatus(ctx);
+        networkStackState = OS_Socket_getStatus(ctx);
         if (networkStackState == UNINITIALIZED || networkStackState == INITIALIZED)
         {
             // just yield to wait until the stack is up and running
@@ -213,14 +215,14 @@ pre_init(void)
 
 OS_Error_t
 nb_helper_reset_ev_struct_for_socket_local(
-    const OS_NetworkSocket_Handle_t handle)
+    const OS_Socket_Handle_t handle)
 {
     CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
     Debug_ASSERT(NULL != sync_func.shared_resource_lock);
     sync_func.shared_resource_lock();
 
-    memset(&eventCollection[handle.handleID], 0, sizeof(OS_NetworkSocket_Evt_t));
+    memset(&eventCollection[handle.handleID], 0, sizeof(OS_Socket_Evt_t));
 
     Debug_ASSERT(NULL != sync_func.shared_resource_unlock);
     sync_func.shared_resource_unlock();
@@ -232,7 +234,7 @@ nb_helper_reset_ev_struct_for_socket_local(
 
 OS_Error_t
 nb_helper_wait_for_conn_acpt_ev_on_socket_local(
-    const OS_NetworkSocket_Handle_t handle)
+    const OS_Socket_Handle_t handle)
 {
     CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
@@ -284,45 +286,45 @@ run()
 {
     Debug_LOG_INFO("Starting TestAppTCPServer ...");
 
-    OS_NetworkSocket_Handle_t srvHandle;
+    OS_Socket_Handle_t srvHandle;
 
-    OS_Error_t err = OS_NetworkSocket_create(
+    OS_Error_t err = OS_Socket_create(
                          &network_stack,
                          &srvHandle,
                          OS_AF_INET,
                          OS_SOCK_STREAM);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
         return -1;
     }
 
-    const OS_NetworkSocket_Addr_t dstAddr =
+    const OS_Socket_Addr_t dstAddr =
     {
         .addr = OS_INADDR_ANY_STR,
         .port = CFG_TCP_SERVER_PORT
     };
 
-    err = OS_NetworkSocket_bind(
+    err = OS_Socket_bind(
               srvHandle,
               &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_bind() failed, code %d", err);
-        OS_NetworkSocket_close(srvHandle);
+        Debug_LOG_ERROR("OS_Socket_bind() failed, code %d", err);
+        OS_Socket_close(srvHandle);
         nb_helper_reset_ev_struct_for_socket_local(srvHandle); //shouldnt inflict latency
         return -1;
     }
 
     int backlog = 10;
 
-    err = OS_NetworkSocket_listen(
+    err = OS_Socket_listen(
               srvHandle,
               backlog);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_listen() failed, code %d", err);
-        OS_NetworkSocket_close(srvHandle);
+        Debug_LOG_ERROR("OS_Socket_listen() failed, code %d", err);
+        OS_Socket_close(srvHandle);
         nb_helper_reset_ev_struct_for_socket_local(srvHandle); //shouldnt inflict latency
         return -1;
     }
@@ -330,8 +332,8 @@ run()
     Debug_LOG_INFO("launching echo server");
 
     /* Gets filled when accept is called */
-    OS_NetworkSocket_Handle_t clientHandle;
-    OS_NetworkSocket_Addr_t srcAddr = {0};
+    OS_Socket_Handle_t clientHandle;
+    OS_Socket_Addr_t srcAddr = {0};
 
     static char buffer[4096];
 
@@ -342,7 +344,7 @@ run()
             // Wait until we get an conn acpt event for the listening socket.
             nb_helper_wait_for_conn_acpt_ev_on_socket_local(srvHandle);
 
-            err = OS_NetworkSocket_accept(
+            err = OS_Socket_accept(
                       srvHandle,
                       &clientHandle,
                       &srcAddr);
@@ -351,8 +353,8 @@ run()
         while (err == OS_ERROR_TRY_AGAIN);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_accept() failed, error %d", err);
-            OS_NetworkSocket_close(srvHandle);
+            Debug_LOG_ERROR("OS_Socket_accept() failed, error %d", err);
+            OS_Socket_close(srvHandle);
             nb_helper_reset_ev_struct_for_socket_local(srvHandle);
             return -1;
         }
@@ -419,7 +421,7 @@ run()
             if (eventMask & OS_SOCK_EV_FIN)
             {
                 Debug_LOG_INFO("connection closed by server");
-                OS_NetworkSocket_close(clientHandle);
+                OS_Socket_close(clientHandle);
                 nb_helper_reset_ev_struct_for_socket_local(clientHandle);
                 break;
             }
@@ -427,7 +429,7 @@ run()
             {
                 eventCollection[clientHandle.handleID].eventMask &= ~OS_SOCK_EV_READ;
                 do {
-                    err = OS_NetworkSocket_read(
+                    err = OS_Socket_read(
                             clientHandle,
                             buffer,
                             sizeof(buffer),
@@ -439,7 +441,7 @@ run()
             else if (eventMask & OS_SOCK_EV_CLOSE)
             {
                 eventCollection[clientHandle.handleID].eventMask = 0;
-                OS_NetworkSocket_close(clientHandle);
+                OS_Socket_close(clientHandle);
                 nb_helper_reset_ev_struct_for_socket_local(clientHandle);
                 uint64_t timestamp_after = 0;
                 TimeServer_getTime(&timer, 1, &timestamp_after);
@@ -447,7 +449,7 @@ run()
 
                 uint64_t delta = timestamp_after - timestamp;
                 uint64_t kbps = (total_bytes/1024)/(delta/1000);
-                Debug_LOG_DEBUG("duration: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
+                //Debug_LOG_DEBUG("duration: %"PRIu64"ms speed: %"PRIu64" kb/s", delta, kbps);
                 Debug_LOG_INFO("\n\nduration: %"PRIu64"ms\n\n speed: %"PRIu64" kb/s", delta, kbps);
                 break;
             }

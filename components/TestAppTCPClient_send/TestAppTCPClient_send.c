@@ -14,7 +14,8 @@
 #include "system_config.h"
 #include <string.h>
 
-#include "OS_Network.h"
+//#include "OS_Network.h"
+#include "OS_Socket.h"
 #include "math.h"
 
 #include "SysLoggerClient.h"
@@ -48,7 +49,7 @@ typedef struct
     mutex_unlock_func_t shared_resource_unlock;
 } nh_helper_sync_func;
 
-static OS_NetworkSocket_Evt_t eventCollection[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
+static OS_Socket_Evt_t eventCollection[OS_NETWORK_MAXIMUM_SOCKET_NO] = {0};
 
 static nh_helper_sync_func sync_func;
 
@@ -115,7 +116,7 @@ pre_init(void)
 
 OS_Error_t
 check_for_socket_event(
-    const OS_NetworkSocket_Handle_t handle)
+    const OS_Socket_Handle_t handle)
 {
     CHECK_VALUE_IN_RANGE(handle.handleID, 0, OS_NETWORK_MAXIMUM_SOCKET_NO);
 
@@ -144,7 +145,7 @@ test_tcp_client_send_only()
 {
     TEST_START();
     int m = 0;
-    const OS_NetworkSocket_Addr_t dstAddr =
+    const OS_Socket_Addr_t dstAddr =
         {
             .addr = GATEWAY_ADDR,
             .port = 5555
@@ -156,12 +157,12 @@ test_tcp_client_send_only()
         TimeServer_getTime(&timer, 1, &timestamp_setup); // 0 -> Time in seconds
         Debug_LOG_TRACE("Reset timestamp to: %u", timestamp_setup);
 
-        OS_NetworkSocket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
+        OS_Socket_Handle_t handle[OS_NETWORK_MAXIMUM_SOCKET_NO];
         OS_Error_t err;
         int i=0;
 
         //No loop -> one socket is enough
-        err = OS_NetworkSocket_create(
+        err = OS_Socket_create(
                   &network_stack,
                   &handle[i],
                   OS_AF_INET,
@@ -169,17 +170,17 @@ test_tcp_client_send_only()
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR(
-                "OS_NetworkSocket_create() failed, code %d for %d socket",
+                "OS_Socket_create() failed, code %d for %d socket",
                 err,
                 i);
                 return;
         }
 
-        err = OS_NetworkSocket_connect(handle[i], &dstAddr);
+        err = OS_Socket_connect(handle[i], &dstAddr);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR(
-                "OS_NetworkSocket_connect() failed, code %d for %d socket",
+                "OS_Socket_connect() failed, code %d for %d socket",
                 err,
                 i);
                 return;
@@ -194,33 +195,33 @@ test_tcp_client_send_only()
                 return;
         }
 
-        Debug_LOG_TRACE("Send request to host...");
+        Debug_LOG_DEBUG("Send request to host...");
         char data[1024];
 
         size_t datalen = sizeof(data);
         for (int i=0; i<datalen;i++) {data[i] = 'a';} 
         size_t kilobytes = datalen * KILOBYTE;
 
-        Debug_LOG_TRACE("\nWriting data to socket: Data: %i BYTE... \n", kilobytes);
+        Debug_LOG_DEBUG("\nWriting data to socket: Data: %i BYTE... \n", kilobytes);
 
         uint64_t timestamp = 0;
         TimeServer_getTime(&timer, 1, &timestamp); // 0 -> Time in seconds
-        Debug_LOG_TRACE("Reset timestamp to: %u", timestamp);
+        Debug_LOG_DEBUG("Reset timestamp to: %u", timestamp);
 
         size_t bytes_written = 0;
         do
         {
             size_t datalen = sizeof(data);
 
-            err = OS_NetworkSocket_write(
+            err = OS_Socket_write(
                       handle[i],
                       &data[0],
                       datalen,
                       &datalen);
             if (err != OS_SUCCESS)
             {
-                Debug_LOG_ERROR("OS_NetworkSocket_write() failed, code %d", err);
-                OS_NetworkSocket_close(handle[i]);
+                Debug_LOG_ERROR("OS_Socket_write() failed, code %d", err);
+                OS_Socket_close(handle[i]);
                 nb_helper_reset_ev_struct_for_socket(handle[i]);
                 return;
             }
@@ -229,16 +230,16 @@ test_tcp_client_send_only()
 
             bytes_written += datalen;
 
-            Debug_LOG_TRACE("Sent %i BYTES of %i BYTES\n", bytes_written, kilobytes);
+            Debug_LOG_DEBUG("Sent %i BYTES of %i BYTES\n", bytes_written, kilobytes);
         }
         while (bytes_written < kilobytes);
 
         /* Close the socket communication */
-        err = OS_NetworkSocket_close(handle[i]);
+        err = OS_Socket_close(handle[i]);
         if (err != OS_SUCCESS)
         {
             Debug_LOG_ERROR(
-                "OS_NetworkSocket_close() failed for handle %d, code %d", i,
+                "OS_Socket_close() failed for handle %d, code %d", i,
                 err);
             return;
         }
