@@ -28,12 +28,18 @@
 #include <camkes.h>
 
 //------------------------------------------------------------------------------
-//                            Test params
+//                            test parameters
 //------------------------------------------------------------------------------
 
+//amount of data to be sent
 #define KILOBYTE 1024*5
 
+//repetitions of test
 #define RUNS 10
+
+//target ip address & port
+#define TARGET_ADRESS   "192.168.82.105"
+#define TARGET_PORT     5555
 
 //------------------------------------------------------------------------------
 
@@ -147,8 +153,8 @@ test_tcp_client_send_only()
     int m = 0;
     const OS_Socket_Addr_t dstAddr =
         {
-            .addr = GATEWAY_ADDR,
-            .port = 5555
+            .addr = TARGET_ADRESS, 
+            .port = TARGET_PORT
         };
 
     for (m = 0; m < RUNS; m++) {
