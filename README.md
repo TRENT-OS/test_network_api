@@ -32,7 +32,7 @@ BUILD_PLATFORM=zynq7000 src/build.sh test_network_api \
 To run the corresponding tests:
 
 ```bash
-BUILD_PLATFORM=zynq7000 src/test.sh run test_network_api.py \
+BUILD_PLATFORM=zynq7000 src/build.sh test-run test_network_api.py \
 --tc=platform.test_configuration:<test_config_name>
 ```
 
@@ -55,7 +55,7 @@ Start the network test in the trentos_test container using the following
 command:
 
 ```bash
-src/test.sh run test_network_api.py --tc=platform.uart_connected:false
+src/build.sh test-run test_network_api.py --tc=platform.uart_connected:false
 --tc=network.client_ip:192.168.82.231 --tc=network.server_ip:192.168.82.232
 ```
 
