@@ -89,6 +89,9 @@ assembly {
             nwStack,
             testAppTCPServer, networkStack
         )
+
+        component SysCtrl sysctrl;
+        connection seL4RPCCall con_sysctrl(from uart.sysctrl_rpc, to sysctrl.sysctrl_rpc);
      }
 
     configuration {
@@ -109,5 +112,8 @@ assembly {
         )
 
         NETWORK_TEST_NIC_CONFIG(nwDriver)
+	ChanMux_UART.priority = 252;
+	uart.priority = 253;
+	sysctrl.priority = 254;
     }
 }
