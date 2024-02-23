@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2020-2024, HENSOLDT Cyber GmbH
+ * 
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ *
+ * For commercial licensing, contact: info.cyber@hensoldt.net
+ */
+
 #define CONCAT_IMPL(X, Y) X##Y
 
 #define MACRO_CONCAT(X, Y) CONCAT_IMPL(X, Y)
