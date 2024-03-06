@@ -17,9 +17,9 @@ DeclareCAmkESComponent(
     C_FLAGS
         -Wall
         -Werror
-        -DNWSTACK_DEV_ADDR="10.0.0.11"
-        -DNWSTACK_GATEWAY_ADDR="10.0.0.1"
-        -DNWSTACK_SUBNET_MASK="255.255.255.0"
+        -DNWSTACK_DEV_ADDR="${DEV_ADDR}"
+        -DNWSTACK_GATEWAY_ADDR="${GATEWAY_ADDR}"
+        -DNWSTACK_SUBNET_MASK="${SUBNET_MASK}"
     LIBS
         system_config
         os_core_api

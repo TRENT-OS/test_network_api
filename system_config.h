@@ -56,9 +56,9 @@
 // App1
 #define DOMAIN_NWSTACK "STACK"
 
-#define CFG_FORBIDDEN_HOST      "10.0.0.1"
+#define CFG_FORBIDDEN_HOST      FORBIDDEN_HOST
 #define CFG_UNREACHABLE_HOST    "0.0.0.0"
-#define CFG_REACHABLE_HOST      "10.0.0.1"
+#define CFG_REACHABLE_HOST      REACHABLE_HOST
 #define CFG_UNREACHABLE_PORT    88
 #define CFG_REACHABLE_PORT      80
 #define CFG_FORBIDDEN_PORT      88
@@ -67,23 +67,23 @@
 #define CFG_UDP_TEST_PORT       8888
 
 #define CFG_ETH_ADDR_CLIENT       "ETH_ADDR_CLIENT"
-#define CFG_ETH_ADDR_CLIENT_VALUE "10.0.0.10"
+#define CFG_ETH_ADDR_CLIENT_VALUE ETH_ADDR_CLIENT_VALUE
 
 #define CFG_ETH_ADDR_SERVER       "ETH_ADDR_SERVER"
-#define CFG_ETH_ADDR_SERVER_VALUE "10.0.0.11"
+#define CFG_ETH_ADDR_SERVER_VALUE ETH_ADDR_SERVER_VALUE
 
 #define CFG_ETH_GATEWAY_ADDR       "ETH_GATEWAY_ADDR"
 #define CFG_ETH_GATEWAY_ADDR_VALUE CFG_REACHABLE_HOST
 
 #define CFG_ETH_SUBNET_MASK       "ETH_SUBNET_MASK"
-#define CFG_ETH_SUBNET_MASK_VALUE "255.255.255.0"
+#define CFG_ETH_SUBNET_MASK_VALUE SUBNET_MASK
 
 #ifndef OS_NETWORK_MAXIMUM_SOCKET_NO
 #define OS_NETWORK_MAXIMUM_SOCKET_NO 16
 #endif
 
 #define NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS 16
-#define NIC_DRIVER_RINGBUFFER_SIZE                                             \
+#define NIC_DRIVER_RINGBUFFER_SIZE \
     (NIC_DRIVER_RINGBUFFER_NUMBER_ELEMENTS * 4096)
 
 //-----------------------------------------------------------------------------
@@ -91,4 +91,4 @@
 //-----------------------------------------------------------------------------
 
 #define SysLogger_Config_MSG_SIZE                SysLogger_MAX_MSG_SIZE
-#define SysLogger_Config_COMPONENT_NAME_COLUMNS  11
+#define SysLogger_Config_COMPONENT_NAME_COLUMNS 11

@@ -14,9 +14,9 @@ NetworkStack_PicoTcp_DeclareCAmkESComponent(
     NetworkStack_PicoTcp
     C_FLAGS
         -DNetworkStack_PicoTcp_USE_HARDCODED_IPADDR
-        -DDEV_ADDR="10.0.0.10"
-        -DGATEWAY_ADDR="10.0.0.1"
-        -DSUBNET_MASK="255.255.255.0"
+        -DDEV_ADDR="${DEV_ADDR}"
+        -DGATEWAY_ADDR="${GATEWAY_ADDR}"
+        -DSUBNET_MASK="${SUBNET_MASK}"
 )
 
 DeclareCAmkESComponent(
@@ -28,9 +28,10 @@ DeclareCAmkESComponent(
         -Wall
         -Werror
         -DOS_NETWORK_MAXIMUM_SOCKET_NO=8
-        -DDEV_ADDR="10.0.0.10"
-        -DGATEWAY_ADDR="10.0.0.1"
-        -DSUBNET_MASK="255.255.255.0"
+        -DDEV_ADDR="${DEV_ADDR}"
+        -DGATEWAY_ADDR="${GATEWAY_ADDR}"
+        -DSUBNET_MASK="${SUBNET_MASK}"
+        {
     LIBS
         system_config
         os_core_api
