@@ -25,14 +25,14 @@ following single-NIC targets are currently supported:
 To build test_network_api in a given configuration
 
 ```bash
-BUILD_PLATFORM=zynq7000 src/build.sh test_network_api \
+BUILD_PLATFORM=zynq7000 trentos/build.sh test_network_api \
 -DTEST_CONFIGURATION=<test_config_name>
 ```
 
 To run the corresponding tests:
 
 ```bash
-BUILD_PLATFORM=zynq7000 src/build.sh test-run test_network_api.py \
+BUILD_PLATFORM=zynq7000 trentos/build.sh test-run test_network_api.py \
 --tc=platform.test_configuration:<test_config_name>
 ```
 
